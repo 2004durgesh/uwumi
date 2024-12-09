@@ -10,15 +10,24 @@ import config from "../../tamagui.config";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import useThemeStore from "@/stores/useThemeStore";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { 
+  Inter_500Medium as InterMedium,
+  Inter_600SemiBold as InterSemiBold,
+  Inter_800ExtraBold as InterBold,
+} from '@expo-google-fonts/inter';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 const tamaguiConfig = createTamagui(config);
 
 export default function RootLayout() {
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
+    InterMedium,
+    InterSemiBold,
+    InterBold,
   });
   const themeName = useThemeStore((state:any) => state.themeName);
 
@@ -44,15 +53,17 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="info/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="info/[source]" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
       </TamaguiProvider>
     </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

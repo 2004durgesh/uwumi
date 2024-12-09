@@ -5,97 +5,147 @@ import React from "react";
 import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import {
   Text,
-  Theme,
-  Button,
   Card,
-  H2,
   Image,
-  Paragraph,
   XStack,
-  H6,
+  YStack,
+  H3,
   ZStack,
+  Spinner,
+  styled,
+  View,
 } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
+
+const StyledCard = styled(Card, {
+  width: 150,
+  height: 250,
+  marginHorizontal: "$1",
+  animation: "bouncy",
+  variants: {
+    isHovered: {
+      true: {
+        scale: 0.95,
+        borderColor: "$color",
+      },
+    },
+  },
+});
 
 const index = () => {
   const { data, isLoading, error, refetch, fetchNextPage, hasNextPage } =
     useAnimeTrending();
 
-  if (isLoading) return <ActivityIndicator />;
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (error) {
+    console.log(error);
+    return (
+      <YStack flex={1} justifyContent="center" alignItems="center">
+        <Text color="$color">Error: {error.message}</Text>
+      </YStack>
+    );
+  }
 
   const AnimeCard = ({ anime }: { anime: any }) => {
     return (
-      <Link asChild href={{
-        pathname: '/info/[id]',
-        params: { source: 'anime', provider: 'gogoanime', id: anime.id },
-        
-      }}>
-        <Card
-          width={150}
-          height={250}
-          bordered
+      <Link
+        asChild
+        href={{
+          pathname: "/info/[source]",
+          params: { source: "anime", provider: "gogoanime", id: anime.id },
+        }}
+      >
+        <StyledCard
           elevate
-          margin={4}
+          // bordered
           animation="bouncy"
-          size="$4"
-          // scale={0.9}
-          hoverStyle={{ scale: 0.9 }}
-          pressStyle={{ scale: 0.8 }}
+          hoverStyle={{ scale: 0.95 }}
+          pressStyle={{ scale: 0.9 }}
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.25}
+          shadowRadius={3.84}
         >
-          <Card.Footer>
-            <Card.Header>
-              <Text numberOfLines={2} ellipsizeMode="tail" width={120}>
-                {anime.title.romaji}
-              </Text>
-            </Card.Header>
+          <Card.Footer padding="$2">
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              color="$color"
+              fontSize="$3"
+              fontWeight="500"
+              margin={0}
+              width={100}
+            >
+              {anime.title.romaji}
+            </Text>
           </Card.Footer>
           <Card.Background>
-            <ZStack width={200} maxWidth={150} flex={1} alignItems="center">
+            <ZStack width="100%" height="100%" alignItems="center">
               <Image
                 source={{
                   width: 135,
                   height: 190,
                   uri: anime.image,
                 }}
-                objectFit="contain"
-                flex={1}
-                borderRadius={8}
+                width={135}
+                height={190}
+                objectFit="cover"
+                borderRadius="$2"
               />
               <LinearGradient
-                width="135"
-                height="190"
-                colors={["black", "transparent"]}
+                width="100%"
+                height="100%"
+                colors={["rgba(0,0,0,0.8)", "transparent"]}
                 start={[0, 1]}
-                end={[0, 0.5]}
-                flex={1}
+                end={[0, 0.3]}
+                borderRadius="$2"
+                opacity={0.9}
               />
             </ZStack>
           </Card.Background>
-        </Card>
+          
+          
+        </StyledCard>
       </Link>
     );
   };
 
   return (
     <ThemedView>
-      <FlatList
-        data={data?.pages.flatMap((page) => page.results) || []}
-        renderItem={({ item }) => <AnimeCard anime={item} />}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-        }
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
-          }
-        }}
-        onEndReachedThreshold={0.5} // Adjust this value as needed
-        ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
-      />
+      <YStack padding="$4" gap="$4">
+        <H3 color="$color">Trending Now</H3>
+        {isLoading && !data ? (
+          <XStack padding="$4" justifyContent="center">
+            <Spinner size="large" color="$color" />
+          </XStack>
+        ) : (
+          <FlatList
+            data={data?.pages.flatMap((page) => page.results) || []}
+            renderItem={({ item }) => <AnimeCard anime={item} />}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+            }}
+            refreshControl={
+              <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+            }
+            onEndReached={() => {
+              if (hasNextPage) {
+                fetchNextPage();
+              }
+            }}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              hasNextPage ? (
+                <XStack padding="$4" justifyContent="center">
+                  <Spinner size="small" color="$color" />
+                </XStack>
+              ) : null
+            }
+          />
+        )}
+      </YStack>
     </ThemedView>
   );
 };
