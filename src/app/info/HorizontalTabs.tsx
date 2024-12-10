@@ -313,6 +313,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
                   <ReadMore>
                     {data?.description?.replace(/<[^>]*>/g, "")}
                   </ReadMore>
+                  <Text>Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi culpa placeat cum animi repellat modi voluptatum dolore, vitae, quam aut perferendis quidem iusto ipsam totam quae ducimus suscipit illo corrupti nobis eum enim blanditiis tempora quaerat provident. Reprehenderit esse quam facere illo unde maiores suscipit molestiae labore. Nobis, obcaecati harum?</Text>
                 </ScrollView>
               </YStack>
             )}

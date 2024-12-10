@@ -15,6 +15,7 @@ import {
   styled,
   View,
 } from "tamagui";
+import Animated from "react-native-reanimated";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 const StyledCard = styled(Card, {
@@ -64,7 +65,7 @@ const index = () => {
           shadowOpacity={0.25}
           shadowRadius={3.84}
         >
-          <Card.Footer padding="$2">
+          <Card.Footer paddingVertical="$5" paddingHorizontal="$1">
             <Text
               numberOfLines={2}
               ellipsizeMode="tail"
@@ -79,16 +80,16 @@ const index = () => {
           </Card.Footer>
           <Card.Background>
             <ZStack width="100%" height="100%" alignItems="center">
-              <Image
+              <Animated.Image
                 source={{
                   width: 135,
                   height: 190,
                   uri: anime.image,
                 }}
+                style={{ borderRadius: 2 }}
                 width={135}
                 height={190}
-                objectFit="cover"
-                borderRadius="$2"
+                resizeMode="cover"
               />
               <LinearGradient
                 width="100%"
@@ -101,8 +102,6 @@ const index = () => {
               />
             </ZStack>
           </Card.Background>
-          
-          
         </StyledCard>
       </Link>
     );
