@@ -21,6 +21,11 @@ interface TabsProps {
   data?: IAnimeInfo;
 }
 
+const StatisticsXStack = styled(XStack, {
+  flex: 1,
+  justifyContent: "space-between",
+});
+
 const AnimatedYStack = styled(YStack, {
   flex: 1,
   x: 0,
@@ -60,6 +65,13 @@ const TabsRovingIndicator = ({
     })}
     {...props}
   />
+);
+
+const StatisticItem = ({ label, value }: { label: string; value: string }) => (
+  <StatisticsXStack>
+    <Text fontSize="$4" fontWeight={700} color='$color2'>{label}</Text>
+    <Text fontSize="$4" fontWeight={700} color='$color4'>{value}</Text>
+  </StatisticsXStack>
 );
 
 const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
@@ -311,9 +323,14 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
                   showsVerticalScrollIndicator={false}
                 >
                   <ReadMore>
-                    {data?.description?.replace(/<[^>]*>/g, "")}
+                    {data?.description?.replace(/<[^>]*>/g, "") || ""}
                   </ReadMore>
-                  <Text>Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi culpa placeat cum animi repellat modi voluptatum dolore, vitae, quam aut perferendis quidem iusto ipsam totam quae ducimus suscipit illo corrupti nobis eum enim blanditiis tempora quaerat provident. Reprehenderit esse quam facere illo unde maiores suscipit molestiae labore. Nobis, obcaecati harum?</Text>
+                  <YStack flex={1} height="100%" width="100%">
+                    <StatisticItem label="Type" value={data?.type || ""} />
+                    <StatisticItem label="Country" value={data?.countryOfOrigin || ""} />
+                    <StatisticItem label="Season" value={`${data?.season}, ${data?.releaseDate}`} />
+                    <StatisticItem label="Duration" value={`${data?.duration}m`} />
+                  </YStack>
                 </ScrollView>
               </YStack>
             )}
