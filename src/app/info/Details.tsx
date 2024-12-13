@@ -6,6 +6,7 @@ import { ChevronDown } from "@tamagui/lucide-icons";
 import React, { useState } from "react";
 import { IAnimeInfo } from "@/constants/types";
 import { WebView } from "react-native-webview";
+import { useThemeStore } from "@/stores";
 
 type DetailsProps = {
   data?: IAnimeInfo;
@@ -25,7 +26,7 @@ const StatisticItem = ({ label, value }: { label: string; value: string }) => (
         <Text fontSize="$4" fontWeight={700} color="$color2">
           {label}
         </Text>
-        <Text fontSize="$4" fontWeight={700} color="$color4">
+        <Text fontSize="$4" fontWeight={700} color="$color">
           {value}
         </Text>
       </>
@@ -40,6 +41,8 @@ const Details: React.FC<DetailsProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
+    const themeName = useThemeStore((state: any) => state.themeName);
+  
 
   return (
     <YStack gap={2}>
@@ -89,10 +92,14 @@ const Details: React.FC<DetailsProps> = ({
               >
                 <LinearGradient
                   locations={[0, 0.05, 0.1]}
-                  colors={[
+                  colors={themeName==="dark"?[
                     "rgba(0, 0, 0, 0.5)",
                     "rgba(0, 0, 0, 0.7)",
                     "rgba(0, 0, 0, 1)",
+                  ]:[
+                    "rgba(255, 255, 255, 0.5)",
+                    "rgba(255, 255, 255, 0.7)",
+                    "rgba(255, 255, 255, 1)",
                   ]}
                   start={{ x: 0.0, y: 0.0 }}
                   end={{ x: 0.0, y: 0.1 }}

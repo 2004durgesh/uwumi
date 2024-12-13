@@ -48,6 +48,7 @@ const EpisodeList = () => {
           data={episodesList || []}
           contentContainerStyle={{
             paddingHorizontal: 16,
+            paddingBottom:100,
             paddingVertical: 8,
             flexGrow: 1,
           }}
@@ -92,7 +93,7 @@ const EpisodeList = () => {
                     >
                       {item?.description}
                     </Text>
-                      <Text width='40%' alignSelf="flex-end" fontSize="$2.5" fontWeight="500" color="$color2" marginLeft='auto'>
+                      <Text width='50%' alignSelf="flex-end" fontSize="$2.5" fontWeight="500" color="$color2" marginLeft='auto'>
                         {new Date(item.airDate).toDateString()}
                       </Text>
                   </YStack>

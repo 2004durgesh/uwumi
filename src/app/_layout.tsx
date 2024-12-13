@@ -8,7 +8,6 @@ import "react-native-reanimated";
 import { Button, TamaguiProvider, XStack, createTamagui } from "tamagui";
 import config from "../../tamagui.config";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import useThemeStore from "@/stores/useThemeStore";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { 
   Inter_500Medium as InterMedium,
@@ -29,7 +28,6 @@ export default function RootLayout() {
     InterSemiBold,
     InterBold,
   });
-  const themeName = useThemeStore((state:any) => state.themeName);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -62,7 +60,6 @@ export default function RootLayout() {
           <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <StatusBar style="auto" />
       </TamaguiProvider>
     </QueryClientProvider>
     </GestureHandlerRootView>

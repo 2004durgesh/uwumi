@@ -1,13 +1,22 @@
-import { create } from 'zustand';
+import { create } from 'zustand'
+import { storage } from '@/stores/MMKV'
+
+type ThemeName = 'light' | 'dark'
 
 interface ThemeState {
-  themeName: 'light' | 'dark' | undefined;
-  setThemeName: (name: 'light' | 'dark' | undefined) => void;
+  themeName: ThemeName
+  setThemeName: (name: ThemeName) => void
 }
 
-const useThemeStore = create<ThemeState>((set) => ({
-  themeName: 'dark',
-  setThemeName: (name: 'light' | 'dark' | undefined) => set({ themeName: name }),
-}));
+const getInitialTheme = (): ThemeName => {
+  const saved = storage.getString('theme')
+  return saved ? (saved as ThemeName) : 'dark'
+}
 
-export default useThemeStore;
+export const useThemeStore = create<ThemeState>((set) => ({
+  themeName: getInitialTheme(),
+  setThemeName: (name) => {
+    storage.set('theme', name)
+    set({ themeName: name })
+  }
+}))
