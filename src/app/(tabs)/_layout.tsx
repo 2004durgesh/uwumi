@@ -5,40 +5,57 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { BookImage, Settings, TvMinimalPlay } from "@tamagui/lucide-icons";
 import { BlurView } from "expo-blur";
+import { Stack, YStack } from "tamagui";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
-      screenOptions={{
-        // tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: false,
-        tabBarStyle: {
-          position: "absolute",
-          borderRadius: 20,
-          marginBottom: 10,
-          backgroundColor: "transparent",
-          borderColor: "transparent",
-          marginHorizontal: 20,
-          height: 60,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        tabBarBackground: () => {
-          return (
-            <BlurView
-              intensity={80}
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                borderRadius: 20,
-                overflow: "hidden",
-                backgroundColor: "transparent",
-              }}
-            />
-          );
-        },
-      }}
+    screenOptions={{
+      headerShown: false,
+      tabBarStyle: {
+        position: 'absolute',
+        height: 64,
+        backgroundColor: 'transparent',
+        borderTopWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      },
+      tabBarBackground: () => (
+        <Stack
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          overflow="hidden"
+          borderTopLeftRadius={20}
+        borderTopRightRadius={20}
+        >
+          <BlurView
+            intensity={80}
+            tint="systemChromeMaterialDark"
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+              backgroundColor: "transparent",
+            }}
+          />
+          <YStack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            backgroundColor="$background"
+            opacity={0.7}
+          />
+        </Stack>
+      ),
+    }}
     >
       <Tabs.Screen
         name="index"

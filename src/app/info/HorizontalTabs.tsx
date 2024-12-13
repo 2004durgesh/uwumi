@@ -1,30 +1,19 @@
 import {
   Tabs,
   YStack,
-  XStack,
   Text,
   styled,
   AnimatePresence,
-  ScrollView,
-  Image,
-  View,
 } from "tamagui";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import type { StackProps, TabLayout, TabsTabProps } from "tamagui";
-import { FlatList, Pressable, TouchableOpacity } from "react-native";
-import { useAnimeEpisodes } from "@/queries";
-import { useLocalSearchParams } from "expo-router";
 import { IAnimeInfo } from "@/constants/types";
-import ReadMore from "@/components/ReadMore";
-
+import Details from "@/app/info/Details";
+import Similar from "./Similar";
+import EpisodeList from "./EpisodeList";
 interface TabsProps {
-  data?: IAnimeInfo;
+  data: IAnimeInfo;
 }
-
-const StatisticsXStack = styled(XStack, {
-  flex: 1,
-  justifyContent: "space-between",
-});
 
 const AnimatedYStack = styled(YStack, {
   flex: 1,
@@ -67,49 +56,7 @@ const TabsRovingIndicator = ({
   />
 );
 
-const StatisticItem = ({ label, value }: { label: string; value: string }) => (
-  <StatisticsXStack>
-    <Text fontSize="$4" fontWeight={700} color='$color2'>{label}</Text>
-    <Text fontSize="$4" fontWeight={700} color='$color4'>{value}</Text>
-  </StatisticsXStack>
-);
-
 const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
-  const { id } = useLocalSearchParams<{
-    id: string;
-  }>();
-  const { data: episodeData, isLoading } = useAnimeEpisodes({ id });
-  // console.log("ep", episodeData);
-  // Transform episodes object to array and sort
-  const episodesList = React.useMemo(() => {
-    if (!episodeData?.episodes) return [];
-
-    return Object.entries(episodeData.episodes)
-      .map(([key, episode]) => {
-        return {
-          id: episode.tvdbId?.toString() || "",
-          number: parseInt(key),
-          title:
-            episode.title?.en ||
-            episode.title?.["x-jat"] ||
-            episode.title?.ja ||
-            episode.episode || // Fallback to episode field
-            `Episode ${key}`, // Final fallback
-          image: episode.image || "",
-          description: episode.overview || "",
-          airDate: episode.airDate || "",
-        };
-      })
-      .filter(
-        (episode) =>
-          (!isNaN(episode.number) || episode.number == undefined) &&
-          episode.image !== undefined &&
-          episode.image !== null &&
-          episode.image !== ""
-      )
-      .sort((a, b) => a.number - b.number);
-  }, [episodeData]);
-
   const [tabState, setTabState] = useState<{
     currentTab: string;
     intentAt: TabLayout | null;
@@ -240,107 +187,11 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
       <AnimatePresence exitBeforeEnter custom={{ direction }} initial={false}>
         <AnimatedYStack key={currentTab}>
           <Tabs.Content value={currentTab} forceMount justifyContent="center">
-            {currentTab === "tab1" && (
-              <YStack gap={2}>
-                <FlatList
-                  data={episodesList || []}
-                  contentContainerStyle={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    flexGrow: 1,
-                  }}
-                  showsVerticalScrollIndicator={true}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => console.log(item)}>
-                      <YStack gap={"$4"} padding={2}>
-                        <XStack gap={"$4"}>
-                          <View position="relative">
-                            <Image
-                              source={{ uri: item?.image }}
-                              width={160}
-                              height={107}
-                              borderRadius="$1"
-                            />
-                            <View
-                              position="absolute"
-                              bottom="$1"
-                              left="$1"
-                              backgroundColor="$background"
-                              opacity={0.8}
-                              borderRadius="$4"
-                              paddingHorizontal="$2"
-                              paddingVertical="$1"
-                            >
-                              <Text
-                                fontSize="$3"
-                                fontWeight="700"
-                                color="$color"
-                              >
-                                EP {item.number}
-                              </Text>
-                            </View>
-                          </View>
-                          <YStack padding={2} flex={1}>
-                            <Text
-                              fontSize="$3"
-                              fontWeight="700"
-                              numberOfLines={2}
-                            >
-                              {item.title}
-                            </Text>
-                            <Text
-                              fontSize="$2.5"
-                              fontWeight="500"
-                              color="$color2"
-                            >
-                              {new Date(item.airDate).toDateString()}
-                            </Text>
-                            <Text
-                              fontSize="$2.5"
-                              color="$color2"
-                              fontWeight="500"
-                              numberOfLines={3}
-                            >
-                              {item?.description}
-                            </Text>
-                          </YStack>
-                        </XStack>
-                      </YStack>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={(item) => item.id.toString()} //just to be sure :)
-                />
-              </YStack>
-            )}
-            {/* done working on tab1 */}
-            {currentTab === "tab2" && (
-              <YStack gap={2}>
-                <ScrollView
-                  contentContainerStyle={{
-                    padding: 16,
-                    flexGrow: 1,
-                  }}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <ReadMore>
-                    {data?.description?.replace(/<[^>]*>/g, "") || ""}
-                  </ReadMore>
-                  <YStack flex={1} height="100%" width="100%">
-                    <StatisticItem label="Type" value={data?.type || ""} />
-                    <StatisticItem label="Country" value={data?.countryOfOrigin || ""} />
-                    <StatisticItem label="Season" value={`${data?.season}, ${data?.releaseDate}`} />
-                    <StatisticItem label="Duration" value={`${data?.duration}m`} />
-                  </YStack>
-                </ScrollView>
-              </YStack>
-            )}
-            {currentTab === "tab3" && (
-              <YStack gap={2}>
-                {data?.relations?.map((relation, index) => (
-                  <Text key={index}>{index}</Text>
-                ))}
-              </YStack>
-            )}
+            {currentTab === "tab1" && <EpisodeList />}
+
+            {currentTab === "tab2" && <Details data={data} />}
+
+            {currentTab === "tab3" && <Similar data={data} />}
           </Tabs.Content>
         </AnimatedYStack>
       </AnimatePresence>

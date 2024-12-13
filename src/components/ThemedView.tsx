@@ -15,28 +15,25 @@ export function ThemedView({
   ...otherProps
 }: ThemedViewProps) {
   const theme = useTheme();
-  const accentName=useAccentStore((state:any)=>state.accentName)
+  console.log(theme);
+  const accentName = useAccentStore((state: any) => state.accentName);
   const content = (
-      <View
-        flex={1}
-        backgroundColor={theme?.background?.val}
-        {...otherProps}
-      >
-        {children}
-      </View>
+    <View flex={1} backgroundColor="$background" {...otherProps}>
+      {children}
+    </View>
   );
 
   return (
-    <Theme name={accentName}>
-      {useSafeArea ? (
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: theme?.accentBackground?.val }}
-        >
-          {content}
-        </SafeAreaView>
-      ) : (
-        content
-      )}
+    <Theme name="light">
+      <Theme name={accentName}>
+        {useSafeArea ? (
+          <SafeAreaView style={{ flex: 1, backgroundColor: "$background" }}>
+            {content}
+          </SafeAreaView>
+        ) : (
+          content
+        )}
+      </Theme>
     </Theme>
   );
 }

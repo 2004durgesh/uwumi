@@ -3,7 +3,6 @@ import {
   Text,
   ZStack,
   XStack,
-  Image,
   YStack,
 } from "tamagui";
 import { useLocalSearchParams } from "expo-router";
@@ -23,19 +22,23 @@ import { LinearGradient } from "tamagui/linear-gradient";
 import HorizontalTabs from "./HorizontalTabs";
 import { BlurView } from "expo-blur";
 import IconTitle from "@/components/IconTitle";
+import CustomImage, { AnimatedCustomImage } from "@/components/CustomImage";
+import Animated from "react-native-reanimated";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Info = () => {
-  const { source, provider, id } = useLocalSearchParams<{
-    source: string;
+  const { mediaType, provider, id,image } = useLocalSearchParams<{
+    mediaType: string;
     provider: string;
     id: string;
+    image: string;
   }>();
-
+  const insets = useSafeAreaInsets();
   const { data, isLoading } = useAnimeInfo({ id, provider });
   console.log(data);
   return (
     <>
-      <ThemedView>
+      <ThemedView useSafeArea={false}>
         <ZStack height={300}>
           <ImageBackground
             source={{ uri: data?.cover }}
@@ -62,16 +65,16 @@ const Info = () => {
               flex={1}
             />
           </View>
-          <View padding={10}>
-            <XStack justifyContent="space-between">
+          <View padding={10} marginTop={insets.top+10}>
+            <XStack justifyContent="space-between" marginBlockEnd={20}>
               <ArrowLeft />
               <Heart />
             </XStack>
 
             <XStack gap={10} alignItems="center">
-              <Image source={{ uri: data?.image }} width={115} height={163} />
+              <AnimatedCustomImage sharedTransitionTag="shared-image" source={{uri:image}} style={{width:115,height:163}}/>
               <YStack paddingHorizontal={20} gap={8} flex={1}>
-                <Text fontWeight='700'>{typeof data?.title === 'object' ? data?.title?.english : data?.title}</Text>
+                <Text color="$color1" fontWeight='700'>{typeof data?.title === 'object' ? data?.title?.english : data?.title}</Text>
                 <IconTitle icon={Clock} text={data?.status} />
 
                 <XStack justifyContent="space-between">
@@ -82,7 +85,7 @@ const Info = () => {
                   />
                   <IconTitle text={data?.type} />
                 </XStack>
-                <Text>
+                <Text color="$color1">
                   {new Date(
                     data?.nextAiringEpisode?.airingTime * 1000
                   ).toDateString()}
@@ -96,7 +99,7 @@ const Info = () => {
         </ZStack>
 
         <YStack alignItems="center" marginTop={20} flex={1}>
-          <HorizontalTabs data={data} />
+          {data && <HorizontalTabs data={data} />}
         </YStack>
       </ThemedView>
     </>

@@ -14,6 +14,7 @@ interface IconTitleProps {
 
   const IconText = styled(Text, {
     fontSize: 14,
+    color:'$color1'
   });
 
   const IconContainer = styled(XStack, {
@@ -24,7 +25,7 @@ interface IconTitleProps {
 
 const IconTitle = ({ icon: Icon, text }: IconTitleProps) => (
     <IconContainer>
-      {Icon && <Icon size={16} />}
+      {Icon && <Icon color="$color1" size={16} />}
       <IconText>{text}</IconText>
     </IconContainer>
   );

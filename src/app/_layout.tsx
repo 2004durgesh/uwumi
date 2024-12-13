@@ -55,10 +55,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
+      <TamaguiProvider config={tamaguiConfig}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="info/[source]" options={{ headerShown: false }} />
+          <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
+          <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

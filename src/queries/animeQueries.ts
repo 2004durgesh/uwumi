@@ -1,4 +1,4 @@
-import { IAnimeResult } from "@/constants/types";
+import { IAnimeResult, ISearch } from "@/constants/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -7,7 +7,7 @@ export function useAnimeTrending() {
   return useInfiniteQuery({
     queryKey: ["anime", "trending"],
     queryFn: async ({ pageParam = 1 }) => {
-      const { data } = await axios.get<IAnimeResult>(
+      const { data } = await axios.get<ISearch<IAnimeResult>>(
         `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/trending`,
         {
           params: { page: pageParam },
@@ -21,7 +21,7 @@ export function useAnimeTrending() {
       return data;
     },
     getNextPageParam: (
-      lastPage: IAnimeResult,
+      lastPage: ISearch<IAnimeResult>,
       pages
     ) => {
       if (lastPage.hasNextPage) {
@@ -31,6 +31,10 @@ export function useAnimeTrending() {
     },
     initialPageParam: 1,
     retry: 3,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
     retryDelay: 1000,
   });
 }
