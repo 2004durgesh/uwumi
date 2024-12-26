@@ -3,61 +3,47 @@ import { FlatList, TouchableOpacity } from "react-native";
 import React from "react";
 import CustomImage from "@/components/CustomImage";
 import { useAnimeEpisodes } from "@/queries";
-import { useLocalSearchParams,Link } from "expo-router";
+import { useLocalSearchParams, Link } from "expo-router";
 
 const EpisodeList = () => {
-  const { mediaType, provider, id} = useLocalSearchParams<{
+  const { mediaType, provider, id } = useLocalSearchParams<{
     mediaType: string;
     provider: string;
     id: string;
   }>();
-  const { data: episodeData, isLoading } = useAnimeEpisodes({ id });
+  const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
   // console.log("ep", episodeData);
   // Transform episodes object to array and sort
-  const episodesList = React.useMemo(() => {
-    if (!episodeData?.episodes) return [];
-
-    return Object.entries(episodeData.episodes)
-      .map(([key, episode]) => {
-        return {
-          id: episode.tvdbId?.toString() || "",
-          number: parseInt(key),
-          title:
-            episode.title?.en ||
-            episode.title?.["x-jat"] ||
-            episode.title?.ja ||
-            episode.episode || // Fallback to episode field
-            `Episode ${key}`, // Final fallback
-          image: episode.image || "",
-          description: episode.overview || "",
-          airDate: episode.airDate || "",
-        };
-      })
-      .filter(
-        (episode) =>
-          (!isNaN(episode.number) || episode.number == undefined) &&
-          episode.image !== undefined &&
-          episode.image !== null &&
-          episode.image !== ""
-      )
-      .sort((a, b) => a.number - b.number);
-  }, [episodeData]);
+  const episodesList = Array.isArray(episodeData) ? episodeData : [];
   return (
     <YStack gap={2}>
-        <FlatList
-          data={episodesList || []}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingBottom:100,
-            paddingVertical: 8,
-            flexGrow: 1,
-          }}
-          showsVerticalScrollIndicator={true}
-          renderItem={({ item }) => (
-            <Link asChild href={{
-              pathname:"/watch/[mediaType]",
-              params:{mediaType,provider,id,poster:item?.image,title:item?.title}
-            }}>
+      <FlatList
+        data={episodesList || []}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: 100,
+          paddingVertical: 8,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator={true}
+        renderItem={({ item }) => (
+          <Link
+            asChild
+            href={{
+              pathname: "/watch/[mediaType]",
+              params: {
+                mediaType,
+                provider,
+                episodeId:item?.id,
+                episodeDubId:item?.dubId,
+                isDub: item?.isDub,
+                poster: item?.image,
+                title: item?.title,
+                description: item?.description,
+                number: item?.number,
+              },
+            }}
+          >
             <TouchableOpacity onPress={() => console.log(item)}>
               <YStack gap={"$4"} padding={2}>
                 <XStack gap={"$4"}>
@@ -93,18 +79,25 @@ const EpisodeList = () => {
                     >
                       {item?.description}
                     </Text>
-                      <Text width='50%' alignSelf="flex-end" fontSize="$2.5" fontWeight="500" color="$color2" marginLeft='auto'>
-                        {new Date(item.airDate).toDateString()}
-                      </Text>
+                    <Text
+                      width="50%"
+                      alignSelf="flex-end"
+                      fontSize="$2.5"
+                      fontWeight="500"
+                      color="$color2"
+                      marginLeft="auto"
+                    >
+                      {new Date(item.airDate).toDateString()}
+                    </Text>
                   </YStack>
                 </XStack>
               </YStack>
             </TouchableOpacity>
-        </Link>
-          )}
-          keyExtractor={(item) => item.id.toString()} //just to be sure :)
-        />
-      </YStack>
+          </Link>
+        )}
+        keyExtractor={(item) => item.id.toString()} //just to be sure :)
+      />
+    </YStack>
   );
 };
 

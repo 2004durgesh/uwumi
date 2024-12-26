@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "adb reverse tcp:3000 tcp:3000 && expo start --localhost",
+    "start": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo start --localhost",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -16,6 +16,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@bottom-tabs/react-navigation": "^0.7.8",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo/vector-icons": "^14.0.4",
     "@react-navigation/bottom-tabs": "^7.0.0",
@@ -28,6 +29,7 @@
     "axios": "^1.7.9",
     "expo": "^52.0.17",
     "expo-blur": "~14.0.1",
+    "expo-build-properties": "^0.13.1",
     "expo-constants": "~17.0.3",
     "expo-dev-client": "~5.0.5",
     "expo-font": "~13.0.1",
@@ -46,6 +48,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.5",
+    "react-native-bottom-tabs": "^0.7.8",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-mmkv": "^3.1.0",
     "react-native-reanimated": "^3.16.3",
@@ -55,7 +58,8 @@
     "react-native-web": "^0.19.13",
     "react-native-webview": "13.12.5",
     "tamagui": "^1.116.15",
-    "zustand": "^5.0.1"
+    "zustand": "^5.0.1",
+    "expo-screen-orientation": "~8.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

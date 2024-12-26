@@ -24,7 +24,7 @@ export function ThemedView({
       {children}
     </View>
   );
-  console.log(themeName,accentName,useTheme())
+  // console.log(themeName,accentName,useTheme())
 
   return (
     <Theme name={themeName}>

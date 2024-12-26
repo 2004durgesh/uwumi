@@ -29,20 +29,13 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
   });
 }
 
-export function useAnimeEpisodes({ id }: { id: string}) {
+export function useAnimeEpisodes({ id,provider='gogoanime' }: { id: string,provider:string }) {
   return useQuery<EpisodeData>({
-    queryKey: ["anime", "episodes", id],
+    queryKey: ["anime", "episodes", id,provider],
     queryFn: async () => {
+      console.log(`${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
       const { data } = await axios.get(
-        `https://api.ani.zip/mappings?anilist_id=${id}`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          timeout: 5000,
-        }
-      );
+        `${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
       return data;
     },
     staleTime: 10 * 60 * 1000,
