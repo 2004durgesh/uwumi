@@ -57,6 +57,18 @@
         {
           "initialOrientation": "DEFAULT"
         }
+      ],
+      [
+        "react-native-video",
+        {
+          "enableNotificationControls": false,
+          "androidExtensions": {
+            "useExoplayerRtsp": false,
+            "useExoplayerSmoothStreaming": true,
+            "useExoplayerHls": true,
+            "useExoplayerDash": false
+          }
+        }
       ]
     ],
     "experiments": {

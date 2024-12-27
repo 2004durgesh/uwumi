@@ -6,7 +6,6 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
   return useQuery<IAnimeInfo>({
     queryKey: ["anime", "info", id, provider],
     queryFn: async () => {
-      // console.log( `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/info/${id}`);
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/data/${id}`,
         {
@@ -33,7 +32,6 @@ export function useAnimeEpisodes({ id,provider='gogoanime' }: { id: string,provi
   return useQuery<EpisodeData>({
     queryKey: ["anime", "episodes", id,provider],
     queryFn: async () => {
-      console.log(`${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
       return data;
