@@ -14,12 +14,15 @@ import {
   VolumeX,
   Fullscreen,
   VolumeOff,
+  Maximize,
+  Minimize,
 } from "@tamagui/lucide-icons";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useLocalSearchParams } from "expo-router";
 import { useWatchAnimeEpisodes } from "@/queries/watchQueries";
 import { ThemedView } from "@/components/ThemedView";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn, FadeOut,Easing} from "react-native-reanimated";
 
 interface VideoPlayerProps {
   source: string;
@@ -32,19 +35,30 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  
+  const [playerDimensions, setPlayerDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  const AnimatedView = Animated.createAnimatedComponent(View);
+
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   useEffect(() => {
-    if (showControls) {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-      controlsTimeoutRef.current = setTimeout(() => {
-        if (isPlaying) {
+    const hideControls = () => {
+      if (isPlaying && showControls) {
+        controlsTimeoutRef.current = setTimeout(() => {
           setShowControls(false);
-        }
-      }, 3000);
+        }, 3000);
+      }
+    };
+
+    // Clear any existing timeout before setting a new one
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
     }
+
+    hideControls();
+
     return () => {
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
@@ -52,25 +66,31 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source }) => {
     };
   }, [showControls, isPlaying]);
 
-  const handleFullscreenToggle = async () => {
+  const enterFullscreen = async () => {
     try {
-      if (!isFullscreen && videoRef.current) {
-        videoRef.current.presentFullscreenPlayer();
+      if (videoRef.current) {
+        videoRef.current.setFullScreen(true);
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.LANDSCAPE
         );
         setIsFullscreen(true);
-      } else {
-        if (videoRef.current) {
-          videoRef.current.dismissFullscreenPlayer();
-          await ScreenOrientation.lockAsync(
-            ScreenOrientation.OrientationLock.PORTRAIT_UP
-          );
-          setIsFullscreen(false);
-        }
       }
     } catch (error) {
-      console.error("Failed to toggle fullscreen:", error);
+      console.error("Failed to enter fullscreen:", error);
+    }
+  };
+
+  const exitFullscreen = async () => {
+    try {
+      if (videoRef.current) {
+        videoRef.current.setFullScreen(false);
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP
+        );
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error("Failed to exit fullscreen:", error);
     }
   };
 
@@ -79,25 +99,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source }) => {
       <TouchableOpacity
         onPress={() => {
           setShowControls(!showControls);
-          console.log("pressed");
+          console.log("pressed", playerDimensions);
         }}
-        style={[
-          { flex: 1 },
-          isFullscreen && {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "black",
-          },
-        ]}
       >
-        <View
-          height="100%"
-          position="relative"
-          backgroundColor={"white"}
-        >
+        <View height={playerDimensions.height} position="relative">
           <Video
             ref={videoRef}
             source={{ uri: source }}
@@ -109,61 +114,83 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source }) => {
               top: top,
               left: 0,
               right: 0,
-            }}           
+            }}
             resizeMode="contain"
-            onFullscreenPlayerWillPresent={() => handleFullscreenToggle()}
-            onFullscreenPlayerWillDismiss={() => handleFullscreenToggle()}
+            onFullscreenPlayerWillPresent={() => enterFullscreen()}
+            onFullscreenPlayerWillDismiss={() => exitFullscreen()}
             paused={!isPlaying}
             muted={isMuted}
             controls={false}
+            onLayout={(e) => {
+              setPlayerDimensions({
+                width: e.nativeEvent.layout.width,
+                height: e.nativeEvent.layout.height,
+              });
+            }}
             onError={(error) => console.log("Video Error:", error)}
           />
 
-        {showControls && (
-          <XStack
-          position="absolute"
-          top={0}
-          left={0}
-            right={0}
-            backgroundColor="$color"
-            paddingVertical="$4"
-            paddingHorizontal="$4"
-            justifyContent="space-between"
-            opacity={0.5}
-            alignItems="center"
-            zIndex={10000}
+          {showControls && (
+            <AnimatedView
+              height={playerDimensions.height}
+              backgroundColor="rgba(0,0,0,0.5)"
+              top={top}
+              left={0}
+              right={0}
+              entering={FadeIn.duration(300).easing(
+                Easing.bezierFn(0.25, 0.1, 0.25, 1)
+              )}
+              exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
             >
-            <Button
-              icon={isPlaying ? Pause : Play}
-              size="$4"
-              circular
-              onPress={(e) => {
-                e.stopPropagation();
-                setIsPlaying(!isPlaying);
-              }}
-              />
-
-            <Button
-              icon={isMuted ? VolumeOff : Volume2}
-              size="$4"
-              circular
-              onPress={(e) => {
-                e.stopPropagation();
-                setIsMuted(!isMuted);
-              }}
-              />
-
-            <Button
-              icon={Fullscreen}
-              size="$4"
-              circular
-              onPress={(e) => {
-                e.stopPropagation();
-                videoRef.current?.presentFullscreenPlayer();
-              }}
-              />
-          </XStack>
-        )}
+              <XStack
+                position="absolute"
+                top={top}
+                left={0}
+                right={0}
+                paddingHorizontal="$4"
+                justifyContent="space-between"
+                alignItems="center"
+                zIndex={10000}
+              >
+                <Button
+                  icon={isPlaying ? Pause : Play}
+                  size="$4"
+                  circular
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setIsPlaying(!isPlaying);
+                  }}
+                />
+                <Button
+                  icon={isMuted ? VolumeOff : Volume2}
+                  size="$4"
+                  circular
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setIsMuted(!isMuted);
+                  }}
+                />
+                <Button
+                  icon={Maximize}
+                  size="$4"
+                  circular
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    enterFullscreen();
+                  }}
+                />
+                <Button
+                  icon={Minimize}
+                  size="$4"
+                  circular
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    exitFullscreen();
+                  }}
+                />
+              </XStack>
+            </AnimatedView>
+          )}
         </View>
       </TouchableOpacity>
     </>
@@ -227,7 +254,7 @@ const Watch = () => {
     );
   }
   return (
-    <ThemedView>
+    <ThemedView useSafeArea={false}>
       <VideoPlayer source={source} />
     </ThemedView>
   );

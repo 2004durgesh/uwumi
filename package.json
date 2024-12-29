@@ -51,6 +51,7 @@
     "react-native": "0.76.5",
     "react-native-bottom-tabs": "^0.7.8",
     "react-native-gesture-handler": "~2.20.2",
+    "react-native-media-console": "^2.2.4",
     "react-native-mmkv": "^3.1.0",
     "react-native-reanimated": "^3.16.3",
     "react-native-safe-area-context": "4.12.0",
