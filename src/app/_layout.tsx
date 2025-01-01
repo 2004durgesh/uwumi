@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { Button, TamaguiProvider, XStack, createTamagui } from "tamagui";
+import { PortalProvider } from '@tamagui/portal'
 import config from "../../tamagui.config";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +24,7 @@ const tamaguiConfig = createTamagui(config);
 export default function RootLayout() {
 
   const colorScheme = useColorScheme();
+  // console.log(process.env);
   const [loaded] = useFonts({
     InterMedium,
     InterSemiBold,
@@ -54,12 +56,14 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
-          <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <PortalProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
+            <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </PortalProvider>
       </TamaguiProvider>
     </QueryClientProvider>
     </GestureHandlerRootView>

@@ -1,213 +1,241 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
+  Dimensions,
   DimensionValue,
   Pressable,
+  StyleProp,
   StyleSheet,
   TouchableOpacity,
-} from "react-native";
-import Video, { type VideoRef } from "react-native-video";
-import { YStack, XStack, Button, View, Spinner, ZStack } from "tamagui";
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Fullscreen,
-  VolumeOff,
-  Maximize,
-  Minimize,
-} from "@tamagui/lucide-icons";
-import * as ScreenOrientation from "expo-screen-orientation";
-import { useLocalSearchParams } from "expo-router";
-import { useWatchAnimeEpisodes } from "@/queries/watchQueries";
-import { ThemedView } from "@/components/ThemedView";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeOut,Easing} from "react-native-reanimated";
+  ViewStyle,
+} from 'react-native';
+import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
+import { YStack, View, Spinner, Text } from 'tamagui';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { useLocalSearchParams } from 'expo-router';
+import { useWatchAnimeEpisodes } from '@/queries/watchQueries';
+import { ThemedView } from '@/components/ThemedView';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ControlsOverlay from './ControlsOverlay';
+import { ISubtitle } from '@/constants/types';
+import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface VideoPlayerProps {
   source: string;
+  subtitles?: ISubtitle[];
+  episodeInfo: {
+    mediaType: string;
+    provider: string;
+    episodeId: string;
+    episodeDubId: string;
+    isDub: string;
+    poster: string;
+    title: string;
+    description: string;
+  };
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ source }) => {
+export interface SubtitleTrack {
+  index: number;
+  title?: string;
+  language?: string;
+  type?: WithDefault<'srt' | 'ttml' | 'vtt' | 'application/x-media-cues', 'srt'>;
+  selected?: boolean;
+  uri: string;
+}
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, episodeInfo, subtitles }) => {
   const { top } = useSafeAreaInsets();
+  const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = episodeInfo;
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [seekableDuration, setSeekableDuration] = useState(0);
+  const [isVideoReady, setIsVideoReady] = useState(false);
   const [playerDimensions, setPlayerDimensions] = useState({
     width: 0,
     height: 0,
   });
-
-  const AnimatedView = Animated.createAnimatedComponent(View);
+  const [dimensions, setDimensions] = useState({
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  });
+  const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
+  const [selectedSubtitle, setSelectedSubtitle] = useState<number | undefined>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  console.log(subtitleTracks,selectedSubtitle);
+  useEffect(() => {
+    if (subtitles) {
+      setSubtitleTracks(subtitles);
+    }
+  }, [subtitles]);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  // useEffect(() => {
+  //   const hideControls = () => {
+  //     if (isPlaying && showControls) {
+  //       controlsTimeoutRef.current = setTimeout(() => {
+  //         setShowControls(false);
+  //       }, 3000);
+  //     }
+  //   };
+
+  //   // Clear any existing timeout before setting a new one
+  //   if (controlsTimeoutRef.current) {
+  //     clearTimeout(controlsTimeoutRef.current);
+  //   }
+
+  //   hideControls();
+
+  //   return () => {
+  //     if (controlsTimeoutRef.current) {
+  //       clearTimeout(controlsTimeoutRef.current);
+  //     }
+  //   };
+  // }, [showControls, isPlaying]);
+
   useEffect(() => {
-    const hideControls = () => {
-      if (isPlaying && showControls) {
-        controlsTimeoutRef.current = setTimeout(() => {
-          setShowControls(false);
-        }, 3000);
-      }
-    };
-
-    // Clear any existing timeout before setting a new one
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-
-    hideControls();
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions({
+        width: window.width,
+        height: window.height,
+      });
+    });
 
     return () => {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
+      subscription?.remove();
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(console.error);
+      SystemNavigationBar.navigationShow();
+      setIsFullscreen(false);
     };
-  }, [showControls, isPlaying]);
+  }, []);
 
   const enterFullscreen = async () => {
     try {
       if (videoRef.current) {
-        videoRef.current.setFullScreen(true);
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE
-        );
+        SystemNavigationBar.stickyImmersive();
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
         setIsFullscreen(true);
       }
     } catch (error) {
-      console.error("Failed to enter fullscreen:", error);
+      console.error('Failed to enter fullscreen:', error);
     }
   };
 
   const exitFullscreen = async () => {
     try {
       if (videoRef.current) {
-        videoRef.current.setFullScreen(false);
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP
-        );
+        SystemNavigationBar.navigationShow();
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
         setIsFullscreen(false);
       }
     } catch (error) {
-      console.error("Failed to exit fullscreen:", error);
+      console.error('Failed to exit fullscreen:', error);
     }
   };
+
+  const handleProgress = ({ currentTime, seekableDuration }: { currentTime: number; seekableDuration: number }) => {
+    setCurrentTime(currentTime);
+    setSeekableDuration(seekableDuration);
+  };
+
+  const videoStyle = useMemo<StyleProp<ViewStyle>>(
+    () => ({
+      width: isFullscreen ? dimensions.width : '100%',
+      height: isFullscreen ? dimensions.height : undefined,
+      aspectRatio: isFullscreen ? undefined : 16 / 9,
+      backgroundColor: 'black',
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+    }),
+    [isFullscreen, dimensions, top]
+  );
 
   return (
     <>
       <TouchableOpacity
         onPress={() => {
           setShowControls(!showControls);
-          console.log("pressed", playerDimensions);
+          console.log('pressed', playerDimensions, dimensions);
         }}
+        style={{ height: isVideoReady ? playerDimensions.height : 250 }}
       >
         <View height={playerDimensions.height} position="relative">
           <Video
             ref={videoRef}
             source={{ uri: source }}
-            style={{
-              width: "100%",
-              aspectRatio: 16 / 9,
-              backgroundColor: "red",
-              position: "absolute",
-              top: top,
-              left: 0,
-              right: 0,
-            }}
-            resizeMode="contain"
+            poster={poster}
+            style={videoStyle}
+            resizeMode={'contain'}
             onFullscreenPlayerWillPresent={() => enterFullscreen()}
             onFullscreenPlayerWillDismiss={() => exitFullscreen()}
             paused={!isPlaying}
             muted={isMuted}
             controls={false}
+            onProgress={handleProgress}
+            progressUpdateInterval={1000}
             onLayout={(e) => {
               setPlayerDimensions({
                 width: e.nativeEvent.layout.width,
                 height: e.nativeEvent.layout.height,
               });
             }}
-            onError={(error) => console.log("Video Error:", error)}
+            onError={(error) => console.log('Video Error:', error)}
+            onLoad={(value) => {
+              setIsVideoReady(true);
+                console.log('Video loaded:', value);
+              }}
+              textTracks={subtitles?.map((track, index) => ({
+                title: track.lang || 'Untitled',
+                language: track.lang!.toLowerCase() as ISO639_1,
+                type: 'application/x-media-cues' as TextTrackType,
+                uri: track.url ?? '',
+                index
+              }))}
+              selectedTextTrack={{
+                type: SelectedTrackType.INDEX,
+                value: selectedSubtitle,
+              }}
+              // Handle when text tracks are loaded
+              onTextTracks={(tracks) => {
+              console.log('Tracks:', tracks);
+            }}
           />
-
-          {showControls && (
-            <AnimatedView
-              height={playerDimensions.height}
-              backgroundColor="rgba(0,0,0,0.5)"
-              top={top}
-              left={0}
-              right={0}
-              entering={FadeIn.duration(300).easing(
-                Easing.bezierFn(0.25, 0.1, 0.25, 1)
-              )}
-              exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
-            >
-              <XStack
-                position="absolute"
-                top={top}
-                left={0}
-                right={0}
-                paddingHorizontal="$4"
-                justifyContent="space-between"
-                alignItems="center"
-                zIndex={10000}
-              >
-                <Button
-                  icon={isPlaying ? Pause : Play}
-                  size="$4"
-                  circular
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    setIsPlaying(!isPlaying);
-                  }}
-                />
-                <Button
-                  icon={isMuted ? VolumeOff : Volume2}
-                  size="$4"
-                  circular
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    setIsMuted(!isMuted);
-                  }}
-                />
-                <Button
-                  icon={Maximize}
-                  size="$4"
-                  circular
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    enterFullscreen();
-                  }}
-                />
-                <Button
-                  icon={Minimize}
-                  size="$4"
-                  circular
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    exitFullscreen();
-                  }}
-                />
-              </XStack>
-            </AnimatedView>
+          {isVideoReady && (
+            <ControlsOverlay
+              showControls={showControls}
+              isPlaying={isPlaying}
+              isMuted={isMuted}
+              isFullscreen={isFullscreen}
+              currentTime={currentTime}
+              seekableDuration={seekableDuration}
+              title={title}
+              subtitleTracks={subtitleTracks}
+              selectedSubtitle={selectedSubtitle}
+              setSelectedSubtitle={setSelectedSubtitle}
+              onPlayPress={() => setIsPlaying((prev) => !prev)}
+              onMutePress={() => setIsMuted((prev) => !prev)}
+              onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+              onSeek={(value) => {
+                videoRef.current?.seek(value);
+                setCurrentTime(value);
+              }}
+            />
           )}
         </View>
       </TouchableOpacity>
+      <Text>{description}</Text>
     </>
   );
 };
 
 const Watch = () => {
-  const {
-    mediaType,
-    provider,
-    episodeId,
-    episodeDubId,
-    isDub,
-    poster,
-    title,
-    description,
-  } = useLocalSearchParams<{
+  const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
     mediaType: string;
     provider: string;
     episodeId: string;
@@ -217,45 +245,35 @@ const Watch = () => {
     title: string;
     description: string;
   }>();
-  // console.log({
-  //   mediaType,
-  //   provider,
-  //   episodeId,
-  //   episodeDubId,
-  //   isDub,
-  //   poster,
-  //   title,
-  //   description,
-  // });
   const { data, isLoading, error } = useWatchAnimeEpisodes({
     episodeId,
     provider,
   });
-  const [source, setSource] = useState<string>(
-    data?.sources?.find((s) => s.quality === "default")?.url ||
-      data?.sources?.find((s) => s.quality === "backup")?.url ||
-      ""
+  console.log(data);
+  const source = useMemo(
+    () =>
+      data?.sources?.find((s) => s.quality === 'default')?.url ||
+      data?.sources?.find((s) => s.quality === 'backup')?.url ||
+      data?.sources?.[0]?.url ||
+      '',
+    [data?.sources]
   );
-  useEffect(() => {
-    if (data?.sources) {
-      const defaultSource =
-        data.sources.find((s) => s.quality === "default")?.url ||
-        data.sources.find((s) => s.quality === "backup")?.url;
-      setSource(defaultSource || "");
-    }
-  }, [data]);
   if (isLoading) {
     return (
       <ThemedView useSafeArea={false}>
         <YStack flex={1} justifyContent="center" alignItems="center">
-          <Spinner />
+          <Spinner size="large" color="$color" />
         </YStack>
       </ThemedView>
     );
   }
   return (
-    <ThemedView useSafeArea={false}>
-      <VideoPlayer source={source} />
+    <ThemedView>
+      <VideoPlayer
+        source={source}
+        subtitles={data?.subtitles}
+        episodeInfo={{ mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description }}
+      />
     </ThemedView>
   );
 };

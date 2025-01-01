@@ -1,3 +1,4 @@
+import { DEFAULT_ANIME_PROVIDER } from "@/constants/provider";
 import { EpisodeData, IAnimeInfo } from "@/constants/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -28,7 +29,7 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
   });
 }
 
-export function useAnimeEpisodes({ id,provider='gogoanime' }: { id: string,provider:string }) {
+export function useAnimeEpisodes({ id,provider=DEFAULT_ANIME_PROVIDER }: { id: string,provider:string }) {
   return useQuery<EpisodeData>({
     queryKey: ["anime", "episodes", id,provider],
     queryFn: async () => {

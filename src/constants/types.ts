@@ -216,3 +216,32 @@ export interface Details {
     day: number;
   };
 }
+
+
+export interface ISource {
+  headers?: { [k: string]: string };
+  intro?: Intro;
+  outro?: Intro;
+  subtitles?: ISubtitle[];
+  sources: IVideo[];
+  download?: string;
+  embedURL?: string;
+}
+export interface Intro {
+  start: number;
+  end: number;
+}
+export interface ISubtitle {
+  id?: string;
+  url: string;
+  lang: string;
+}
+
+export interface IVideo {
+  url: string;
+  quality?: string;
+  isM3U8?: boolean;
+  isDASH?: boolean;
+  size?: number;
+  [x: string]: unknown; 
+}

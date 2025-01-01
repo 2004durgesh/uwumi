@@ -53,7 +53,7 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
         pathname: "/info/[mediaType]",
         params: {
           mediaType: "anime",
-          provider: "gogoanime",
+          provider: "zoro",
           id: item.id,
           image: item.image,
         },
