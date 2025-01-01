@@ -19,6 +19,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { ISubtitle } from '@/constants/types';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
+import { useEvent } from 'expo';
+import { useVideoPlayer, VideoView } from 'expo-video';
 
 interface VideoPlayerProps {
   source: string;
@@ -47,14 +49,12 @@ export interface SubtitleTrack {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, episodeInfo, subtitles }) => {
   const { top } = useSafeAreaInsets();
   const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = episodeInfo;
-  const videoRef = useRef<VideoRef>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
+  const videoRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [seekableDuration, setSeekableDuration] = useState(0);
-  const [isVideoReady, setIsVideoReady] = useState(false);
+  // const [isVideoReady, setIsVideoReady] = useState(false);
   const [playerDimensions, setPlayerDimensions] = useState({
     width: 0,
     height: 0,
@@ -65,13 +65,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, episodeInfo, subtitle
   });
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitle, setSelectedSubtitle] = useState<number | undefined>(0);
-  const [isLoading, setIsLoading] = useState(true);
-  console.log(subtitleTracks,selectedSubtitle);
+  console.log(subtitleTracks, selectedSubtitle);
   useEffect(() => {
     if (subtitles) {
       setSubtitleTracks(subtitles);
     }
   }, [subtitles]);
+
+  const player = useVideoPlayer(source, (player) => {
+    player.loop = true;
+  });
+  const { isPlaying } = useEvent(player, 'playingChange', {
+    isPlaying: player.playing,
+  });
+  const { muted } = useEvent(player, 'mutedChange', { muted: player.muted });
+  const { subtitleTrack } = useEvent(player, 'subtitleTrackChange', { subtitleTrack: player.subtitleTrack });
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   // useEffect(() => {
@@ -163,70 +171,45 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, episodeInfo, subtitle
           setShowControls(!showControls);
           console.log('pressed', playerDimensions, dimensions);
         }}
-        style={{ height: isVideoReady ? playerDimensions.height : 250 }}
+        style={{ backgroundColor: 'red', flex: 1 }}
       >
         <View height={playerDimensions.height} position="relative">
-          <Video
+          <VideoView
             ref={videoRef}
-            source={{ uri: source }}
-            poster={poster}
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
+            nativeControls={false}
             style={videoStyle}
-            resizeMode={'contain'}
-            onFullscreenPlayerWillPresent={() => enterFullscreen()}
-            onFullscreenPlayerWillDismiss={() => exitFullscreen()}
-            paused={!isPlaying}
-            muted={isMuted}
-            controls={false}
-            onProgress={handleProgress}
-            progressUpdateInterval={1000}
+            contentFit={'contain'}
+            onFullscreenEnter={() => enterFullscreen()}
+            onFullscreenExit={() => exitFullscreen()}
             onLayout={(e) => {
               setPlayerDimensions({
                 width: e.nativeEvent.layout.width,
                 height: e.nativeEvent.layout.height,
               });
             }}
-            onError={(error) => console.log('Video Error:', error)}
-            onLoad={(value) => {
-              setIsVideoReady(true);
-                console.log('Video loaded:', value);
-              }}
-              textTracks={subtitles?.map((track, index) => ({
-                title: track.lang || 'Untitled',
-                language: track.lang!.toLowerCase() as ISO639_1,
-                type: 'application/x-media-cues' as TextTrackType,
-                uri: track.url ?? '',
-                index
-              }))}
-              selectedTextTrack={{
-                type: SelectedTrackType.INDEX,
-                value: selectedSubtitle,
-              }}
-              // Handle when text tracks are loaded
-              onTextTracks={(tracks) => {
-              console.log('Tracks:', tracks);
+          />
+          <ControlsOverlay
+            showControls={showControls}
+            isPlaying={isPlaying}
+            isMuted={muted}
+            isFullscreen={isFullscreen}
+            currentTime={currentTime}
+            seekableDuration={seekableDuration}
+            title={title}
+            subtitleTracks={subtitleTracks}
+            selectedSubtitle={selectedSubtitle}
+            setSelectedSubtitle={setSelectedSubtitle}
+            onPlayPress={() => (isPlaying ? player.pause() : player.play())}
+            onMutePress={() => (player.muted = !muted)}
+            onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+            onSeek={(value) => {
+              player.seekBy(value);
+              setCurrentTime(value);
             }}
           />
-          {isVideoReady && (
-            <ControlsOverlay
-              showControls={showControls}
-              isPlaying={isPlaying}
-              isMuted={isMuted}
-              isFullscreen={isFullscreen}
-              currentTime={currentTime}
-              seekableDuration={seekableDuration}
-              title={title}
-              subtitleTracks={subtitleTracks}
-              selectedSubtitle={selectedSubtitle}
-              setSelectedSubtitle={setSelectedSubtitle}
-              onPlayPress={() => setIsPlaying((prev) => !prev)}
-              onMutePress={() => setIsMuted((prev) => !prev)}
-              onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
-              onSeek={(value) => {
-                videoRef.current?.seek(value);
-                setCurrentTime(value);
-              }}
-            />
-          )}
         </View>
       </TouchableOpacity>
       <Text>{description}</Text>
