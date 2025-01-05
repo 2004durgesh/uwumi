@@ -1,5 +1,5 @@
-import { View, Text, YStack, XStack, Spinner,useTheme } from 'tamagui';
-import { FlatList, Pressable,StyleSheet } from 'react-native';
+import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 import React, { Suspense, useRef } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useAnimeEpisodes } from '@/queries';
@@ -23,91 +23,6 @@ const LoadingState = () => (
   </YStack>
 );
 
-const rightActions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
-  const theme=useTheme();
-  const hasReachedThresholdUp = useSharedValue(false);
-  const hasReachedThresholdDown = useSharedValue(false);
-  const lastDragValue = useSharedValue(0);
-  const THRESHOLD = 100;
-  const BUFFER = 5; // Buffer zone to prevent edge cases
-
-  // useAnimatedReaction(
-  //   () => {
-  //     return drag.value;
-  //   },
-  //   (dragValue) => {
-  //     const absValue = Math.abs(dragValue);
-  //     const isMovingOut = Math.abs(dragValue) > Math.abs(lastDragValue.value);
-  //     lastDragValue.value = dragValue;
-
-  //     if (absValue >= THRESHOLD + BUFFER && !hasReachedThresholdUp.value && isMovingOut) {
-  //       hasReachedThresholdUp.value = true;
-  //       hasReachedThresholdDown.value = false;
-  //     } else if (absValue <= THRESHOLD - BUFFER && hasReachedThresholdUp.value && !isMovingOut) {
-  //       hasReachedThresholdDown.value = true;
-  //       hasReachedThresholdUp.value = false;
-  //     }
-  //   }
-  // );
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
-    return {
-      transform: [
-        {
-          scale: withSpring(0.9 + progress * 0.1, {
-            mass: 0.5,
-            damping: 20,
-            stiffness: 200,
-          }),
-        },
-      ],
-      opacity: withSpring(progress > 0 ? 1 : 0.7),
-    };
-  });
-
-  const eyeIconStyle = useAnimatedStyle(() => {
-    const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
-    
-    // Interpolate icon opacity based on progress
-    const opacity = interpolate(
-      progress,
-      [0.5, 1],
-      [1, 0],
-      Extrapolation.CLAMP
-    );
-    
-    return { opacity };
-  });
-  
-  const eyeOffIconStyle = useAnimatedStyle(() => {
-    const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
-    
-    const opacity = interpolate(
-      progress,
-      [0.5, 1],
-      [0, 1],
-      Extrapolation.CLAMP
-    );
-    
-    return { opacity };
-  });
-
-  return (
-    <Animated.View style={[animatedStyle, { width: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: theme?.color4?.val }]}>
-      <Animated.View style={[{...StyleSheet.absoluteFillObject,justifyContent: 'center',
-    alignItems: 'center'}, eyeIconStyle]}>
-        <Eye color="white" size={24} />
-      </Animated.View>
-      
-      <Animated.View style={[{...StyleSheet.absoluteFillObject,justifyContent: 'center',
-    alignItems: 'center'}, eyeOffIconStyle]}>
-        <EyeOff color="white" size={24} />
-      </Animated.View>
-    </Animated.View>
-  );
-};
-
 const EpisodeList = () => {
   const { mediaType, provider, id } = useLocalSearchParams<{
     mediaType: string;
@@ -117,6 +32,68 @@ const EpisodeList = () => {
 
   const swipeRef = useRef<SwipeableMethods>(null);
   const router = useRouter();
+  const theme = useTheme();
+
+  const rightActions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
+    const THRESHOLD = 100;
+
+    const animatedStyle = useAnimatedStyle(() => {
+      const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
+      return {
+        transform: [
+          {
+            scale: withSpring(0.9 + progress * 0.1, {
+              mass: 0.5,
+              damping: 20,
+              stiffness: 200,
+            }),
+          },
+        ],
+        opacity: withSpring(progress > 0 ? 1 : 0.7),
+      };
+    });
+
+    const eyeIconStyle = useAnimatedStyle(() => {
+      const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
+
+      // Interpolate icon opacity based on progress
+      const opacity = interpolate(progress, [0.5, 1], [1, 0], Extrapolation.CLAMP);
+
+      return { opacity };
+    });
+
+    const eyeOffIconStyle = useAnimatedStyle(() => {
+      const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
+
+      const opacity = interpolate(progress, [0.5, 1], [0, 1], Extrapolation.CLAMP);
+
+      return { opacity };
+    });
+
+    return (
+      <Animated.View
+        style={[
+          animatedStyle,
+          { width: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: theme?.color4?.val },
+        ]}
+      >
+        <Animated.View
+          style={[{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' }, eyeIconStyle]}
+        >
+          <Eye color="white" size={24} />
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' },
+            eyeOffIconStyle,
+          ]}
+        >
+          <EyeOff color="white" size={24} />
+        </Animated.View>
+      </Animated.View>
+    );
+  };
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
   // console.log("ep", episodeData);
   const episodesList = Array.isArray(episodeData) ? episodeData : [];
@@ -140,7 +117,7 @@ const EpisodeList = () => {
             friction={2}
             enableTrackpadTwoFingerGesture
             rightThreshold={40}
-            onSwipeableOpen={()=>{swipeRef?.current?.close()}}
+            onSwipeableOpen={(_, s) => s.close()}
             onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
             onSwipeableWillClose={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
             renderRightActions={rightActions}
