@@ -34,6 +34,7 @@ const Info = () => {
   // console.log(data);
   const themeName = useThemeStore((state: any) => state.themeName);
 
+
   return (
     <>
       <ThemedView useSafeArea={false} useStatusBar>

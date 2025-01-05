@@ -1,6 +1,16 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { YStack, XStack, Button, Text, View, Slider, Sheet, ScrollView } from 'tamagui';
-import { Play, Pause, Volume2, VolumeOff, Maximize, Minimize, Settings } from '@tamagui/lucide-icons';
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeOff,
+  Maximize,
+  Minimize,
+  Settings,
+  Captions,
+  CaptionsOff,
+} from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import { ISubtitle } from '@/constants/types';
@@ -11,8 +21,8 @@ interface ControlsOverlayProps {
   isMuted: boolean;
   isFullscreen: boolean;
   subtitleTracks: ISubtitle[] | undefined;
-  selectedSubtitle: number | undefined;
-  setSelectedSubtitle: (index: number | undefined) => void;
+  selectedSubtitleIndex: number | undefined;
+  setSelectedSubtitleIndex: (index: number | undefined) => void;
   currentTime: number;
   seekableDuration: number;
   title: string;
@@ -22,7 +32,7 @@ interface ControlsOverlayProps {
   onSeek: (time: number) => void;
 }
 
-const formatTime = (seconds: number): string => {
+export const formatTime = (seconds: number): string => {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
@@ -42,8 +52,8 @@ const ControlsOverlay = React.memo(
     isMuted,
     isFullscreen,
     subtitleTracks,
-    selectedSubtitle,
-    setSelectedSubtitle,
+    selectedSubtitleIndex,
+    setSelectedSubtitleIndex,
     currentTime,
     seekableDuration,
     title,
@@ -53,12 +63,14 @@ const ControlsOverlay = React.memo(
     onSeek,
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
+    // console.log("settings are being shown", openSettings);
     return showControls ? (
       <>
         <AnimatedYStack
           flex={1}
           justifyContent="space-between"
-          padding="$2"
+          paddingHorizontal={isFullscreen ? '$10' : '$2'}
+          paddingVertical={isFullscreen ? '$5' : '$2'}
           backgroundColor="rgba(0, 0, 0, 0.5)"
           entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
           exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
@@ -67,8 +79,13 @@ const ControlsOverlay = React.memo(
             <Text color="white" fontWeight={700} fontSize="$3.5">
               {title}
             </Text>
-            <XStack gap="$2">
-              <Pressable onPress={() => setOpenSettings(!openSettings)}>
+            <XStack gap="$4">
+              {(selectedSubtitleIndex ?? -1) > -1 ? (
+                <Captions color="white" size={20} onPress={() => setSelectedSubtitleIndex(-1)} />
+              ) : (
+                <CaptionsOff color="white" size={20} onPress={() => setSelectedSubtitleIndex(0)} />
+              )}
+              <Pressable onPress={(e) => {e.stopPropagation();setOpenSettings(!openSettings)}}>
                 <Settings color="white" size={20} />
               </Pressable>
               <Sheet
@@ -76,7 +93,7 @@ const ControlsOverlay = React.memo(
                 modal={true}
                 open={openSettings}
                 onOpenChange={(value: boolean) => setOpenSettings(value)}
-                snapPoints={[80, 25]}
+                snapPoints={isFullscreen ? [80, 25] : [50, 25]}
                 snapPointsMode={'percent'}
                 dismissOnSnapToBottom
                 zIndex={100_000}
@@ -89,13 +106,13 @@ const ControlsOverlay = React.memo(
                   enterStyle={{ opacity: 0 }}
                   exitStyle={{ opacity: 0 }}
                 />
-                <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width="85%">
+                <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width="95%">
                   <Sheet.ScrollView>
                     <YStack gap="$2">
                       <Button
-                        backgroundColor={selectedSubtitle === undefined ? '$color' : '$gray5'}
+                        backgroundColor={selectedSubtitleIndex === undefined ? '$color' : '#0e0f15'}
                         onPress={() => {
-                          setSelectedSubtitle(undefined);
+                          setSelectedSubtitleIndex(undefined);
                         }}
                       >
                         Off
@@ -103,9 +120,10 @@ const ControlsOverlay = React.memo(
                       {subtitleTracks?.map((track, index) => (
                         <Button
                           key={index}
-                          backgroundColor={selectedSubtitle === index ? '$color' : '$gray5'}
+                          backgroundColor={'#0e0f15'}
+                          color={selectedSubtitleIndex === index ? '$color' : '$color1'}
                           onPress={() => {
-                            setSelectedSubtitle(index);
+                            setSelectedSubtitleIndex(index);
                           }}
                         >
                           {track.lang}
@@ -131,7 +149,7 @@ const ControlsOverlay = React.memo(
               <Pressable onPress={onMutePress}>
                 {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
               </Pressable>
-              <XStack gap="$2" marginLeft="auto" alignItems="center">
+              <XStack gap="$4" marginLeft="auto" alignItems="center">
                 <Button
                   backgroundColor="$color"
                   color="$color4"
@@ -139,6 +157,8 @@ const ControlsOverlay = React.memo(
                   height="$3"
                   paddingHorizontal="$3"
                   onPress={() => onSeek(Math.round(currentTime) + 85)}
+                  fontWeight={500}
+                  fontSize={13}
                 >
                   +85 s
                 </Button>
