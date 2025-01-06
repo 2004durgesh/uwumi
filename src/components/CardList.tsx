@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Card, ZStack, styled, XStack, Spinner, useTheme } from "tamagui";
+import { Text, Card, ZStack, styled, XStack, Spinner } from "tamagui";
 import { Link } from "expo-router";
 import { LinearGradient } from "tamagui/linear-gradient";
 import { AnimatedCustomImage } from "./CustomImage";
@@ -44,7 +44,6 @@ const StyledCard = styled(Card, {
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
 const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
-  const theme=useTheme()
 
   return (
     <Link
@@ -90,8 +89,6 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
           <ZStack width="100%" height="100%" alignItems="center">
             <AnimatedCustomImage
               source={{
-                width: 135,
-                height: 190,
                 uri: item.image,
               }}
               style={{ borderRadius: 10 }}

@@ -10,7 +10,7 @@ import type { StackProps, TabLayout, TabsTabProps } from "tamagui";
 import { IAnimeInfo } from "@/constants/types";
 import Details from "@/app/info/Details";
 import Similar from "./Similar";
-import EpisodeList from "./EpisodeList";
+import Episodes from "./Episodes"
 interface TabsProps {
   data: IAnimeInfo;
 }
@@ -187,7 +187,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
       <AnimatePresence exitBeforeEnter custom={{ direction }} initial={false}>
         <AnimatedYStack key={currentTab}>
           <Tabs.Content value={currentTab} forceMount justifyContent="center">
-            {currentTab === "tab1" && <EpisodeList />}
+            {currentTab === "tab1" && <Episodes />}
 
             {currentTab === "tab2" && <Details data={data} />}
 

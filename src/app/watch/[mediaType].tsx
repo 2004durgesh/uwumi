@@ -17,6 +17,8 @@ import Animated, { runOnJS } from 'react-native-reanimated';
 import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
+import EpisodeList from '@/components/EpisodeList';
+import { useCurrentPlayingEpisode } from '@/stores/useCurrentPlayingEpisode';
 
 export interface SubtitleTrack {
   index: number;
@@ -38,13 +40,14 @@ const OverylayedView = styled(View, {
   alignItems: 'center',
   pointerEvents: 'none',
 });
-const AnimatedView = Animated.createAnimatedComponent(styled(OverylayedView,{width: '50%', height: '100%'}));
+const AnimatedView = Animated.createAnimatedComponent(styled(OverylayedView, { width: '50%', height: '100%' }));
 const SeekText = styled(Text, { fontSize: 16, fontWeight: 'bold', color: 'white' });
 
 const Watch = () => {
-  const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
+  const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
     mediaType: string;
     provider: string;
+    id: string;
     episodeId: string;
     episodeDubId: string;
     isDub: string;
@@ -56,7 +59,17 @@ const Watch = () => {
     episodeId,
     provider,
   });
+  console.log(data);
   const { top, right, bottom, left } = useSafeAreaInsets();
+  const setCurrentPlayingEpisode = useCurrentPlayingEpisode((state) => state.setCurrentPlayingEpisode);
+  useEffect(() => {
+    if (episodeId) {
+      setCurrentPlayingEpisode(episodeId);
+    }
+    return ()=>{
+      setCurrentPlayingEpisode("");
+    }
+  }, [episodeId]);
   const videoRef = useRef<VideoRef>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -278,139 +291,109 @@ const Watch = () => {
   }
   return (
     <ThemedView useSafeArea={false} useStatusBar>
-      <GestureDetector gesture={gestures}>
-        <View height={isVideoReady ? playerDimensions.height : 250} top={top}>
-          <Pressable
-            onPress={() => {
-              if (isDoubleTap) return;
-              toggleControls();
-            }}
-            style={{ flex: 1 }}
-          >
-            <View
-              style={{ height: playerDimensions.height, position: 'relative' }}
-              // style={{height:"100%", position: 'relative' }} //keep for future ref
+      <View height="100%" top={top}>
+        <GestureDetector gesture={gestures}>
+          <View height={isVideoReady ? playerDimensions.height : 250}>
+            <Pressable
+              onPress={() => {
+                if (isDoubleTap) return;
+                toggleControls();
+              }}
+              style={{ flex: 1 }}
             >
-              <Video
-                ref={videoRef}
-                source={{
-                  uri: source,
-                  textTracks: subtitleTracks?.map((track, index) => ({
-                    title: track.lang || 'Untitled',
-                    language: track.lang?.toLowerCase() as ISO639_1,
-                    type: TextTrackType.VTT,
-                    uri: track.url || '',
-                    index,
-                  })),
-                  textTracksAllowChunklessPreparation: false,
-                }}
-                style={videoStyle}
-                resizeMode={'contain'}
-                poster={{
-                  source: { uri: poster },
-                  resizeMode: "contain",
-                }}
-                onProgress={handleProgress}
-                onPlaybackStateChanged={handlePlaybackStateChange}
-                onLayout={(e) => {
-                  setPlayerDimensions({
-                    width: e.nativeEvent.layout.width,
-                    height: e.nativeEvent.layout.height,
-                  });
-                }}
-                onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
-                onError={(error) => console.log('Video Error:', error)}
-                onLoad={(value) => {
-                  console.log('Video loaded:', value);
-                  setIsVideoReady(true);
-                }}
-                // selectedVideoTrack={{
-                //   type: SelectedVideoTrackType.INDEX,
-                //   value: 0,
-                // }}
-                selectedTextTrack={{
-                  type: SelectedTrackType.INDEX,
-                  value: (selectedSubtitleIndex ?? 0) + 1,
-                }}
-                onTextTracks={(tracks) => {
-                  console.log('Text Tracks:', tracks);
-                }}
-                subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
-              />
-
-              {isVideoReady && (
-                <ControlsOverlay
-                  showControls={showControls}
-                  isPlaying={playbackState.isPlaying}
-                  isMuted={isMuted}
-                  isFullscreen={isFullscreen}
-                  currentTime={currentTime}
-                  seekableDuration={seekableDuration}
-                  title={title}
-                  subtitleTracks={subtitleTracks}
-                  selectedSubtitleIndex={selectedSubtitleIndex}
-                  setSelectedSubtitleIndex={setSelectedSubtitleIndex}
-                  onPlayPress={handlePlayPress}
-                  onMutePress={handleMutePress}
-                  onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
-                  onSeek={handleSeek}
+              <View
+                style={{ height: playerDimensions.height, position: 'relative' }}
+                // style={{height:"100%", position: 'relative' }} //keep for future ref
+              >
+                <Video
+                  ref={videoRef}
+                  source={{
+                    uri: source,
+                    textTracks: subtitleTracks?.map((track, index) => ({
+                      title: track.lang || 'Untitled',
+                      language: track.lang?.toLowerCase() as ISO639_1,
+                      type: TextTrackType.VTT,
+                      uri: track.url || '',
+                      index,
+                    })),
+                    textTracksAllowChunklessPreparation: false,
+                  }}
+                  style={videoStyle}
+                  resizeMode={'contain'}
+                  poster={{
+                    source: { uri: poster },
+                    resizeMode: 'contain',
+                  }}
+                  onProgress={handleProgress}
+                  onPlaybackStateChanged={handlePlaybackStateChange}
+                  onLayout={(e) => {
+                    setPlayerDimensions({
+                      width: e.nativeEvent.layout.width,
+                      height: e.nativeEvent.layout.height,
+                    });
+                  }}
+                  onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
+                  onError={(error) => console.log('Video Error:', error)}
+                  onLoad={(value) => {
+                    console.log('Video loaded:', value);
+                    setIsVideoReady(true);
+                  }}
+                  // selectedVideoTrack={{
+                  //   type: SelectedVideoTrackType.INDEX,
+                  //   value: 0,
+                  // }}
+                  selectedTextTrack={{
+                    type: SelectedTrackType.INDEX,
+                    value: (selectedSubtitleIndex ?? 0) + 1,
+                  }}
+                  onTextTracks={(tracks) => {
+                    console.log('Text Tracks:', tracks);
+                  }}
+                  subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
                 />
-              )}
-            </View>
-          </Pressable>
-          <AnimatedView left={0} style={backwardAnimatedStyle}>
-            <SeekText>-{doubleTapValue.backward}s</SeekText>
-          </AnimatedView>
-          {isBuffering && (
-            <OverylayedView left={0} right={0} top={0} bottom={0}>
-              <Spinner size="large" color="white" />
-            </OverylayedView>
-          )}
-          <AnimatedView right={0} style={forwardAnimatedStyle}>
-            <SeekText>+{doubleTapValue.forward}s</SeekText>
-          </AnimatedView>
+                {isVideoReady && (
+                  <ControlsOverlay
+                    showControls={showControls}
+                    isPlaying={playbackState.isPlaying}
+                    isMuted={isMuted}
+                    isFullscreen={isFullscreen}
+                    currentTime={currentTime}
+                    seekableDuration={seekableDuration}
+                    title={title}
+                    subtitleTracks={subtitleTracks}
+                    selectedSubtitleIndex={selectedSubtitleIndex}
+                    setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                    onPlayPress={handlePlayPress}
+                    onMutePress={handleMutePress}
+                    onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+                    onSeek={handleSeek}
+                  />
+                )}
+              </View>
+            </Pressable>
+            <AnimatedView left={0} style={backwardAnimatedStyle}>
+              <SeekText>-{doubleTapValue.backward}s</SeekText>
+            </AnimatedView>
+            {isBuffering && (
+              <OverylayedView left={0} right={0} top={0} bottom={0}>
+                <Spinner size="large" color="white" />
+              </OverylayedView>
+            )}
+            <AnimatedView right={0} style={forwardAnimatedStyle}>
+              <SeekText>+{doubleTapValue.forward}s</SeekText>
+            </AnimatedView>
+          </View>
+        </GestureDetector>
+        <View flex={1}>
+          {description && <Text padding={10} textAlign='justify'>{description}</Text>}
+          <View flex={1}>
+            <EpisodeList mediaType={mediaType} provider={provider} id={id} />
+          </View>
         </View>
-      </GestureDetector>
+      </View>
     </ThemedView>
   );
 };
 
 export default Watch;
 
-const styles = StyleSheet.create({
-  centerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
-  },
-  forwardIndicator: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: '50%',
-    height: '100%',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-    alignItems: 'center',
-  },
-  backwardIndicator: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: '50%',
-    height: '100%',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-    alignItems: 'center',
-  },
-  seekText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

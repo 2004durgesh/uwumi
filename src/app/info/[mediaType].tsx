@@ -80,12 +80,11 @@ const Info = () => {
                 source={{ uri: image }}
                 style={{ width: 115, height: 163 }}
               />
-              <YStack paddingHorizontal={20} gap={8} flex={1}>
-                <Text color="$color1" fontSize="$5" fontWeight="700">
+              <YStack gap={8} flex={1}>
+                <Text numberOfLines={3} color="$color1" fontSize="$5" fontWeight="700">
                   {typeof data?.title === "object"
                     ? data?.title?.english
-                    : data?.title}
-                </Text>
+                    : data?.title}</Text>
 
                 <IconTitle icon={Clock} text={data?.status} />
 
