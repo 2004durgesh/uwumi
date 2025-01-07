@@ -6,7 +6,7 @@ import { Text, Card, Image, XStack, YStack, H3, ZStack, Spinner, styled, View } 
 import CardList from '@/components/CardList';
 import { IAnimeResult } from '@/constants/types';
 
-const index = () => {
+const Anime = () => {
   const { data, isLoading, error, refetch, fetchNextPage, hasNextPage } = useAnimeTrending();
 
   if (error) {
@@ -47,4 +47,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Anime;

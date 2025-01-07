@@ -1,8 +1,7 @@
-import { createTamagui,createFont  } from 'tamagui'
+import { createTamagui, createFont } from 'tamagui';
 import { createAnimations } from '@tamagui/animations-react-native';
-import * as themes from '@/constants/theme-out'
-import { tokens } from '@tamagui/config/v3'
-
+import * as themes from '@/constants/theme-out';
+import { tokens } from '@tamagui/config/v3';
 
 const animations = createAnimations({
   bouncy: {
@@ -80,7 +79,7 @@ const fonts = {
       300: { normal: 'InterLight' },
     },
   }),
-}
+};
 
 const config = createTamagui({
   tokens,
@@ -88,6 +87,6 @@ const config = createTamagui({
   animations,
   fonts,
   // ...the rest of your config
-})
+});
 
-export default config
+export default config;

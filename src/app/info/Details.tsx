@@ -46,8 +46,7 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
           padding: 16,
           flexGrow: 1,
         }}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <View>
           <View>
             <View marginTop="$2">
@@ -74,8 +73,7 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
                   overflow: 'hidden',
                   borderBottomLeftRadius: 16,
                   borderBottomRightRadius: 16,
-                }}
-              >
+                }}>
                 <LinearGradient
                   locations={[0, 0.05, 0.1]}
                   colors={
@@ -85,8 +83,7 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
                   }
                   start={{ x: 0.0, y: 0.0 }}
                   end={{ x: 0.0, y: 0.1 }}
-                  style={{ height: '100%', width: '100%' }}
-                >
+                  style={{ height: '100%', width: '100%' }}>
                   <View>
                     {/* Animated icon rotation */}
                     <MotiView
@@ -100,8 +97,7 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
                       transition={{
                         type: 'timing',
                         duration: 500,
-                      }}
-                    >
+                      }}>
                       <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
                         <ChevronDown size={24} color="$color" />
                       </TouchableOpacity>

@@ -1,15 +1,15 @@
 // import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
-import "react-native-reanimated";
-import { Button, TamaguiProvider, XStack, createTamagui } from "tamagui";
-import { PortalProvider } from '@tamagui/portal'
-import config from "../../tamagui.config";
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import 'react-native-reanimated';
+import { Button, TamaguiProvider, XStack, createTamagui } from 'tamagui';
+import { PortalProvider } from '@tamagui/portal';
+import config from '../../tamagui.config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { 
+import {
   Inter_500Medium as InterMedium,
   Inter_600SemiBold as InterSemiBold,
   Inter_800ExtraBold as InterBold,
@@ -21,7 +21,6 @@ SplashScreen.preventAutoHideAsync();
 const tamaguiConfig = createTamagui(config);
 
 export default function RootLayout() {
-
   // console.log(process.env);
   const [loaded] = useFonts({
     InterMedium,
@@ -33,7 +32,7 @@ export default function RootLayout() {
     defaultOptions: {
       queries: {
         staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000,   // 30 minutes
+        gcTime: 30 * 60 * 1000, // 30 minutes
         retry: 2,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
@@ -52,18 +51,18 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={tamaguiConfig}>
-        <PortalProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
-            <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </PortalProvider>
-      </TamaguiProvider>
-    </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <TamaguiProvider config={tamaguiConfig}>
+          <PortalProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
+              <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </PortalProvider>
+        </TamaguiProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

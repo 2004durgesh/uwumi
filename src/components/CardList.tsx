@@ -1,17 +1,12 @@
-import React from "react";
-import { Text, Card, ZStack, styled, XStack, Spinner } from "tamagui";
-import { Link } from "expo-router";
-import { LinearGradient } from "tamagui/linear-gradient";
-import { AnimatedCustomImage } from "./CustomImage";
-import { IAnimeInfo, IAnimeResult, ISearch } from "@/constants/types";
-import { FlatList, RefreshControl } from "react-native";
-import { InfiniteData } from "@tanstack/react-query";
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeInDown,
-  FadeOutDown,
-} from "react-native-reanimated";
+import React from 'react';
+import { Text, Card, ZStack, styled, XStack, Spinner } from 'tamagui';
+import { Link } from 'expo-router';
+import { LinearGradient } from 'tamagui/linear-gradient';
+import { AnimatedCustomImage } from './CustomImage';
+import { IAnimeInfo, IAnimeResult, ISearch } from '@/constants/types';
+import { FlatList, RefreshControl } from 'react-native';
+import { InfiniteData } from '@tanstack/react-query';
+import Animated, { Easing, FadeIn, FadeInDown, FadeOutDown } from 'react-native-reanimated';
 interface CardListProps {
   data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined;
   hasNextPage?: boolean | undefined;
@@ -25,17 +20,16 @@ interface AnimeCardProps {
   index: number;
 }
 
-
 const StyledCard = styled(Card, {
-  width: "33%",
+  width: '33%',
   height: 190,
-  marginHorizontal:"$0.5",
-  marginVertical:"$1",
+  marginHorizontal: '$0.5',
+  marginVertical: '$1',
   variants: {
     isHovered: {
       true: {
         scale: 0.95,
-        borderColor: "$color",
+        borderColor: '$color',
       },
     },
   },
@@ -44,20 +38,18 @@ const StyledCard = styled(Card, {
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
 const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
-
   return (
     <Link
       asChild
       href={{
-        pathname: "/info/[mediaType]",
+        pathname: '/info/[mediaType]',
         params: {
-          mediaType: "anime",
-          provider: "zoro",
+          mediaType: 'anime',
+          provider: 'zoro',
           id: item.id,
           image: item.image,
         },
-      }}
-    >
+      }}>
       <AnimatedStyledCard
         entering={FadeInDown.delay(50 * index)}
         // exiting={FadeOutDown.duration(index*300).easing(
@@ -70,8 +62,7 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
         pressStyle={{ scale: 0.9 }}
         shadowOffset={{ width: 0, height: 2 }}
         shadowOpacity={0.25}
-        shadowRadius={3.84}
-      >
+        shadowRadius={3.84}>
         <Card.Footer paddingVertical="$2" paddingHorizontal="$2">
           <Text
             numberOfLines={2}
@@ -80,9 +71,8 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
             fontWeight="500"
             margin={0}
             width={100}
-            color='#ffffff'
-          >
-            {typeof item.title === "string" ? item.title : item.title.romaji}
+            color="#ffffff">
+            {typeof item.title === 'string' ? item.title : item.title.romaji}
           </Text>
         </Card.Footer>
         <Card.Background>
@@ -100,7 +90,7 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
             <LinearGradient
               width={135}
               height="100%"
-              colors={["rgba(0,0,0,0.8)", "transparent"]}
+              colors={['rgba(0,0,0,0.8)', 'transparent']}
               start={[0, 1]}
               end={[0, 0.3]}
               borderRadius={10}
@@ -113,17 +103,11 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
   );
 };
 
-const CardList: React.FC<CardListProps> = ({
-  data,
-  hasNextPage,
-  fetchNextPage,
-  refetch,
-  isLoading,
-}) => {
+const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, refetch, isLoading }) => {
   const isInfiniteData = (
-    data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined
+    data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined,
   ): data is InfiniteData<ISearch<IAnimeResult>> => {
-    return !!data && "pages" in data;
+    return !!data && 'pages' in data;
   };
 
   // Get the correct data array based on type
@@ -135,13 +119,10 @@ const CardList: React.FC<CardListProps> = ({
     return data;
   };
 
-
   return (
     <FlatList
       data={getItems() || []}
-      renderItem={({ item, index }: { item: IAnimeResult; index: number }) => (
-        <Animecard item={item} index={index} />
-      )}
+      renderItem={({ item, index }: { item: IAnimeResult; index: number }) => <Animecard item={item} index={index} />}
       showsHorizontalScrollIndicator={false}
       numColumns={3}
       keyExtractor={(item) => item.id.toString()}
@@ -149,9 +130,7 @@ const CardList: React.FC<CardListProps> = ({
         paddingHorizontal: 8,
         paddingVertical: 4,
       }}
-      refreshControl={
-        <RefreshControl refreshing={!!isLoading} onRefresh={refetch} />
-      }
+      refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
       onEndReached={() => {
         if (hasNextPage) {
           fetchNextPage?.();

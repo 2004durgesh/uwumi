@@ -1,2 +1,2 @@
-export * from "./useAccentStore"
-export * from "./useThemeStore"
+export * from './useAccentStore';
+export * from './useThemeStore';

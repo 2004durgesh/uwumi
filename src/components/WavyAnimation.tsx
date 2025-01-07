@@ -17,13 +17,13 @@ const AnimatedBar = memo(({ delay }: { delay: number }) => {
     const randomDuration = Math.floor(400 + Math.random() * 200);
 
     height.value = withDelay(delay, withRepeat(withTiming(12, { duration: randomDuration }), -1, true));
-  }, [delay]);
+  }, [delay, height]);
 
   return <Animated.View style={animatedStyle} />;
 });
 
 const WavyAnimation = memo(() => {
-  const bars = [0, 50, 75, 100,0]; // Different delays for each bar
+  const bars = [0, 50, 75, 100, 0]; // Different delays for each bar
 
   return (
     <XStack height={12} gap={2} alignItems="center">

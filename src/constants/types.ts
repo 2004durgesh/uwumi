@@ -1,5 +1,5 @@
 export interface EpisodeTitle {
-  "x-jat"?: string;
+  'x-jat'?: string;
   en?: string;
   ja?: string;
   [key: string]: string | undefined;
@@ -196,7 +196,7 @@ export interface Character {
 export interface Details {
   characters?: Character[];
   studios: string[];
-  subOrDub: "sub" | "dub";
+  subOrDub: 'sub' | 'dub';
   trailer: {
     id: string;
     site?: string;
@@ -216,7 +216,6 @@ export interface Details {
     day: number;
   };
 }
-
 
 export interface ISource {
   headers?: { [k: string]: string };
@@ -243,5 +242,5 @@ export interface IVideo {
   isM3U8?: boolean;
   isDASH?: boolean;
   size?: number;
-  [x: string]: unknown; 
+  [x: string]: unknown;
 }

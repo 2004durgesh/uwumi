@@ -73,8 +73,7 @@ const ControlsOverlay = React.memo(
           paddingVertical={isFullscreen ? '$5' : '$2'}
           backgroundColor="rgba(0, 0, 0, 0.5)"
           entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-          exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
-        >
+          exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}>
           <XStack width="100%" justifyContent="space-between" alignItems="center">
             <Text color="white" fontWeight={700} fontSize="$3.5">
               {title}
@@ -85,7 +84,11 @@ const ControlsOverlay = React.memo(
               ) : (
                 <CaptionsOff color="white" size={20} onPress={() => setSelectedSubtitleIndex(0)} />
               )}
-              <Pressable onPress={(e) => {e.stopPropagation();setOpenSettings(!openSettings)}}>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setOpenSettings(!openSettings);
+                }}>
                 <Settings color="white" size={20} />
               </Pressable>
               <Sheet
@@ -97,8 +100,7 @@ const ControlsOverlay = React.memo(
                 snapPointsMode={'percent'}
                 dismissOnSnapToBottom
                 zIndex={100_000}
-                animation="quick"
-              >
+                animation="quick">
                 <Sheet.Handle backgroundColor="$color4" />
                 <Sheet.Overlay
                   backgroundColor="transparent"
@@ -113,8 +115,7 @@ const ControlsOverlay = React.memo(
                         backgroundColor={selectedSubtitleIndex === undefined ? '$color' : '#0e0f15'}
                         onPress={() => {
                           setSelectedSubtitleIndex(undefined);
-                        }}
-                      >
+                        }}>
                         Off
                       </Button>
                       {subtitleTracks?.map((track, index) => (
@@ -124,8 +125,7 @@ const ControlsOverlay = React.memo(
                           color={selectedSubtitleIndex === index ? '$color' : '$color1'}
                           onPress={() => {
                             setSelectedSubtitleIndex(index);
-                          }}
-                        >
+                          }}>
                           {track.lang}
                         </Button>
                       ))}
@@ -158,8 +158,7 @@ const ControlsOverlay = React.memo(
                   paddingHorizontal="$3"
                   onPress={() => onSeek(Math.round(currentTime) + 85)}
                   fontWeight={500}
-                  fontSize={13}
-                >
+                  fontSize={13}>
                   +85 s
                 </Button>
                 <Pressable onPress={onFullscreenPress}>
@@ -179,8 +178,7 @@ const ControlsOverlay = React.memo(
                   onValueChange={([value]) => {
                     onSeek(Math.round(value));
                   }}
-                  step={1}
-                >
+                  step={1}>
                   <Slider.Track>
                     <Slider.TrackActive backgroundColor="$color" />
                   </Slider.Track>
@@ -195,7 +193,7 @@ const ControlsOverlay = React.memo(
         </AnimatedYStack>
       </>
     ) : null;
-  }
+  },
 );
 
 export default ControlsOverlay;

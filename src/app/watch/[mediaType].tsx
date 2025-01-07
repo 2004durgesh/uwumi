@@ -220,7 +220,7 @@ const Watch = () => {
             runOnJS(updateVolume)(newVolume);
           }
         }),
-    [brightness, volume, dimensions.width, updateBrightness, updateVolume]
+    [brightness, volume, dimensions.width, updateBrightness, updateVolume],
   );
 
   // Horizontal gesture handler for seeking
@@ -241,7 +241,7 @@ const Watch = () => {
           const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
           runOnJS(handleSeek)(newTime);
         }),
-    [dimensions.width, seekableDuration, currentTime, handleSeek]
+    [dimensions.width, seekableDuration, currentTime, handleSeek],
   );
 
   const toggleControls = useCallback(() => {
@@ -261,7 +261,7 @@ const Watch = () => {
       left: isFullscreen ? right : 0,
       right: 0,
     }),
-    [isFullscreen, dimensions, right]
+    [isFullscreen, dimensions, right],
   );
   const source = useMemo(
     () =>
@@ -269,7 +269,7 @@ const Watch = () => {
       data?.sources?.find((s) => s.quality === 'backup')?.url ||
       data?.sources?.[0]?.url ||
       '',
-    [data?.sources]
+    [data?.sources],
   );
 
   useEffect(() => {
@@ -298,8 +298,7 @@ const Watch = () => {
                 if (isDoubleTap) return;
                 toggleControls();
               }}
-              style={{ flex: 1 }}
-            >
+              style={{ flex: 1 }}>
               <View
                 style={{ height: playerDimensions.height, position: 'relative' }}
                 // style={{height:"100%", position: 'relative' }} //keep for future ref

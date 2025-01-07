@@ -1,9 +1,9 @@
 import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
-import React, { Suspense, useRef } from 'react';
+import React, { useRef } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useAnimeEpisodes } from '@/hooks/queries';
-import { useLocalSearchParams, Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import ReanimatedSwipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, {
   SharedValue,
@@ -80,11 +80,9 @@ const EpisodeList = ({
         style={[
           animatedStyle,
           { width: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: theme?.color4?.val },
-        ]}
-      >
+        ]}>
         <Animated.View
-          style={[{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' }, eyeIconStyle]}
-        >
+          style={[{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' }, eyeIconStyle]}>
           <Eye color="white" size={24} />
         </Animated.View>
 
@@ -92,8 +90,7 @@ const EpisodeList = ({
           style={[
             { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' },
             eyeOffIconStyle,
-          ]}
-        >
+          ]}>
           <EyeOff color="white" size={24} />
         </Animated.View>
       </Animated.View>
@@ -119,15 +116,13 @@ const EpisodeList = ({
               number: item?.number,
             },
           })
-        }
-      >
+        }>
         <YStack
           gap={'$4'}
           padding={2}
           borderWidth={1}
           borderColor={currentPlayingEpisode === item.id ? '$color4' : '$background'}
-          backgroundColor="$background"
-        >
+          backgroundColor="$background">
           <XStack gap={'$4'}>
             <View position="relative">
               <CustomImage source={item?.image} style={{ width: 160, height: 107, bordeRadius: 4 }} />
@@ -139,8 +134,7 @@ const EpisodeList = ({
                 opacity={0.8}
                 borderRadius="$4"
                 paddingHorizontal="$2"
-                paddingVertical="$1"
-              >
+                paddingVertical="$1">
                 <Text fontSize="$3" fontWeight="700" color="$color">
                   EP {item.number}
                 </Text>
@@ -199,8 +193,7 @@ const EpisodeList = ({
               onSwipeableOpen={(_: any, s: any) => s.close()}
               onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               onSwipeableWillClose={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              renderRightActions={rightActions}
-            >
+              renderRightActions={rightActions}>
               {renderPressableItem({ item })}
             </ReanimatedSwipeable>
           ) : (

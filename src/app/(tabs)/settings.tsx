@@ -27,7 +27,7 @@ const AccentSelector = memo(() => {
     (accent: string) => {
       setAccentName(accent);
     },
-    [setAccentName]
+    [setAccentName],
   );
 
   return (
@@ -35,22 +35,19 @@ const AccentSelector = memo(() => {
       <Button
         themeInverse
         onPress={() => handleAccentChange('default')}
-        opacity={currentAccent === 'default' ? 0.5 : 1}
-      >
+        opacity={currentAccent === 'default' ? 0.5 : 1}>
         Base Accent
       </Button>
       <Button
         themeInverse
         onPress={() => handleAccentChange('cloudflare')}
-        opacity={currentAccent === 'cloudflare' ? 0.5 : 1}
-      >
+        opacity={currentAccent === 'cloudflare' ? 0.5 : 1}>
         Cloudflare Accent
       </Button>
       <Button
         themeInverse
         onPress={() => handleAccentChange('cottonCandy')}
-        opacity={currentAccent === 'cottonCandy' ? 0.5 : 1}
-      >
+        opacity={currentAccent === 'cottonCandy' ? 0.5 : 1}>
         Cotton Candy Accent
       </Button>
     </YStack>
