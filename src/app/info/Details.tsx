@@ -1,12 +1,12 @@
-import { MotiView } from "moti";
-import { LinearGradient } from "tamagui/linear-gradient";
-import { Text, Stack, View, YStack, XStack, styled, ZStack, ScrollView } from "tamagui";
-import { TouchableOpacity } from "react-native";
-import { ChevronDown } from "@tamagui/lucide-icons";
-import React, { useState } from "react";
-import { IAnimeInfo } from "@/constants/types";
-import { WebView } from "react-native-webview";
-import { useThemeStore } from "@/stores";
+import { MotiView } from 'moti';
+import { LinearGradient } from 'tamagui/linear-gradient';
+import { Text, Stack, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
+import { TouchableOpacity } from 'react-native';
+import { ChevronDown } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
+import { IAnimeInfo } from '@/constants/types';
+import { WebView } from 'react-native-webview';
+import { useThemeStore } from '@/hooks/stores';
 
 type DetailsProps = {
   data?: IAnimeInfo;
@@ -16,7 +16,7 @@ type DetailsProps = {
 
 const StatisticsXStack = styled(XStack, {
   flex: 1,
-  justifyContent: "space-between",
+  justifyContent: 'space-between',
 });
 
 const StatisticItem = ({ label, value }: { label: string; value: string }) => (
@@ -34,39 +34,25 @@ const StatisticItem = ({ label, value }: { label: string; value: string }) => (
   </StatisticsXStack>
 );
 
-const Details: React.FC<DetailsProps> = ({
-  data,
-  previewLines = 3,
-  lineHeight = 20,
-}) => {
+const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 20 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
-    const themeName = useThemeStore((state: any) => state.themeName);
-  
+  const themeName = useThemeStore((state: any) => state.themeName);
 
   return (
     <YStack gap={2}>
       <ScrollView
-      contentContainerStyle={{
-        padding: 16,
-        flexGrow: 1,
-      }}
-      showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          padding: 16,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator={false}
       >
         <View>
           <View>
             <View marginTop="$2">
-              <View
-                onLayout={(event) =>
-                  setContentHeight(event.nativeEvent.layout.height)
-                }
-              >
-                <Text
-                  color="$color1"
-                  paddingHorizontal="$2"
-                  lineHeight="$3.5"
-                  textAlign="justify"
-                >
+              <View onLayout={(event) => setContentHeight(event.nativeEvent.layout.height)}>
+                <Text color="$color1" paddingHorizontal="$2" lineHeight="$3.5" textAlign="justify">
                   {data?.description}
                 </Text>
               </View>
@@ -81,71 +67,56 @@ const Details: React.FC<DetailsProps> = ({
                   translateY: isExpanded ? 0 : -contentHeight + lineHeight,
                 }}
                 transition={{
-                  type: "timing",
+                  type: 'timing',
                   duration: 500,
                 }}
                 style={{
-                  overflow: "hidden",
+                  overflow: 'hidden',
                   borderBottomLeftRadius: 16,
                   borderBottomRightRadius: 16,
                 }}
               >
                 <LinearGradient
                   locations={[0, 0.05, 0.1]}
-                  colors={themeName==="dark"?[
-                    "rgba(0, 0, 0, 0.5)",
-                    "rgba(0, 0, 0, 0.7)",
-                    "rgba(0, 0, 0, 1)",
-                  ]:[
-                    "rgba(255, 255, 255, 0.5)",
-                    "rgba(255, 255, 255, 0.7)",
-                    "rgba(255, 255, 255, 1)",
-                  ]}
+                  colors={
+                    themeName === 'dark'
+                      ? ['rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 1)']
+                      : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.7)', 'rgba(255, 255, 255, 1)']
+                  }
                   start={{ x: 0.0, y: 0.0 }}
                   end={{ x: 0.0, y: 0.1 }}
-                  style={{ height: "100%", width: "100%" }}
+                  style={{ height: '100%', width: '100%' }}
                 >
                   <View>
                     {/* Animated icon rotation */}
                     <MotiView
-                      style={{ alignItems: "center", padding: 8 }}
+                      style={{ alignItems: 'center', padding: 8 }}
                       from={{
-                        rotate: "180deg",
+                        rotate: '180deg',
                       }}
                       animate={{
-                        rotate: isExpanded ? "180deg" : "0deg",
+                        rotate: isExpanded ? '180deg' : '0deg',
                       }}
                       transition={{
-                        type: "timing",
+                        type: 'timing',
                         duration: 500,
                       }}
                     >
-                      <TouchableOpacity
-                        onPress={() => setIsExpanded(!isExpanded)}
-                      >
+                      <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
                         <ChevronDown size={24} color="$color" />
                       </TouchableOpacity>
                     </MotiView>
                     <YStack flex={1} height="100%" width="100%" gap="$2">
-                      <StatisticItem label="Type" value={data?.type || ""} />
-                      <StatisticItem
-                        label="Country"
-                        value={data?.countryOfOrigin || ""}
-                      />
-                      <StatisticItem
-                        label="Season"
-                        value={`${data?.season}, ${data?.releaseDate}`}
-                      />
-                      <StatisticItem
-                        label="Duration"
-                        value={`${data?.duration}m`}
-                      />
+                      <StatisticItem label="Type" value={data?.type || ''} />
+                      <StatisticItem label="Country" value={data?.countryOfOrigin || ''} />
+                      <StatisticItem label="Season" value={`${data?.season}, ${data?.releaseDate}`} />
+                      <StatisticItem label="Duration" value={`${data?.duration}m`} />
                       <YStack height={200} position="relative">
                         <ZStack height={200}>
                           <WebView
                             bounces={false}
                             scrollEnabled={false}
-                            originWhitelist={["*"]}
+                            originWhitelist={['*']}
                             source={{
                               html: `
                                 <html>
@@ -168,8 +139,8 @@ const Details: React.FC<DetailsProps> = ({
                               `,
                             }}
                             style={{
-                              width: "100%",
-                              height: "100%",
+                              width: '100%',
+                              height: '100%',
                             }}
                           />
                           <View width="100%" height="100%" />

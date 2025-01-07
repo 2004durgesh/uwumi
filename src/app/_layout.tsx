@@ -8,7 +8,6 @@ import "react-native-reanimated";
 import { Button, TamaguiProvider, XStack, createTamagui } from "tamagui";
 import { PortalProvider } from '@tamagui/portal'
 import config from "../../tamagui.config";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { 
   Inter_500Medium as InterMedium,
@@ -23,7 +22,6 @@ const tamaguiConfig = createTamagui(config);
 
 export default function RootLayout() {
 
-  const colorScheme = useColorScheme();
   // console.log(process.env);
   const [loaded] = useFonts({
     InterMedium,

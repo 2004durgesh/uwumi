@@ -1,26 +1,19 @@
-import { View, Text, ZStack, XStack, YStack } from "tamagui";
-import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { ThemedView } from "@/components/ThemedView";
-import { useAnimeInfo } from "@/queries";
-import { ImageBackground, StyleSheet } from "react-native";
-import { useThemeStore } from "@/stores";
-import AnimatedCountdown from "@/components/AnimatedCountdown";
-import {
-  ArrowLeft,
-  Captions,
-  CaptionsOff,
-  Clock,
-  Heart,
-  Star,
-} from "@tamagui/lucide-icons";
-import { LinearGradient } from "tamagui/linear-gradient";
-import HorizontalTabs from "./HorizontalTabs";
-import { BlurView } from "expo-blur";
-import IconTitle from "@/components/IconTitle";
-import CustomImage, { AnimatedCustomImage } from "@/components/CustomImage";
-import Animated from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, ZStack, XStack, YStack } from 'tamagui';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useState } from 'react';
+import { ThemedView } from '@/components/ThemedView';
+import { useAnimeInfo } from '@/hooks/queries';
+import { ImageBackground, StyleSheet } from 'react-native';
+import { useThemeStore } from '@/hooks/stores';
+import AnimatedCountdown from '@/components/AnimatedCountdown';
+import { ArrowLeft, Captions, CaptionsOff, Clock, Heart, Star } from '@tamagui/lucide-icons';
+import { LinearGradient } from 'tamagui/linear-gradient';
+import HorizontalTabs from './HorizontalTabs';
+import { BlurView } from 'expo-blur';
+import IconTitle from '@/components/IconTitle';
+import CustomImage, { AnimatedCustomImage } from '@/components/CustomImage';
+import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Info = () => {
   const { mediaType, provider, id, image } = useLocalSearchParams<{
@@ -34,15 +27,11 @@ const Info = () => {
   // console.log(data);
   const themeName = useThemeStore((state: any) => state.themeName);
 
-
   return (
     <>
       <ThemedView useSafeArea={false} useStatusBar>
         <ZStack height={300}>
-          <ImageBackground
-            source={{ uri: data?.cover }}
-            style={{ width: "100%", height: 300 }}
-          />
+          <ImageBackground source={{ uri: data?.cover }} style={{ width: '100%', height: 300 }} />
           <BlurView
             style={{
               ...StyleSheet.absoluteFillObject,
@@ -55,13 +44,9 @@ const Info = () => {
               width="100%"
               height="300"
               colors={
-                themeName === "dark"
-                  ? ["rgba(0,0,0,1)", "rgba(0,0,0,0.7)", "rgba(0,0,0,0.4)"]
-                  : [
-                      "rgba(255,255,255,1)",
-                      "rgba(255,255,255,0.7)",
-                      "rgba(255,255,255,0.4)",
-                    ]
+                themeName === 'dark'
+                  ? ['rgba(0,0,0,1)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.4)']
+                  : ['rgba(255,255,255,1)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.4)']
               }
               start={[0, 1]}
               end={[0, 0.5]}
@@ -82,18 +67,15 @@ const Info = () => {
               />
               <YStack gap={8} flex={1}>
                 <Text numberOfLines={3} color="$color1" fontSize="$5" fontWeight="700">
-                  {typeof data?.title === "object"
-                    ? data?.title?.english
-                    : data?.title}</Text>
+                  {typeof data?.title === 'object' ? data?.title?.english : data?.title}
+                </Text>
 
                 <IconTitle icon={Clock} text={data?.status} />
 
                 <XStack justifyContent="space-between">
                   <IconTitle icon={Star} text={data?.rating} />
                   {data?.nextAiringEpisode?.airingTime && (
-                    <AnimatedCountdown
-                      targetDate={data.nextAiringEpisode.airingTime}
-                    />
+                    <AnimatedCountdown targetDate={data.nextAiringEpisode.airingTime} />
                   )}
                   <IconTitle text={data?.type} />
                 </XStack>

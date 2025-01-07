@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { storage } from "@/stores/MMKV";
+import { create } from 'zustand';
+import { storage } from '@/hooks/stores/MMKV';
 
-type AccentName = string | null ;
+type AccentName = string | null;
 
 interface AccentState {
   accentName: AccentName;
@@ -9,15 +9,15 @@ interface AccentState {
 }
 
 const getInitialAccent = (): AccentName => {
-  const saved = storage.getString("accent");
-  return saved ? (saved as AccentName) : "default";
+  const saved = storage.getString('accent');
+  return saved ? (saved as AccentName) : 'default';
 };
 
 export const useAccentStore = create<AccentState>((set) => ({
   accentName: getInitialAccent(),
   setAccentName: (name) => {
     if (name !== null) {
-      storage.set("accent", name);
+      storage.set('accent', name);
     }
     set({ accentName: name });
   },

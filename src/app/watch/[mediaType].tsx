@@ -8,7 +8,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { ISubtitle } from '@/constants/types';
-import { useWatchAnimeEpisodes } from '@/queries/watchQueries';
+import { useWatchAnimeEpisodes } from '@/hooks/queries/watchQueries';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
@@ -18,7 +18,7 @@ import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
 import EpisodeList from '@/components/EpisodeList';
-import { useCurrentPlayingEpisode } from '@/stores/useCurrentPlayingEpisode';
+import { useCurrentPlayingEpisode } from '@/hooks/stores/useCurrentPlayingEpisode';
 
 export interface SubtitleTrack {
   index: number;
@@ -59,16 +59,15 @@ const Watch = () => {
     episodeId,
     provider,
   });
-  console.log(data);
   const { top, right, bottom, left } = useSafeAreaInsets();
   const setCurrentPlayingEpisode = useCurrentPlayingEpisode((state) => state.setCurrentPlayingEpisode);
   useEffect(() => {
     if (episodeId) {
       setCurrentPlayingEpisode(episodeId);
     }
-    return ()=>{
-      setCurrentPlayingEpisode("");
-    }
+    return () => {
+      setCurrentPlayingEpisode('');
+    };
   }, [episodeId]);
   const videoRef = useRef<VideoRef>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -385,7 +384,11 @@ const Watch = () => {
           </View>
         </GestureDetector>
         <View flex={1}>
-          {description && <Text padding={10} textAlign='justify'>{description}</Text>}
+          {description && (
+            <Text padding={10} textAlign="justify">
+              {description}
+            </Text>
+          )}
           <View flex={1}>
             <EpisodeList mediaType={mediaType} provider={provider} id={id} />
           </View>
@@ -396,4 +399,3 @@ const Watch = () => {
 };
 
 export default Watch;
-
