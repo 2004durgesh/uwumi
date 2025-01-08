@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback, useLayoutEffect } from 'react';
 import { Dimensions, TouchableOpacity, StyleProp, ViewStyle, Pressable, StyleSheet } from 'react-native';
 import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
 import VideoPlayer from 'react-native-media-console';
@@ -18,7 +18,7 @@ import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
 import EpisodeList from '@/components/EpisodeList';
-import { useCurrentPlayingEpisode } from '@/hooks/stores/useCurrentPlayingEpisode';
+import { useEpisodesIdStore } from '@/hooks/stores/useEpisodesStore';
 
 export interface SubtitleTrack {
   index: number;
@@ -33,14 +33,7 @@ interface PlaybackState {
   isPlaying: boolean;
   isSeeking: boolean;
 }
-const OverylayedView = styled(View, {
-  position: 'absolute',
-  top: 0,
-  justifyContent: 'center',
-  alignItems: 'center',
-  pointerEvents: 'none',
-});
-const AnimatedView = Animated.createAnimatedComponent(styled(OverylayedView, { width: '50%', height: '100%' }));
+
 const SeekText = styled(Text, { fontSize: 16, fontWeight: 'bold', color: 'white' });
 
 const Watch = () => {
@@ -60,15 +53,15 @@ const Watch = () => {
     provider,
   });
   const { top, right, bottom, left } = useSafeAreaInsets();
-  const setCurrentPlayingEpisode = useCurrentPlayingEpisode((state) => state.setCurrentPlayingEpisode);
+  const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   useEffect(() => {
     if (episodeId) {
-      setCurrentPlayingEpisode(episodeId);
+      setEpisodeIds(episodeId);
     }
     return () => {
-      setCurrentPlayingEpisode('');
+      setEpisodeIds('');
     };
-  }, [episodeId]);
+  }, [setEpisodeIds, episodeId]);
   const videoRef = useRef<VideoRef>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -163,13 +156,20 @@ const Watch = () => {
   }, []);
 
   // Double tap gesture handlers for skip forward/backward
-  const { doubleTapGesture, isDoubleTap, doubleTapValue, forwardAnimatedStyle, backwardAnimatedStyle } =
-    useDoubleTapGesture({
-      videoRef,
-      seekInterval: 10,
-      onSeekStart: () => console.log('Seeking started'),
-      onSeekEnd: () => console.log('Seeking ended'),
-    });
+  const {
+    doubleTapGesture,
+    isDoubleTap,
+    doubleTapValue,
+    forwardAnimatedStyle,
+    backwardAnimatedStyle,
+    animatedRipple,
+    boxRef,
+  } = useDoubleTapGesture({
+    videoRef,
+    seekInterval: 10,
+    onSeekStart: () => console.log('Seeking started'),
+    onSeekEnd: () => console.log('Seeking ended'),
+  });
   const updateBrightness = useCallback(async (value: number) => {
     await Brightness.setBrightnessAsync(value);
     setBrightness(value);
@@ -358,6 +358,7 @@ const Watch = () => {
                     currentTime={currentTime}
                     seekableDuration={seekableDuration}
                     title={title}
+                    isBuffering={isBuffering}
                     subtitleTracks={subtitleTracks}
                     selectedSubtitleIndex={selectedSubtitleIndex}
                     setSelectedSubtitleIndex={setSelectedSubtitleIndex}
@@ -369,17 +370,17 @@ const Watch = () => {
                 )}
               </View>
             </Pressable>
-            <AnimatedView left={0} style={backwardAnimatedStyle}>
-              <SeekText>-{doubleTapValue.backward}s</SeekText>
-            </AnimatedView>
-            {isBuffering && (
-              <OverylayedView left={0} right={0} top={0} bottom={0}>
-                <Spinner size="large" color="white" />
-              </OverylayedView>
-            )}
-            <AnimatedView right={0} style={forwardAnimatedStyle}>
-              <SeekText>+{doubleTapValue.forward}s</SeekText>
-            </AnimatedView>
+            <Animated.View ref={boxRef} style={styles.overlayLeft}>
+              <Animated.View style={[animatedRipple]}>
+                <SeekText>-{doubleTapValue.backward}s</SeekText>
+              </Animated.View>
+            </Animated.View>
+
+            {/* <Animated.View ref={boxRef} style={styles.overlayRight}>
+              <Animated.View style={[animatedRipple, forwardAnimatedStyle]}>
+                <SeekText>+{doubleTapValue.forward}s</SeekText>
+              </Animated.View>
+            </Animated.View> */}
           </View>
         </GestureDetector>
         <View flex={1}>
@@ -398,3 +399,28 @@ const Watch = () => {
 };
 
 export default Watch;
+
+const styles = StyleSheet.create({
+  overlayRight: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '50%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
+    overflow: 'hidden',
+  },
+  overlayLeft: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '50%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
+    overflow: 'hidden',
+  },
+});

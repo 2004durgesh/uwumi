@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useAnimeEpisodes } from '@/hooks/queries';
 import { useRouter } from 'expo-router';
@@ -14,8 +15,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
-import { useCurrentPlayingEpisode } from '@/hooks/stores/useCurrentPlayingEpisode';
+import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
 import WavyAnimation from './WavyAnimation';
+import { Episode } from '@/constants/types';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -37,7 +39,17 @@ const EpisodeList = ({
   const swipeRef = useRef<SwipeableMethods>(null);
   const router = useRouter();
   const theme = useTheme();
-  const currentPlayingEpisode = useCurrentPlayingEpisode((state) => state.currentPlayingEpisode);
+
+  const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
+  const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
+  const episodesList = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
+
+  const setEpisodes = useEpisodesStore((state) => state.setEpisodes);
+  useEffect(() => {
+    if (episodesList) {
+      setEpisodes(episodesList);
+    }
+  }, [episodesList, setEpisodes]);
 
   const rightActions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
     const THRESHOLD = 100;
@@ -60,18 +72,14 @@ const EpisodeList = ({
 
     const eyeIconStyle = useAnimatedStyle(() => {
       const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
-
       // Interpolate icon opacity based on progress
       const opacity = interpolate(progress, [0.5, 1], [1, 0], Extrapolation.CLAMP);
-
       return { opacity };
     });
 
     const eyeOffIconStyle = useAnimatedStyle(() => {
       const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
-
       const opacity = interpolate(progress, [0.5, 1], [0, 1], Extrapolation.CLAMP);
-
       return { opacity };
     });
 
@@ -97,10 +105,10 @@ const EpisodeList = ({
     );
   };
 
-  const renderPressableItem = ({ item }: { item: any }) => {
+  const renderPressableItem = ({ item }: { item: Episode }) => {
     return (
       <Pressable
-        onPress={() =>
+        onPress={() => {
           router.push({
             pathname: '/watch/[mediaType]',
             params: {
@@ -115,13 +123,13 @@ const EpisodeList = ({
               description: item?.description,
               number: item?.number,
             },
-          })
-        }>
+          });
+        }}>
         <YStack
           gap={'$4'}
           padding={2}
           borderWidth={1}
-          borderColor={currentPlayingEpisode === item.id ? '$color4' : '$background'}
+          borderColor={currentEpisodeId === item.id ? '$color4' : '$background'}
           backgroundColor="$background">
           <XStack gap={'$4'}>
             <View position="relative">
@@ -155,9 +163,9 @@ const EpisodeList = ({
               </Text>
 
               <XStack justifyContent="space-between" alignItems="center">
-                {currentPlayingEpisode === item?.id ? <WavyAnimation /> : null}
+                <View>{currentEpisodeId === item?.id ? <WavyAnimation /> : null}</View>
                 <Text fontSize="$2.5" fontWeight="500" color="$color2">
-                  {new Date(item.airDate).toDateString()}
+                  {new Date(item?.airDate).toDateString()}
                 </Text>
               </XStack>
             </YStack>
@@ -166,9 +174,7 @@ const EpisodeList = ({
       </Pressable>
     );
   };
-  const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
-  // console.log('ep', episodeData);
-  const episodesList = Array.isArray(episodeData) ? episodeData : [];
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -183,7 +189,7 @@ const EpisodeList = ({
         ListFooterComponent={<View height={100} />}
         showsVerticalScrollIndicator={true}
         keyExtractor={(item) => item.id.toString()} //just to be sure :)
-        renderItem={({ item }) =>
+        renderItem={({ item }: { item: Episode }) =>
           swipeable ? (
             <ReanimatedSwipeable
               ref={swipeRef}

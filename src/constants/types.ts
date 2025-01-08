@@ -1,63 +1,14 @@
-export interface EpisodeTitle {
-  'x-jat'?: string;
-  en?: string;
-  ja?: string;
-  [key: string]: string | undefined;
-}
-
-// Image export Interface
-export interface SeriesImage {
-  coverType: string;
-  url: string;
-}
-
-// Mappings export Interface
-export interface Mappings {
-  animeplanet_id: string;
-  kitsu_id: number;
-  mal_id: number;
-  type: string;
-  anilist_id: number;
-  anisearch_id: number;
-  anidb_id: number;
-  notifymoe_id: string;
-  livechart_id: number;
-  thetvdb_id: number;
-  imdb_id: string;
-  themoviedb_id: string;
-}
-
-// Episode export Interface
 export interface Episode {
-  title: EpisodeTitle;
-  tvdbShowId?: number;
-  tvdbId?: number;
-  seasonNumber?: number;
-  episodeNumber?: number;
-  absoluteEpisodeNumber?: number;
-  airDate?: string;
-  airDateUtc?: string;
-  runtime?: number;
-  overview?: string;
+  id: string;
+  dubId?: string;
+  isDub?: string;
+  number: number;
+  url: string;
+  dubUrl?: string;
   image?: string;
-  episode: string;
-  anidbEid?: number;
-  length?: number;
-  airdate?: string;
-  rating?: string;
-  summary?: string;
-  finaleType?: string;
-}
-
-// Main Dandadan Series export Interface
-export interface EpisodeData {
-  episodes: {
-    [key: string]: Episode;
-  };
-  episodeCount: number;
-  specialCount: number;
-  images: SeriesImage[];
-  mappings: Mappings;
+  title: string;
+  description?: string;
+  airDate: string;
 }
 
 export interface ITitle {
@@ -71,9 +22,6 @@ export interface ISearch<T> {
   currentPage?: number;
   hasNextPage?: boolean;
   totalPages?: number;
-  /**
-   * total results must include results from all pages
-   */
   totalResults?: number;
   results: T[];
 }
@@ -104,7 +52,7 @@ export interface IAnimeResult {
   rating?: number;
   type?: MediaFormat;
   releaseDate?: string;
-  [x: string]: any; // other fields
+  [x: string]: any;
 }
 
 enum MediaStatus {
@@ -165,7 +113,7 @@ export interface IAnimeInfo extends IAnimeResult {
   color?: string;
   cover?: string;
   trailer?: Trailer;
-  episodes?: EpisodeData[];
+  episodes?: Episode[];
   startDate?: FuzzyDate;
   endDate?: FuzzyDate;
   recommendations?: IAnimeResult[];

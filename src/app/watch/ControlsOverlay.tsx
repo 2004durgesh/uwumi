@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, ScrollView } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, ScrollView, Spinner } from 'tamagui';
 import {
   Play,
   Pause,
@@ -10,16 +10,20 @@ import {
   Settings,
   Captions,
   CaptionsOff,
+  SkipForward,
+  SkipBack,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import { ISubtitle } from '@/constants/types';
+import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
 
 interface ControlsOverlayProps {
   showControls: boolean;
   isPlaying: boolean;
   isMuted: boolean;
   isFullscreen: boolean;
+  isBuffering: boolean;
   subtitleTracks: ISubtitle[] | undefined;
   selectedSubtitleIndex: number | undefined;
   setSelectedSubtitleIndex: (index: number | undefined) => void;
@@ -51,6 +55,7 @@ const ControlsOverlay = React.memo(
     isPlaying,
     isMuted,
     isFullscreen,
+    isBuffering,
     subtitleTracks,
     selectedSubtitleIndex,
     setSelectedSubtitleIndex,
@@ -64,6 +69,29 @@ const ControlsOverlay = React.memo(
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     // console.log("settings are being shown", openSettings);
+    const prevEpisodeId = useEpisodesIdStore((state) => state.prevEpisodeId);
+    const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
+    const nextEpisodeId = useEpisodesIdStore((state) => state.nextEpisodeId);
+    const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
+    const episodes = useEpisodesStore((state) => state.episodes);
+    const currentEpisodeIndex = episodes.findIndex((ep) => ep.id === currentEpisodeId);
+    const prevEpisodeIndex = episodes.findIndex((ep) => ep.id === prevEpisodeId);
+    const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
+    const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].id : null;
+    const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
+    useEffect(() => {
+      if (prevId || nextId) {
+        setEpisodeIds(currentEpisodeId!, prevId, nextId);
+      }
+    }, [currentEpisodeId, prevId, nextId, setEpisodeIds]);
+    // console.log(
+    //   'current',
+    //   episodes[currentEpisodeIndex],
+    //   'prev',
+    //   episodes[prevEpisodeIndex],
+    //   'next',
+    //   episodes[nextEpisodeIndex],
+    // );
     return showControls ? (
       <>
         <AnimatedYStack
@@ -137,9 +165,19 @@ const ControlsOverlay = React.memo(
           </XStack>
 
           {/* Center play/pause button */}
-          <XStack justifyContent="center">
-            <Pressable onPress={onPlayPress}>
-              {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
+          <XStack alignItems="center" justifyContent="center" gap="$8">
+            <Pressable onPress={() => console.log('back')}>
+              <SkipBack color="white" size={30} />
+            </Pressable>
+            {isBuffering ? (
+              <Spinner size="large" color="white" />
+            ) : (
+              <Pressable onPress={onPlayPress}>
+                {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
+              </Pressable>
+            )}
+            <Pressable onPress={() => console.log('forward')}>
+              <SkipForward color="white" size={30} />
             </Pressable>
           </XStack>
 
@@ -195,5 +233,5 @@ const ControlsOverlay = React.memo(
     ) : null;
   },
 );
-
+ControlsOverlay.displayName = 'ControlsOverlay';
 export default ControlsOverlay;

@@ -21,6 +21,7 @@ const AnimatedBar = memo(({ delay }: { delay: number }) => {
 
   return <Animated.View style={animatedStyle} />;
 });
+AnimatedBar.displayName = 'AnimatedBar';
 
 const WavyAnimation = memo(() => {
   const bars = [0, 50, 75, 100, 0]; // Different delays for each bar
@@ -33,5 +34,6 @@ const WavyAnimation = memo(() => {
     </XStack>
   );
 });
+WavyAnimation.displayName = 'WavyAnimation';
 
 export default WavyAnimation;

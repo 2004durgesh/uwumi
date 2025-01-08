@@ -1,13 +1,15 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions } from 'react-native';
-import { Gesture } from 'react-native-gesture-handler';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  measure,
+  useAnimatedRef,
   useAnimatedStyle,
+  useSharedValue,
   withSequence,
   withSpring,
   withTiming,
   runOnJS,
-  useSharedValue,
 } from 'react-native-reanimated';
 import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 
@@ -49,6 +51,16 @@ export const useDoubleTapGesture = ({
     backward: 0,
   });
 
+  // Ripple effect states
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const rippleScale = useSharedValue(0);
+  const rippleOpacity = useSharedValue(0.3);
+  const boxWidth = useSharedValue(0);
+  const boxHeight = useSharedValue(0);
+
+  const boxRef = useAnimatedRef();
+
   const resetConsecutiveCount = useCallback(
     (direction: 'forward' | 'backward') => {
       consecutiveTapCount.current = {
@@ -75,7 +87,6 @@ export const useDoubleTapGesture = ({
 
   const showTapAnimation = useCallback(
     (direction: 'forward' | 'backward') => {
-      // Clear any existing animation timeout
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
@@ -86,10 +97,9 @@ export const useDoubleTapGesture = ({
 
       scaleValue.value = withSequence(withSpring(1.2), withSpring(1));
 
-      // Set a timeout to reset the counter after animation ends
       animationTimeoutRef.current = setTimeout(() => {
         runOnJS(resetConsecutiveCount)(direction);
-      }, 1000); // Adjust timeout duration as needed
+      }, 1000);
     },
     [forwardOpacity, backwardOpacity, scaleValue, resetConsecutiveCount],
   );
@@ -131,7 +141,6 @@ export const useDoubleTapGesture = ({
         consecutiveTapCount.current.lastDirection = direction;
         consecutiveTapCount.current.lastTapTime = now;
 
-        // Trigger animations and feedback
         runOnJS(triggerHapticFeedback)();
         runOnJS(showTapAnimation)(direction);
       } catch (error) {
@@ -166,6 +175,12 @@ export const useDoubleTapGesture = ({
           const screenMidPoint = Dimensions.get('window').width / 2;
           const direction = touchX < screenMidPoint ? 'backward' : 'forward';
 
+          translateX.value = event.x;
+          translateY.value = event.y;
+          rippleScale.value = 0;
+          rippleScale.value = withTiming(1, { duration: 500 });
+          rippleOpacity.value = 0.4;
+
           runOnJS(handleSeek)(direction);
         })
         .onEnd(() => {
@@ -173,10 +188,39 @@ export const useDoubleTapGesture = ({
           if (onSeekEnd) {
             runOnJS(onSeekEnd)();
           }
+          rippleOpacity.value = withTiming(0, { duration: 500 });
         })
         .runOnJS(true),
-    [isLocked, tapCount, handleSeek, onSeekStart, onSeekEnd],
+    [isLocked, onSeekStart, translateX, translateY, rippleScale, rippleOpacity, handleSeek, tapCount, onSeekEnd],
   );
+
+  const animatedRipple = useAnimatedStyle(() => {
+    const boxLayout = measure(boxRef);
+    if (boxLayout) {
+      boxWidth.value = boxLayout.width;
+      boxHeight.value = boxLayout.height;
+    }
+
+    const radius = Math.sqrt(boxWidth.value ** 2 + boxHeight.value ** 2);
+    const width = radius * 2;
+    const height = radius * 2;
+
+    return {
+      width,
+      height,
+      borderRadius: radius,
+      backgroundColor: 'red',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      opacity: rippleOpacity.value,
+      transform: [
+        { translateX: translateX.value - radius },
+        { translateY: translateY.value - radius },
+        { scale: rippleScale.value },
+      ],
+    };
+  });
 
   const forwardAnimatedStyle = useAnimatedStyle(() => ({
     opacity: forwardOpacity.value,
@@ -192,71 +236,11 @@ export const useDoubleTapGesture = ({
     doubleTapGesture,
     isDoubleTap,
     doubleTapValue,
+    boxRef,
+    animatedRipple,
     forwardAnimatedStyle,
     backwardAnimatedStyle,
   };
 };
 
-// Usage Example:
-/*
-const VideoPlayer = () => {
-  const videoRef = useRef(null);
-  
-  const {
-    doubleTapGesture,
-    isDoubleTap,
-    doubleTapValue,
-    forwardAnimatedStyle,
-    backwardAnimatedStyle
-  } = useDoubleTapGesture({
-    videoRef,
-    seekInterval: 10,
-    onSeekStart: () => console.log('Seeking started'),
-    onSeekEnd: () => console.log('Seeking ended')
-  });
-
-  return (
-    <GestureDetector gesture={doubleTapGesture}>
-      <View style={styles.container}>
-        <Video ref={videoRef} {...videoProps} />
-        
-        
-        <Animated.View style={[styles.forwardIndicator, forwardAnimatedStyle]}>
-          <Text style={styles.seekText}>+{doubleTapValue.forward}s</Text>
-        </Animated.View>
-        
-        <Animated.View style={[styles.backwardIndicator, backwardAnimatedStyle]}>
-          <Text style={styles.seekText}>-{doubleTapValue.backward}s</Text>
-        </Animated.View>
-      </View>
-    </GestureDetector>
-  );
-};
-
-const styles = {
-  container: {
-    flex: 1,
-  },
-  forwardIndicator: {
-    position: 'absolute',
-    right: '25%',
-    top: '50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 15,
-    borderRadius: 40,
-  },
-  backwardIndicator: {
-    position: 'absolute',
-    left: '25%',
-    top: '50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 15,
-    borderRadius: 40,
-  },
-  seekText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-};
-*/
+export default useDoubleTapGesture;
