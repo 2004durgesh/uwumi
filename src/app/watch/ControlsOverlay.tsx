@@ -17,9 +17,15 @@ import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import { ISubtitle } from '@/constants/types';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
+import { useRouter } from 'expo-router';
 
 interface ControlsOverlayProps {
   showControls: boolean;
+  routeInfo: {
+    mediaType: string;
+    provider: string;
+    id: string;
+  };
   isPlaying: boolean;
   isMuted: boolean;
   isFullscreen: boolean;
@@ -37,14 +43,23 @@ interface ControlsOverlayProps {
 }
 
 export const formatTime = (seconds: number): string => {
+  // Handle invalid inputs
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return '0:00';
+  }
+
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
 
+  // Format with hours if present
   if (h > 0) {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
-  return `${m}:${s.toString().padStart(2, '0')}`;
+
+  // Ensure minutes are never negative
+  const minutes = Math.max(0, m);
+  return `${minutes}:${s.toString().padStart(2, '0')}`;
 };
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
@@ -52,6 +67,7 @@ const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 const ControlsOverlay = React.memo(
   ({
     showControls,
+    routeInfo,
     isPlaying,
     isMuted,
     isFullscreen,
@@ -69,6 +85,8 @@ const ControlsOverlay = React.memo(
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     // console.log("settings are being shown", openSettings);
+    const router = useRouter();
+    const { mediaType, provider, id } = routeInfo;
     const prevEpisodeId = useEpisodesIdStore((state) => state.prevEpisodeId);
     const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
     const nextEpisodeId = useEpisodesIdStore((state) => state.nextEpisodeId);
@@ -166,8 +184,27 @@ const ControlsOverlay = React.memo(
 
           {/* Center play/pause button */}
           <XStack alignItems="center" justifyContent="center" gap="$8">
-            <Pressable onPress={() => console.log('back')}>
-              <SkipBack color="white" size={30} />
+            <Pressable
+              onPress={() => {
+                if (prevEpisodeIndex >= 0) {
+                  router.push({
+                    pathname: '/watch/[mediaType]',
+                    params: {
+                      mediaType,
+                      provider,
+                      id,
+                      episodeId: episodes[prevEpisodeIndex].id,
+                      episodeDubId: episodes[prevEpisodeIndex].dubId,
+                      isDub: episodes[prevEpisodeIndex].isDub,
+                      poster: episodes[prevEpisodeIndex].image,
+                      title: episodes[prevEpisodeIndex].title,
+                      description: episodes[prevEpisodeIndex].description,
+                      number: episodes[prevEpisodeIndex].number,
+                    },
+                  });
+                }
+              }}>
+              <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
             </Pressable>
             {isBuffering ? (
               <Spinner size="large" color="white" />
@@ -176,8 +213,27 @@ const ControlsOverlay = React.memo(
                 {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
               </Pressable>
             )}
-            <Pressable onPress={() => console.log('forward')}>
-              <SkipForward color="white" size={30} />
+            <Pressable
+              onPress={() => {
+                if (nextEpisodeIndex >= 0) {
+                  router.push({
+                    pathname: '/watch/[mediaType]',
+                    params: {
+                      mediaType,
+                      provider,
+                      id,
+                      episodeId: episodes[nextEpisodeIndex].id,
+                      episodeDubId: episodes[nextEpisodeIndex].dubId,
+                      isDub: episodes[nextEpisodeIndex].isDub,
+                      poster: episodes[nextEpisodeIndex].image,
+                      title: episodes[nextEpisodeIndex].title,
+                      description: episodes[nextEpisodeIndex].description,
+                      number: episodes[nextEpisodeIndex].number,
+                    },
+                  });
+                }
+              }}>
+              <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
             </Pressable>
           </XStack>
 

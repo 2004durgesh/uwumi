@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -59,7 +60,9 @@ export const useDoubleTapGesture = ({
   const boxWidth = useSharedValue(0);
   const boxHeight = useSharedValue(0);
 
-  const boxRef = useAnimatedRef();
+  const backwardRippleRef = useAnimatedRef();
+  const forwardRippleRef = useAnimatedRef();
+  const activeDirection = useSharedValue<'forward' | 'backward' | null>(null);
 
   const resetConsecutiveCount = useCallback(
     (direction: 'forward' | 'backward') => {
@@ -103,6 +106,7 @@ export const useDoubleTapGesture = ({
     },
     [forwardOpacity, backwardOpacity, scaleValue, resetConsecutiveCount],
   );
+
 
   const handleSeek = useCallback(
     async (direction: 'forward' | 'backward') => {
@@ -174,7 +178,9 @@ export const useDoubleTapGesture = ({
           const touchX = event.absoluteX;
           const screenMidPoint = Dimensions.get('window').width / 2;
           const direction = touchX < screenMidPoint ? 'backward' : 'forward';
+          activeDirection.value = direction;
 
+          // Store the actual touch coordinates
           translateX.value = event.x;
           translateY.value = event.y;
           rippleScale.value = 0;
@@ -191,11 +197,27 @@ export const useDoubleTapGesture = ({
           rippleOpacity.value = withTiming(0, { duration: 500 });
         })
         .runOnJS(true),
-    [isLocked, onSeekStart, translateX, translateY, rippleScale, rippleOpacity, handleSeek, tapCount, onSeekEnd],
+    [
+      isLocked,
+      onSeekStart,
+      activeDirection,
+      translateX,
+      translateY,
+      rippleScale,
+      rippleOpacity,
+      handleSeek,
+      tapCount,
+      onSeekEnd,
+    ],
   );
 
-  const animatedRipple = useAnimatedStyle(() => {
-    const boxLayout = measure(boxRef);
+  const backwardAnimatedRipple = useAnimatedStyle(() => {
+    if (activeDirection.value !== 'backward') {
+      return { opacity: 0 };
+    }
+    const boxLayout = measure(backwardRippleRef);
+    if (!boxLayout) return { opacity: 0 };
+
     if (boxLayout) {
       boxWidth.value = boxLayout.width;
       boxHeight.value = boxLayout.height;
@@ -209,10 +231,11 @@ export const useDoubleTapGesture = ({
       width,
       height,
       borderRadius: radius,
-      backgroundColor: 'red',
+      backgroundColor: 'white',
       position: 'absolute',
       top: 0,
       left: 0,
+      zIndex: 1,
       opacity: rippleOpacity.value,
       transform: [
         { translateX: translateX.value - radius },
@@ -222,22 +245,58 @@ export const useDoubleTapGesture = ({
     };
   });
 
-  const forwardAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: forwardOpacity.value,
-    transform: [{ scale: scaleValue.value }],
-  }));
+  const forwardAnimatedRipple = useAnimatedStyle(() => {
+    if (activeDirection.value !== 'forward') {
+      return { opacity: 0 };
+    }
+    const boxLayout = measure(forwardRippleRef);
+    if (!boxLayout) return { opacity: 0 };
 
-  const backwardAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: backwardOpacity.value,
-    transform: [{ scale: scaleValue.value }],
-  }));
+    if (boxLayout) {
+      boxWidth.value = boxLayout.width;
+      boxHeight.value = boxLayout.height;
+    }
+
+    const radius = Math.sqrt(boxWidth.value ** 2 + boxHeight.value ** 2);
+    const width = radius * 2;
+    const height = radius * 2;
+
+    // Use the actual touch coordinates for forward ripple too
+    return {
+      width,
+      height,
+      borderRadius: radius,
+      backgroundColor: 'white',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 1,
+      opacity: rippleOpacity.value,
+      transform: [
+        { translateX: translateX.value - radius },
+        { translateY: translateY.value - radius },
+        { scale: rippleScale.value },
+      ],
+    };
+  });
+
+  const createDirectionalStyle = (opacityValue: Animated.SharedValue<number>) =>
+    useAnimatedStyle(() => ({
+      opacity: opacityValue.value,
+      transform: [{ scale: scaleValue.value }],
+    }));
+
+  const forwardAnimatedStyle = createDirectionalStyle(forwardOpacity);
+  const backwardAnimatedStyle = createDirectionalStyle(backwardOpacity);
 
   return {
     doubleTapGesture,
     isDoubleTap,
     doubleTapValue,
-    boxRef,
-    animatedRipple,
+    backwardRippleRef,
+    forwardRippleRef,
+    backwardAnimatedRipple,
+    forwardAnimatedRipple,
     forwardAnimatedStyle,
     backwardAnimatedStyle,
   };

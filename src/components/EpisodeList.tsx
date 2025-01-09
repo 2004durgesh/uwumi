@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import React, { useEffect, useRef, useMemo } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useAnimeEpisodes } from '@/hooks/queries';
@@ -39,6 +40,8 @@ const EpisodeList = ({
   const swipeRef = useRef<SwipeableMethods>(null);
   const router = useRouter();
   const theme = useTheme();
+  const flashListRef = useRef<FlashList<Episode>>(null);
+  const hasScrolledRef = useRef(false);
 
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
@@ -50,6 +53,14 @@ const EpisodeList = ({
       setEpisodes(episodesList);
     }
   }, [episodesList, setEpisodes]);
+
+  const currentEpisode = episodesList.find((episode) => episode.id === currentEpisodeId);
+
+  useEffect(() => {
+    return () => {
+      hasScrolledRef.current = false;
+    };
+  }, [currentEpisodeId]);
 
   const rightActions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
     const THRESHOLD = 100;
@@ -179,16 +190,27 @@ const EpisodeList = ({
     return <LoadingState />;
   }
   return (
-    <YStack gap={2}>
-      <FlatList
+    <YStack flex={1} gap={2}>
+      <FlashList
+        ref={flashListRef}
         data={episodesList || []}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingVertical: 8,
         }}
+        ListEmptyComponent={<Text>No episodes found</Text>}
         ListFooterComponent={<View height={100} />}
+        estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
-        keyExtractor={(item) => item.id.toString()} //just to be sure :)
+        estimatedFirstItemOffset={900}
+        onLoad={(e) => {
+          flashListRef?.current?.scrollToItem({
+            item: currentEpisode,
+            animated: true,
+            viewPosition: 0.5,
+          });
+        }}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }: { item: Episode }) =>
           swipeable ? (
             <ReanimatedSwipeable

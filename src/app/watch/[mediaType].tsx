@@ -34,7 +34,31 @@ interface PlaybackState {
   isSeeking: boolean;
 }
 
-const SeekText = styled(Text, { fontSize: 16, fontWeight: 'bold', color: 'white' });
+const SeekText = styled(Text, {
+  fontSize: 10,
+  fontWeight: 'bold',
+  color: 'white',
+  padding: 10,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  borderRadius: 8,
+});
+
+const OverlayedView = styled(Animated.View, {
+  position: 'absolute',
+  top: 0,
+  // width: 200,
+  // height: 200,
+  width: '50%',
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
+  pointerEvents: 'none',
+  zIndex: 10,
+  overflow: 'hidden',
+  borderRadius: '50%',
+  transform: [{ scale: 1.5 }],
+  // backgroundColor: 'red',
+});
 
 const Watch = () => {
   const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
@@ -162,8 +186,10 @@ const Watch = () => {
     doubleTapValue,
     forwardAnimatedStyle,
     backwardAnimatedStyle,
-    animatedRipple,
-    boxRef,
+    backwardRippleRef,
+    forwardRippleRef,
+    backwardAnimatedRipple,
+    forwardAnimatedRipple,
   } = useDoubleTapGesture({
     videoRef,
     seekInterval: 10,
@@ -224,25 +250,25 @@ const Watch = () => {
   );
 
   // Horizontal gesture handler for seeking
-  const seekGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX([-10, 10])
-        .onUpdate((event) => {
-          'worklet';
-          const MAX_SEEK_SECONDS = 15;
-          const direction = Math.sign(event.translationX);
-          const absTranslation = Math.abs(event.translationX);
+  // const seekGesture = useMemo(
+  //   () =>
+  //     Gesture.Pan()
+  //       .activeOffsetX([-10, 10])
+  //       .onUpdate((event) => {
+  //         'worklet';
+  //         const MAX_SEEK_SECONDS = 15;
+  //         const direction = Math.sign(event.translationX);
+  //         const absTranslation = Math.abs(event.translationX);
 
-          // Non-linear scaling for smoother control
-          const scale = Math.min(absTranslation / dimensions.width, 1);
-          const seekDelta = direction * scale * MAX_SEEK_SECONDS;
+  //         // Non-linear scaling for smoother control
+  //         const scale = Math.min(absTranslation / dimensions.width, 1);
+  //         const seekDelta = direction * scale * MAX_SEEK_SECONDS;
 
-          const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
-          runOnJS(handleSeek)(newTime);
-        }),
-    [dimensions.width, seekableDuration, currentTime, handleSeek],
-  );
+  //         const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
+  //         runOnJS(handleSeek)(newTime);
+  //       }),
+  //   [dimensions.width, seekableDuration, currentTime, handleSeek],
+  // );
 
   const toggleControls = useCallback(() => {
     setShowControls((showControls) => !showControls);
@@ -292,7 +318,7 @@ const Watch = () => {
     <ThemedView useSafeArea={false} useStatusBar>
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
-          <View height={isVideoReady ? playerDimensions.height : 250}>
+          <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>
             <Pressable
               onPress={() => {
                 if (isDoubleTap) return;
@@ -333,7 +359,7 @@ const Watch = () => {
                   onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
                   onError={(error) => console.log('Video Error:', error)}
                   onLoad={(value) => {
-                    console.log('Video loaded:', value);
+                    // console.log('Video loaded:', value);
                     setIsVideoReady(true);
                   }}
                   // selectedVideoTrack={{
@@ -344,14 +370,15 @@ const Watch = () => {
                     type: SelectedTrackType.INDEX,
                     value: (selectedSubtitleIndex ?? 0) + 1,
                   }}
-                  onTextTracks={(tracks) => {
-                    console.log('Text Tracks:', tracks);
-                  }}
+                  // onTextTracks={(tracks) => {
+                  //   console.log('Text Tracks:', tracks);
+                  // }}
                   subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
                 />
                 {isVideoReady && (
                   <ControlsOverlay
                     showControls={showControls}
+                    routeInfo={{ mediaType, provider, id }}
                     isPlaying={playbackState.isPlaying}
                     isMuted={isMuted}
                     isFullscreen={isFullscreen}
@@ -370,29 +397,32 @@ const Watch = () => {
                 )}
               </View>
             </Pressable>
-            <Animated.View ref={boxRef} style={styles.overlayLeft}>
-              <Animated.View style={[animatedRipple]}>
+            <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
+              <Animated.View style={[backwardAnimatedRipple]}>
                 <SeekText>-{doubleTapValue.backward}s</SeekText>
               </Animated.View>
-            </Animated.View>
+            </OverlayedView>
 
-            {/* <Animated.View ref={boxRef} style={styles.overlayRight}>
-              <Animated.View style={[animatedRipple, forwardAnimatedStyle]}>
+            <OverlayedView ref={forwardRippleRef} style={{ right: 0 }}>
+              <Animated.View style={[forwardAnimatedRipple]}>
                 <SeekText>+{doubleTapValue.forward}s</SeekText>
               </Animated.View>
-            </Animated.View> */}
+            </OverlayedView>
           </View>
         </GestureDetector>
-        <View flex={1}>
-          {description && (
-            <Text padding={10} textAlign="justify">
-              {description}
-            </Text>
-          )}
+        {!isFullscreen && (
           <View flex={1}>
-            <EpisodeList mediaType={mediaType} provider={provider} id={id} />
+            {description && (
+              <Text padding={10} textAlign="justify">
+                {description}
+              </Text>
+            )}
+            <View flex={1}>
+              <EpisodeList mediaType={mediaType} provider={provider} id={id} />
+            </View>
           </View>
-        </View>
+        )}
+
       </View>
     </ThemedView>
   );
@@ -400,27 +430,3 @@ const Watch = () => {
 
 export default Watch;
 
-const styles = StyleSheet.create({
-  overlayRight: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '50%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
-    overflow: 'hidden',
-  },
-  overlayLeft: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '50%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
-    overflow: 'hidden',
-  },
-});
