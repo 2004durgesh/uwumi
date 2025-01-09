@@ -1,12 +1,13 @@
 import React from 'react';
-import { Text, Card, ZStack, styled, XStack, Spinner } from 'tamagui';
+import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamagui';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { AnimatedCustomImage } from './CustomImage';
-import { IAnimeInfo, IAnimeResult, ISearch } from '@/constants/types';
-import { FlatList, RefreshControl } from 'react-native';
+import { IAnimeResult, ISearch } from '@/constants/types';
+import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
-import Animated, { Easing, FadeIn, FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FlashList } from '@shopify/flash-list';
 interface CardListProps {
   data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined;
   hasNextPage?: boolean | undefined;
@@ -120,31 +121,36 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
   };
 
   return (
-    <FlatList
-      data={getItems() || []}
-      renderItem={({ item, index }: { item: IAnimeResult; index: number }) => <Animecard item={item} index={index} />}
-      showsHorizontalScrollIndicator={false}
-      numColumns={3}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-      }}
-      refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
-      onEndReached={() => {
-        if (hasNextPage) {
-          fetchNextPage?.();
+    <YStack flex={1} height="100%">
+      <FlashList
+        data={getItems() || []}
+        renderItem={({ item, index }: { item: IAnimeResult; index: number }) => <Animecard item={item} index={index} />}
+        ListEmptyComponent={<Text>No episodes found</Text>}
+        estimatedItemSize={150}
+        showsVerticalScrollIndicator={true}
+        estimatedFirstItemOffset={900}
+        numColumns={3}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+        }}
+        refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
+        onEndReached={() => {
+          if (hasNextPage) {
+            fetchNextPage?.();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          hasNextPage ? (
+            <XStack padding="$4" justifyContent="center">
+              <Spinner size="small" color="$color" />
+            </XStack>
+          ) : null
         }
-      }}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={
-        hasNextPage ? (
-          <XStack padding="$4" justifyContent="center">
-            <Spinner size="small" color="$color" />
-          </XStack>
-        ) : null
-      }
-    />
+      />
+    </YStack>
   );
 };
 

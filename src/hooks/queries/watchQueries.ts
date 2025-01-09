@@ -1,5 +1,5 @@
 import { DEFAULT_ANIME_PROVIDER } from '@/constants/provider';
-import { EpisodeData, IAnimeInfo, ISource } from '@/constants/types';
+import { IAnimeInfo, ISource } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -17,6 +17,7 @@ export function useWatchAnimeEpisodes({
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/watch/${episodeId}?provider=${provider}`,
       );
+      console.log(data);
       return data;
     },
     staleTime: 10 * 60 * 1000,
