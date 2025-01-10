@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Text, XStack, YStack, H3, Spinner, Tabs, styled, View } from 'tamagui';
 import CardList from '@/components/CardList';
 import { ChartNoAxesCombined, Heart } from '@tamagui/lucide-icons';
+import SearchBar from '@/components/SearchBar';
 
 const Anime = () => {
   const {
@@ -43,7 +44,8 @@ const Anime = () => {
 
   return (
     <ThemedView>
-      <YStack height="100%" gap="$2">
+      <YStack gap="$2">
+        <SearchBar />
         <Tabs
           defaultValue="tab1"
           orientation="horizontal"
@@ -86,13 +88,15 @@ const Anime = () => {
                 <Spinner size="large" color="$color" />
               </XStack>
             ) : (
-              <CardList
-                data={trendingData}
-                refetch={refetchTrending}
-                fetchNextPage={fetchNextTrending}
-                hasNextPage={hasNextTrending}
-                isLoading={trendingLoading}
-              />
+              <View height="100%">
+                <CardList
+                  data={trendingData}
+                  refetch={refetchTrending}
+                  fetchNextPage={fetchNextTrending}
+                  hasNextPage={hasNextTrending}
+                  isLoading={trendingLoading}
+                />
+              </View>
             )}
           </Tabs.Content>
 
@@ -102,13 +106,15 @@ const Anime = () => {
                 <Spinner size="large" color="$color" />
               </XStack>
             ) : (
-              <CardList
-                data={popularData}
-                refetch={refetchPopular}
-                fetchNextPage={fetchNextPopular}
-                hasNextPage={hasNextPopular}
-                isLoading={popularLoading}
-              />
+              <View height="100%">
+                <CardList
+                  data={popularData}
+                  refetch={refetchPopular}
+                  fetchNextPage={fetchNextPopular}
+                  hasNextPage={hasNextPopular}
+                  isLoading={popularLoading}
+                />
+              </View>
             )}
           </Tabs.Content>
         </Tabs>

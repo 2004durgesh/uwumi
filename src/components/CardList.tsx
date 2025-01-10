@@ -22,10 +22,9 @@ interface AnimeCardProps {
 }
 
 const StyledCard = styled(Card, {
-  width: '33%',
+  width: '100%',
   height: 190,
-  marginHorizontal: '$0.5',
-  marginVertical: '$1',
+  // marginVertical: '$1.5',
   variants: {
     isHovered: {
       true: {
@@ -38,7 +37,7 @@ const StyledCard = styled(Card, {
 
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
-const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
+const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
   return (
     <Link
       asChild
@@ -51,19 +50,7 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
           image: item.image,
         },
       }}>
-      <AnimatedStyledCard
-        entering={FadeInDown.delay(50 * index)}
-        // exiting={FadeOutDown.duration(index*300).easing(
-        //   Easing.inOut(Easing.bezierFn(0.25, 0.1, 0.25, 1))
-        // )}
-        // bordered
-        elevate
-        animation="bouncy"
-        hoverStyle={{ scale: 0.7 }}
-        pressStyle={{ scale: 0.9 }}
-        shadowOffset={{ width: 0, height: 2 }}
-        shadowOpacity={0.25}
-        shadowRadius={3.84}>
+      <AnimatedStyledCard entering={FadeInDown.delay(50 * index)} elevate animation="bouncy">
         <Card.Footer paddingVertical="$2" paddingHorizontal="$2">
           <Text
             numberOfLines={2}
@@ -77,19 +64,19 @@ const Animecard: React.FC<AnimeCardProps> = ({ item, index }) => {
           </Text>
         </Card.Footer>
         <Card.Background>
-          <ZStack width="100%" height="100%" alignItems="center">
+          <ZStack width="100%" height="100%" alignItems="center" justifyContent="center">
             <AnimatedCustomImage
               source={{
                 uri: item.image,
               }}
               style={{ borderRadius: 10 }}
-              width={135}
+              width={'100%'}
               height={190}
               contentFit="cover"
               sharedTransitionTag="shared-image"
             />
             <LinearGradient
-              width={135}
+              width={'100%'}
               height="100%"
               colors={['rgba(0,0,0,0.8)', 'transparent']}
               start={[0, 1]}
@@ -121,10 +108,12 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
   };
 
   return (
-    <YStack flex={1} height="100%">
+    <YStack flex={1} alignItems="center" justifyContent="center">
       <FlashList
         data={getItems() || []}
-        renderItem={({ item, index }: { item: IAnimeResult; index: number }) => <Animecard item={item} index={index} />}
+        renderItem={({ item, index }: { item: IAnimeResult; index: number }) => (
+          <CustomCard item={item} index={index} />
+        )}
         ListEmptyComponent={<Text>No episodes found</Text>}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
@@ -132,9 +121,9 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
         numColumns={3}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{
-          paddingHorizontal: 8,
-          paddingVertical: 4,
+          padding: 1,
         }}
+        ItemSeparatorComponent={() => <View style={{ width: 8, height: 8 }}><Text>ji</Text></View>}
         refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
         onEndReached={() => {
           if (hasNextPage) {
