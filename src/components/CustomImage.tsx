@@ -15,6 +15,8 @@ const CustomImage = forwardRef<Image, CustomImageProps>((props, ref) => {
   return <Image ref={ref} source={imageSource} transition={1000} style={style} {...rest} />;
 });
 
+CustomImage.displayName = 'CustomImage';
+
 // Create animated version of the forwarded ref component
 export const AnimatedCustomImage = Animated.createAnimatedComponent(CustomImage);
 

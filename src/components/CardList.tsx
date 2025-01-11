@@ -8,6 +8,7 @@ import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
+import ListEmpty from './ListEmpty';
 interface CardListProps {
   data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined;
   hasNextPage?: boolean | undefined;
@@ -24,7 +25,6 @@ interface AnimeCardProps {
 const StyledCard = styled(Card, {
   width: '100%',
   height: 190,
-  // marginVertical: '$1.5',
   variants: {
     isHovered: {
       true: {
@@ -50,7 +50,7 @@ const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
           image: item.image,
         },
       }}>
-      <AnimatedStyledCard entering={FadeInDown.delay(50 * index)} elevate animation="bouncy">
+      <AnimatedStyledCard entering={FadeInDown.delay(50 * index)} flex={1} elevate animation="bouncy">
         <Card.Footer paddingVertical="$2" paddingHorizontal="$2">
           <Text
             numberOfLines={2}
@@ -64,7 +64,7 @@ const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
           </Text>
         </Card.Footer>
         <Card.Background>
-          <ZStack width="100%" height="100%" alignItems="center" justifyContent="center">
+          <ZStack width="100%" height="100%" alignItems="center">
             <AnimatedCustomImage
               source={{
                 uri: item.image,
@@ -108,22 +108,24 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
   };
 
   return (
-    <YStack flex={1} alignItems="center" justifyContent="center">
+    <YStack flex={1}>
       <FlashList
         data={getItems() || []}
         renderItem={({ item, index }: { item: IAnimeResult; index: number }) => (
-          <CustomCard item={item} index={index} />
+          <View flex={1} paddingVertical={4} paddingHorizontal={4}>
+            <CustomCard item={item} index={index} />
+          </View>
         )}
-        ListEmptyComponent={<Text>No episodes found</Text>}
+        ListEmptyComponent={<ListEmpty />}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
         estimatedFirstItemOffset={900}
         numColumns={3}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{
-          padding: 1,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
         }}
-        ItemSeparatorComponent={() => <View style={{ width: 8, height: 8 }}><Text>ji</Text></View>}
         refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
         onEndReached={() => {
           if (hasNextPage) {
@@ -136,7 +138,9 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
             <XStack padding="$4" justifyContent="center">
               <Spinner size="small" color="$color" />
             </XStack>
-          ) : null
+          ) : (
+            <View height={100} />
+          )
         }
       />
     </YStack>

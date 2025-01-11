@@ -107,7 +107,6 @@ export const useDoubleTapGesture = ({
     [forwardOpacity, backwardOpacity, scaleValue, resetConsecutiveCount],
   );
 
-
   const handleSeek = useCallback(
     async (direction: 'forward' | 'backward') => {
       if (!videoRef.current) return;

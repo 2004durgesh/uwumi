@@ -422,11 +422,9 @@ const Watch = () => {
             </View>
           </View>
         )}
-
       </View>
     </ThemedView>
   );
 };
 
 export default Watch;
-

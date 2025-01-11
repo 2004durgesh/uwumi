@@ -1,10 +1,11 @@
 import { ThemedView } from '@/components/ThemedView';
-import { useAnimePopular, useAnimeTrending } from '@/hooks/queries';
+import { useAnimePopular, useAnimeSearch, useAnimeTrending } from '@/hooks/queries';
 import React, { useState } from 'react';
-import { Text, XStack, YStack, H3, Spinner, Tabs, styled, View } from 'tamagui';
+import { Text, XStack, YStack, Spinner, Tabs, styled, View } from 'tamagui';
 import CardList from '@/components/CardList';
-import { ChartNoAxesCombined, Heart } from '@tamagui/lucide-icons';
+import { ChartNoAxesCombined, Heart, Search, SlidersHorizontal } from '@tamagui/lucide-icons';
 import SearchBar from '@/components/SearchBar';
+import { useSearchStore } from '@/hooks/stores/useSearchStore';
 
 const Anime = () => {
   const {
@@ -25,6 +26,16 @@ const Anime = () => {
     hasNextPage: hasNextPopular,
   } = useAnimePopular();
 
+  const debouncedQuery = useSearchStore((state) => state.debouncedQuery);
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    error: searchError,
+    refetch: refetchSearch,
+    fetchNextPage: fetchNextSearch,
+    hasNextPage: hasNextSearch,
+  } = useAnimeSearch(debouncedQuery);
+
   const [currentTab, setCurrentTab] = useState('tab1');
 
   const TabText = styled(Text, {
@@ -33,8 +44,8 @@ const Anime = () => {
     color: '$color2',
   });
 
-  if (trendingError || popularError) {
-    const error = trendingError || popularError;
+  if (trendingError || popularError || searchError) {
+    const error = trendingError || popularError || searchError;
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
         <Text color="$color">Error: {error?.message}</Text>
@@ -53,7 +64,7 @@ const Anime = () => {
           width="100%"
           value={currentTab}
           onValueChange={(value) => setCurrentTab(value)}>
-          <Tabs.List disablePassBorderRadius width="50%" marginVertical="$2" marginHorizontal="$4" gap="$2">
+          <Tabs.List disablePassBorderRadius width="65%" marginVertical="$2" marginHorizontal="$4" gap="$2">
             <Tabs.Tab
               flex={1}
               padding={0}
@@ -79,6 +90,19 @@ const Anime = () => {
               <XStack gap="$2" alignItems="center">
                 <Heart color="$color2" size={15} />
                 <TabText>Popular</TabText>
+              </XStack>
+            </Tabs.Tab>
+            <Tabs.Tab
+              flex={1}
+              padding={0}
+              value="tab3"
+              height={35}
+              borderWidth={2}
+              borderColor={currentTab === 'tab3' ? '$color4' : '$color2'}
+              backgroundColor={currentTab === 'tab3' ? '$color4' : '$background'}>
+              <XStack gap="$2" alignItems="center">
+                <Search color="$color2" size={15} />
+                <TabText>Search</TabText>
               </XStack>
             </Tabs.Tab>
           </Tabs.List>
@@ -113,6 +137,23 @@ const Anime = () => {
                   fetchNextPage={fetchNextPopular}
                   hasNextPage={hasNextPopular}
                   isLoading={popularLoading}
+                />
+              </View>
+            )}
+          </Tabs.Content>
+          <Tabs.Content value="tab3">
+            {searchLoading && !searchData ? (
+              <XStack padding="$4" justifyContent="center">
+                <Spinner size="large" color="$color" />
+              </XStack>
+            ) : (
+              <View height="100%">
+                <CardList
+                  data={searchData}
+                  refetch={refetchSearch}
+                  fetchNextPage={fetchNextSearch}
+                  hasNextPage={hasNextSearch}
+                  isLoading={searchLoading}
                 />
               </View>
             )}

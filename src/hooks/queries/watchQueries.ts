@@ -20,11 +20,5 @@ export function useWatchAnimeEpisodes({
       console.log(data);
       return data;
     },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 3,
-    retryDelay: 1000,
   });
 }

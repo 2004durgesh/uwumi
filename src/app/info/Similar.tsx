@@ -5,9 +5,9 @@ import CardList from '@/components/CardList';
 
 const Similar = ({ data }: { data: IAnimeInfo }) => {
   return (
-    <YStack gap={2}>
+    <View height="100%">
       <CardList data={data?.recommendations} />
-    </YStack>
+    </View>
   );
 };
 

@@ -19,6 +19,7 @@ import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
+import ListEmpty from './ListEmpty';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -198,7 +199,7 @@ const EpisodeList = ({
           paddingHorizontal: 16,
           paddingVertical: 8,
         }}
-        ListEmptyComponent={<Text>No episodes found</Text>}
+        ListEmptyComponent={<ListEmpty />}
         ListFooterComponent={<View height={100} />}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}

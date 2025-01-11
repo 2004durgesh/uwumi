@@ -31,10 +31,12 @@ export default function RootLayout() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes
-        retry: 2,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retry: 3,
+        staleTime: 10 * 60 * 1000, // 10 minutes
+        gcTime: 60 * 60 * 1000, // 1 hour
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        retryDelay: 1000,
       },
     },
   });
@@ -58,6 +60,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
               <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
+              <Stack.Screen name="search/[mediaType]" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
           </PortalProvider>

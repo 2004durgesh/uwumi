@@ -17,12 +17,6 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
       });
       return data;
     },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 3,
-    retryDelay: 1000,
   });
 }
 
@@ -33,11 +27,5 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_ANIME_PROVIDER }: { id
       const { data } = await axios.get(`${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
       return data;
     },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 3,
-    retryDelay: 1000,
   });
 }
