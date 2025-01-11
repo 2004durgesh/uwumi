@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamagui';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
@@ -8,9 +8,10 @@ import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
-import ListEmpty from './ListEmpty';
-interface CardListProps {
+import NoResults from './NoResults';
+export interface CardListProps {
   data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined;
+  error: Error | null;
   hasNextPage?: boolean | undefined;
   fetchNextPage?: () => void;
   refetch?: () => void;
@@ -91,7 +92,7 @@ const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
   );
 };
 
-const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, refetch, isLoading }) => {
+const CardList: React.FC<CardListProps> = ({ data, error, hasNextPage, fetchNextPage, refetch, isLoading }) => {
   const isInfiniteData = (
     data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined,
   ): data is InfiniteData<ISearch<IAnimeResult>> => {
@@ -107,6 +108,25 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
     return data;
   };
 
+  if (isLoading && !data) {
+    return (
+      <XStack padding="$4" justifyContent="center">
+        <Spinner size="large" color="$color" />
+      </XStack>
+    );
+  }
+
+  if (error) {
+    return (
+      <YStack justifyContent="center" alignItems="center">
+        <NoResults />
+        <Text fontSize="$4" color="$color4" textAlign="center" marginTop="$4">
+          Error: {error?.message}
+        </Text>
+      </YStack>
+    );
+  }
+
   return (
     <YStack flex={1}>
       <FlashList
@@ -116,10 +136,11 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
             <CustomCard item={item} index={index} />
           </View>
         )}
-        ListEmptyComponent={<ListEmpty />}
+        ListEmptyComponent={<NoResults />}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
         estimatedFirstItemOffset={900}
+        drawDistance={500}
         numColumns={3}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{
@@ -147,4 +168,4 @@ const CardList: React.FC<CardListProps> = ({ data, hasNextPage, fetchNextPage, r
   );
 };
 
-export default CardList;
+export default memo(CardList);

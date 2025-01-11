@@ -1,11 +1,8 @@
 import { ThemedView } from '@/components/ThemedView';
 import { useAnimePopular, useAnimeSearch, useAnimeTrending } from '@/hooks/queries';
-import React, { useState } from 'react';
-import { Text, XStack, YStack, Spinner, Tabs, styled, View } from 'tamagui';
-import CardList from '@/components/CardList';
-import { ChartNoAxesCombined, Heart, Search, SlidersHorizontal } from '@tamagui/lucide-icons';
-import SearchBar from '@/components/SearchBar';
+import React from 'react';
 import { useSearchStore } from '@/hooks/stores/useSearchStore';
+import MediaBrowser from '@/components/MediaBrowser';
 
 const Anime = () => {
   const {
@@ -36,130 +33,36 @@ const Anime = () => {
     hasNextPage: hasNextSearch,
   } = useAnimeSearch(debouncedQuery);
 
-  const [currentTab, setCurrentTab] = useState('tab1');
-
-  const TabText = styled(Text, {
-    fontSize: 13,
-    fontWeight: 500,
-    color: '$color2',
-  });
-
-  if (trendingError || popularError || searchError) {
-    const error = trendingError || popularError || searchError;
-    return (
-      <YStack flex={1} justifyContent="center" alignItems="center">
-        <Text color="$color">Error: {error?.message}</Text>
-      </YStack>
-    );
-  }
+  const tabsData = {
+    tab1: {
+      data: trendingData,
+      error: trendingError,
+      isLoading: trendingLoading,
+      refetch: refetchTrending,
+      fetchNextPage: fetchNextTrending,
+      hasNextPage: hasNextTrending,
+    },
+    tab2: {
+      data: popularData,
+      error: popularError,
+      isLoading: popularLoading,
+      refetch: refetchPopular,
+      fetchNextPage: fetchNextPopular,
+      hasNextPage: hasNextPopular,
+    },
+    tab3: {
+      data: searchData,
+      error: searchError,
+      isLoading: searchLoading,
+      refetch: refetchSearch,
+      fetchNextPage: fetchNextSearch,
+      hasNextPage: hasNextSearch,
+    },
+  };
 
   return (
     <ThemedView>
-      <YStack gap="$2">
-        <SearchBar />
-        <Tabs
-          defaultValue="tab1"
-          orientation="horizontal"
-          flexDirection="column"
-          width="100%"
-          value={currentTab}
-          onValueChange={(value) => setCurrentTab(value)}>
-          <Tabs.List disablePassBorderRadius width="65%" marginVertical="$2" marginHorizontal="$4" gap="$2">
-            <Tabs.Tab
-              flex={1}
-              padding={0}
-              height={35}
-              value="tab1"
-              borderWidth={2}
-              borderColor={currentTab === 'tab1' ? '$color4' : '$color2'}
-              backgroundColor={currentTab === 'tab1' ? '$color4' : '$background'}>
-              <XStack gap="$2" alignItems="center">
-                <ChartNoAxesCombined color="$color2" size={15} />
-                <TabText>Trending</TabText>
-              </XStack>
-            </Tabs.Tab>
-
-            <Tabs.Tab
-              flex={1}
-              padding={0}
-              value="tab2"
-              height={35}
-              borderWidth={2}
-              borderColor={currentTab === 'tab2' ? '$color4' : '$color2'}
-              backgroundColor={currentTab === 'tab2' ? '$color4' : '$background'}>
-              <XStack gap="$2" alignItems="center">
-                <Heart color="$color2" size={15} />
-                <TabText>Popular</TabText>
-              </XStack>
-            </Tabs.Tab>
-            <Tabs.Tab
-              flex={1}
-              padding={0}
-              value="tab3"
-              height={35}
-              borderWidth={2}
-              borderColor={currentTab === 'tab3' ? '$color4' : '$color2'}
-              backgroundColor={currentTab === 'tab3' ? '$color4' : '$background'}>
-              <XStack gap="$2" alignItems="center">
-                <Search color="$color2" size={15} />
-                <TabText>Search</TabText>
-              </XStack>
-            </Tabs.Tab>
-          </Tabs.List>
-          <Tabs.Content value="tab1">
-            {trendingLoading && !trendingData ? (
-              <XStack padding="$4" justifyContent="center">
-                <Spinner size="large" color="$color" />
-              </XStack>
-            ) : (
-              <View height="100%">
-                <CardList
-                  data={trendingData}
-                  refetch={refetchTrending}
-                  fetchNextPage={fetchNextTrending}
-                  hasNextPage={hasNextTrending}
-                  isLoading={trendingLoading}
-                />
-              </View>
-            )}
-          </Tabs.Content>
-
-          <Tabs.Content value="tab2">
-            {popularLoading && !popularData ? (
-              <XStack padding="$4" justifyContent="center">
-                <Spinner size="large" color="$color" />
-              </XStack>
-            ) : (
-              <View height="100%">
-                <CardList
-                  data={popularData}
-                  refetch={refetchPopular}
-                  fetchNextPage={fetchNextPopular}
-                  hasNextPage={hasNextPopular}
-                  isLoading={popularLoading}
-                />
-              </View>
-            )}
-          </Tabs.Content>
-          <Tabs.Content value="tab3">
-            {searchLoading && !searchData ? (
-              <XStack padding="$4" justifyContent="center">
-                <Spinner size="large" color="$color" />
-              </XStack>
-            ) : (
-              <View height="100%">
-                <CardList
-                  data={searchData}
-                  refetch={refetchSearch}
-                  fetchNextPage={fetchNextSearch}
-                  hasNextPage={hasNextSearch}
-                  isLoading={searchLoading}
-                />
-              </View>
-            )}
-          </Tabs.Content>
-        </Tabs>
-      </YStack>
+      <MediaBrowser tabsData={tabsData} />
     </ThemedView>
   );
 };

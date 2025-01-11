@@ -62,9 +62,8 @@ export function useAnimeSearch(query: string) {
       const url = `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/advanced-search`;
       const params = { page: pageParam.toString(), query: query };
 
-      // Log full URL with params
-      const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
-      console.log('🔍 Making request to:', fullUrl);
+      // const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
+      // console.log('🔍 Making request to:', fullUrl);
 
       const { data } = await axios.get<ISearch<IAnimeResult>>(url, {
         params,

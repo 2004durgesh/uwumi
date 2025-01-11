@@ -1,4 +1,4 @@
-import { useSearchStore } from '@/hooks/stores/useSearchStore';
+import { useSearchStore, useTabsStore } from '@/hooks/stores/useSearchStore';
 import { X } from '@tamagui/lucide-icons';
 import React, { useCallback, useRef, useEffect } from 'react';
 import { TextInput } from 'react-native';
@@ -8,6 +8,7 @@ const SearchBar: React.FC = () => {
   const searchQuery = useSearchStore((state) => state.searchQuery);
   const setSearchQuery = useSearchStore((state) => state.setSearchQuery);
   const setDebouncedQuery = useSearchStore((state) => state.setDebouncedQuery);
+  const setCurrentTab = useTabsStore((state) => state.setCurrentTab);
 
   const handleTextChange = useCallback((text: string) => {
     setSearchQuery(text);
@@ -25,6 +26,7 @@ const SearchBar: React.FC = () => {
       setSearchQuery(searchQuery.trim());
       setDebouncedQuery(searchQuery.trim()); // Pass true to skip debounce
     }
+    setCurrentTab('tab3');
   }, [searchQuery]);
 
   return (

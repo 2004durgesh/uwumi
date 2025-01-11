@@ -1,7 +1,7 @@
 import { MotiView } from 'moti';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { Text, Stack, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
-import { TouchableOpacity } from 'react-native';
+import { Pressable } from 'react-native';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { IAnimeInfo } from '@/constants/types';
@@ -98,9 +98,11 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
                         type: 'timing',
                         duration: 500,
                       }}>
-                      <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
+                      <Pressable
+                        style={{ width: '100%', height: 25, alignItems: 'center' }}
+                        onPress={() => setIsExpanded(!isExpanded)}>
                         <ChevronDown size={24} color="$color" />
-                      </TouchableOpacity>
+                      </Pressable>
                     </MotiView>
                     <YStack flex={1} height="100%" width="100%" gap="$2">
                       <StatisticItem label="Type" value={data?.type || ''} />

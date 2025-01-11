@@ -8,6 +8,11 @@ interface SearchStore {
   setDebouncedQuery: (query: string) => void;
 }
 
+interface TabsStore {
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
+}
+
 export const useSearchStore = create<SearchStore>((set) => ({
   searchQuery: '',
   debouncedQuery: '',
@@ -15,4 +20,9 @@ export const useSearchStore = create<SearchStore>((set) => ({
   setDebouncedQuery: debounce((query: string) => {
     set({ debouncedQuery: query });
   }, 1000),
+}));
+
+export const useTabsStore = create<TabsStore>((set) => ({
+  currentTab: 'tab1',
+  setCurrentTab: (tab: string) => set({ currentTab: tab }),
 }));

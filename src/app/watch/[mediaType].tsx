@@ -1,9 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback, useLayoutEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Dimensions, TouchableOpacity, StyleProp, ViewStyle, Pressable, StyleSheet } from 'react-native';
-import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
+import Video, {
+  ISO639_1,
+  SelectedTrackType,
+  SelectedVideoTrackType,
+  TextTrackType,
+  type VideoRef,
+} from 'react-native-video';
 import VideoPlayer from 'react-native-media-console';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { YStack, Spinner, Text, View, styled } from 'tamagui';
+import { YStack, Spinner, Text, View } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
@@ -13,12 +19,10 @@ import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { runOnJS } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, withSequence, withTiming, runOnJS } from 'react-native-reanimated';
 import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
-import EpisodeList from '@/components/EpisodeList';
-import { useEpisodesIdStore } from '@/hooks/stores/useEpisodesStore';
 
 export interface SubtitleTrack {
   index: number;
@@ -34,37 +38,10 @@ interface PlaybackState {
   isSeeking: boolean;
 }
 
-const SeekText = styled(Text, {
-  fontSize: 10,
-  fontWeight: 'bold',
-  color: 'white',
-  padding: 10,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  borderRadius: 8,
-});
-
-const OverlayedView = styled(Animated.View, {
-  position: 'absolute',
-  top: 0,
-  // width: 200,
-  // height: 200,
-  width: '50%',
-  height: '100%',
-  justifyContent: 'center',
-  alignItems: 'center',
-  pointerEvents: 'none',
-  zIndex: 10,
-  overflow: 'hidden',
-  borderRadius: '50%',
-  transform: [{ scale: 1.5 }],
-  // backgroundColor: 'red',
-});
-
 const Watch = () => {
-  const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
+  const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
     mediaType: string;
     provider: string;
-    id: string;
     episodeId: string;
     episodeDubId: string;
     isDub: string;
@@ -77,16 +54,8 @@ const Watch = () => {
     provider,
   });
   const { top, right, bottom, left } = useSafeAreaInsets();
-  const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
-  useEffect(() => {
-    if (episodeId) {
-      setEpisodeIds(episodeId);
-    }
-    return () => {
-      setEpisodeIds('');
-    };
-  }, [setEpisodeIds, episodeId]);
   const videoRef = useRef<VideoRef>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -108,6 +77,8 @@ const Watch = () => {
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [showSkipAnimation, setShowSkipAnimation] = useState(false);
+  const [skipDirection, setSkipDirection] = useState<'forward' | 'backward'>('forward');
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
   const [systemVolume, setSystemVolume] = useState(1);
@@ -180,22 +151,13 @@ const Watch = () => {
   }, []);
 
   // Double tap gesture handlers for skip forward/backward
-  const {
-    doubleTapGesture,
-    isDoubleTap,
-    doubleTapValue,
-    forwardAnimatedStyle,
-    backwardAnimatedStyle,
-    backwardRippleRef,
-    forwardRippleRef,
-    backwardAnimatedRipple,
-    forwardAnimatedRipple,
-  } = useDoubleTapGesture({
-    videoRef,
-    seekInterval: 10,
-    onSeekStart: () => console.log('Seeking started'),
-    onSeekEnd: () => console.log('Seeking ended'),
-  });
+  const { doubleTapGesture, isDoubleTap, doubleTapValue, forwardAnimatedStyle, backwardAnimatedStyle } =
+    useDoubleTapGesture({
+      videoRef,
+      seekInterval: 10,
+      onSeekStart: () => console.log('Seeking started'),
+      onSeekEnd: () => console.log('Seeking ended'),
+    });
   const updateBrightness = useCallback(async (value: number) => {
     await Brightness.setBrightnessAsync(value);
     setBrightness(value);
@@ -229,52 +191,38 @@ const Watch = () => {
   }, []);
 
   // Vertical gesture handler for brightness/volume
-  const brightnessVolumeGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetY([-10, 10])
-        .onUpdate((event) => {
-          'worklet';
-          const side = event.x < dimensions.width / 2 ? 'brightness' : 'volume';
-          const delta = -event.translationY / 200;
+  const verticalGesture = Gesture.Pan()
+    .activeOffsetY([-10, 10])
+    .onUpdate((event) => {
+      'worklet';
+      const side = event.x < dimensions.width / 2 ? 'brightness' : 'volume';
+      const delta = -event.translationY / 200;
 
-          if (side === 'brightness') {
-            const newBrightness = Math.max(0, Math.min(1, brightness + delta));
-            runOnJS(updateBrightness)(newBrightness);
-          } else {
-            const newVolume = Math.max(0, Math.min(1, volume + delta));
-            runOnJS(updateVolume)(newVolume);
-          }
-        }),
-    [brightness, volume, dimensions.width, updateBrightness, updateVolume],
-  );
+      if (side === 'brightness') {
+        const newBrightness = Math.max(0, Math.min(1, brightness + delta));
+        runOnJS(updateBrightness)(newBrightness);
+      } else {
+        const newVolume = Math.max(0, Math.min(1, volume + delta));
+        runOnJS(updateVolume)(newVolume);
+      }
+    });
 
   // Horizontal gesture handler for seeking
-  // const seekGesture = useMemo(
-  //   () =>
-  //     Gesture.Pan()
-  //       .activeOffsetX([-10, 10])
-  //       .onUpdate((event) => {
-  //         'worklet';
-  //         const MAX_SEEK_SECONDS = 15;
-  //         const direction = Math.sign(event.translationX);
-  //         const absTranslation = Math.abs(event.translationX);
+  const seekGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .onUpdate((event) => {
+      'worklet';
+      const MAX_SEEK_SECONDS = 15;
+      const direction = Math.sign(event.translationX);
+      const absTranslation = Math.abs(event.translationX);
 
-  //         // Non-linear scaling for smoother control
-  //         const scale = Math.min(absTranslation / dimensions.width, 1);
-  //         const seekDelta = direction * scale * MAX_SEEK_SECONDS;
+      // Non-linear scaling for smoother control
+      const scale = Math.min(absTranslation / dimensions.width, 1);
+      const seekDelta = direction * scale * MAX_SEEK_SECONDS;
 
-  //         const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
-  //         runOnJS(handleSeek)(newTime);
-  //       }),
-  //   [dimensions.width, seekableDuration, currentTime, handleSeek],
-  // );
-
-  const toggleControls = useCallback(() => {
-    setShowControls((showControls) => !showControls);
-  }, []);
-
-  const gestures = Gesture.Exclusive(doubleTapGesture, brightnessVolumeGesture);
+      const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
+      runOnJS(handleSeek)(newTime);
+    });
 
   const videoStyle = useMemo<StyleProp<ViewStyle>>(
     () => ({
@@ -316,115 +264,131 @@ const Watch = () => {
   }
   return (
     <ThemedView useSafeArea={false} useStatusBar>
-      <View height="100%" top={top}>
-        <GestureDetector gesture={gestures}>
-          <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>
-            <Pressable
-              onPress={() => {
-                if (isDoubleTap) return;
-                toggleControls();
-              }}
-              style={{ flex: 1 }}>
-              <View
-                style={{ height: playerDimensions.height, position: 'relative' }}
-                // style={{height:"100%", position: 'relative' }} //keep for future ref
-              >
-                <Video
-                  ref={videoRef}
-                  source={{
-                    uri: source,
-                    textTracks: subtitleTracks?.map((track, index) => ({
-                      title: track.lang || 'Untitled',
-                      language: track.lang?.toLowerCase() as ISO639_1,
-                      type: TextTrackType.VTT,
-                      uri: track.url || '',
-                      index,
-                    })),
-                    textTracksAllowChunklessPreparation: false,
-                  }}
-                  style={videoStyle}
-                  resizeMode={'contain'}
-                  poster={{
-                    source: { uri: poster },
-                    resizeMode: 'contain',
-                  }}
-                  onProgress={handleProgress}
-                  onPlaybackStateChanged={handlePlaybackStateChange}
-                  onLayout={(e) => {
-                    setPlayerDimensions({
-                      width: e.nativeEvent.layout.width,
-                      height: e.nativeEvent.layout.height,
-                    });
-                  }}
-                  onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
-                  onError={(error) => console.log('Video Error:', error)}
-                  onLoad={(value) => {
-                    // console.log('Video loaded:', value);
-                    setIsVideoReady(true);
-                  }}
-                  // selectedVideoTrack={{
-                  //   type: SelectedVideoTrackType.INDEX,
-                  //   value: 0,
-                  // }}
-                  selectedTextTrack={{
-                    type: SelectedTrackType.INDEX,
-                    value: (selectedSubtitleIndex ?? 0) + 1,
-                  }}
-                  // onTextTracks={(tracks) => {
-                  //   console.log('Text Tracks:', tracks);
-                  // }}
-                  subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
-                />
-                {isVideoReady && (
-                  <ControlsOverlay
-                    showControls={showControls}
-                    routeInfo={{ mediaType, provider, id }}
-                    isPlaying={playbackState.isPlaying}
-                    isMuted={isMuted}
-                    isFullscreen={isFullscreen}
-                    currentTime={currentTime}
-                    seekableDuration={seekableDuration}
-                    title={title}
-                    isBuffering={isBuffering}
-                    subtitleTracks={subtitleTracks}
-                    selectedSubtitleIndex={selectedSubtitleIndex}
-                    setSelectedSubtitleIndex={setSelectedSubtitleIndex}
-                    onPlayPress={handlePlayPress}
-                    onMutePress={handleMutePress}
-                    onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
-                    onSeek={handleSeek}
-                  />
-                )}
-              </View>
-            </Pressable>
-            <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
-              <Animated.View style={[backwardAnimatedRipple]}>
-                <SeekText>-{doubleTapValue.backward}s</SeekText>
-              </Animated.View>
-            </OverlayedView>
+      <GestureDetector gesture={Gesture.Race(verticalGesture, seekGesture, doubleTapGesture)}>
+        <View height={isVideoReady ? playerDimensions.height : 250} top={top}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowControls(!showControls);
+            }}
+            style={{ flex: 1 }}>
+            <View
+              style={{ height: playerDimensions.height, position: 'relative' }}
+              // style={{height:"100%", position: 'relative' }} //keep for future ref
+            >
+              <Video
+                ref={videoRef}
+                source={{
+                  uri: source,
+                  textTracks: subtitleTracks?.map((track, index) => ({
+                    title: track.lang || 'Untitled',
+                    language: track.lang?.toLowerCase() as ISO639_1,
+                    type: TextTrackType.VTT,
+                    uri: track.url || '',
+                    index,
+                  })),
+                  textTracksAllowChunklessPreparation: false,
+                }}
+                style={videoStyle}
+                resizeMode={'contain'}
+                onProgress={handleProgress}
+                onPlaybackStateChanged={handlePlaybackStateChange}
+                onLayout={(e) => {
+                  setPlayerDimensions({
+                    width: e.nativeEvent.layout.width,
+                    height: e.nativeEvent.layout.height,
+                  });
+                }}
+                onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
+                onError={(error) => console.log('Video Error:', error)}
+                onLoad={(value) => {
+                  console.log('Video loaded:', value);
+                  setIsVideoReady(true);
+                }}
+                // selectedVideoTrack={{
+                //   type: SelectedVideoTrackType.INDEX,
+                //   value: 0,
+                // }}
+                selectedTextTrack={{
+                  type: SelectedTrackType.INDEX,
+                  value: (selectedSubtitleIndex ?? 0) + 1,
+                }}
+                onTextTracks={(tracks) => {
+                  console.log('Text Tracks:', tracks);
+                }}
+                subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
+              />
 
-            <OverlayedView ref={forwardRippleRef} style={{ right: 0 }}>
-              <Animated.View style={[forwardAnimatedRipple]}>
-                <SeekText>+{doubleTapValue.forward}s</SeekText>
-              </Animated.View>
-            </OverlayedView>
-          </View>
-        </GestureDetector>
-        {!isFullscreen && (
-          <View flex={1}>
-            {description && (
-              <Text padding={10} textAlign="justify">
-                {description}
-              </Text>
-            )}
-            <View flex={1}>
-              <EpisodeList mediaType={mediaType} provider={provider} id={id} />
+              {isVideoReady && (
+                <ControlsOverlay
+                  showControls={showControls}
+                  isPlaying={playbackState.isPlaying}
+                  isMuted={isMuted}
+                  isFullscreen={isFullscreen}
+                  currentTime={currentTime}
+                  seekableDuration={seekableDuration}
+                  title={title}
+                  subtitleTracks={subtitleTracks}
+                  selectedSubtitleIndex={selectedSubtitleIndex}
+                  setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                  onPlayPress={handlePlayPress}
+                  onMutePress={handleMutePress}
+                  onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+                  onSeek={handleSeek}
+                />
+              )}
             </View>
-          </View>
-        )}
-      </View>
+          </TouchableOpacity>
+          <Animated.View style={[styles.forwardIndicator, forwardAnimatedStyle]}>
+            <Text style={styles.seekText}>+{doubleTapValue.forward}s</Text>
+          </Animated.View>
+          {isBuffering && (
+            <View style={styles.centerOverlay}>
+              <Spinner size="large" color="white" />
+            </View>
+          )}
+          <Animated.View style={[styles.backwardIndicator, backwardAnimatedStyle]}>
+            <Text style={styles.seekText}>-{doubleTapValue.backward}s</Text>
+          </Animated.View>
+        </View>
+      </GestureDetector>
     </ThemedView>
   );
 };
 
 export default Watch;
+
+const styles = StyleSheet.create({
+  centerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
+  },
+  forwardIndicator: {
+    position: 'absolute',
+    right: '25%',
+    top: '50%',
+    transform: [{ translateY: -25 }], // Center the element by offsetting half its height
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 15,
+    borderRadius: 40,
+  },
+  backwardIndicator: {
+    position: 'absolute',
+    left: '25%',
+    top: '50%',
+    transform: [{ translateY: -25 }], // Center the element by offsetting half its height
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 15,
+    borderRadius: 40,
+  },
+  seekText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

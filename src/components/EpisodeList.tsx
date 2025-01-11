@@ -19,7 +19,7 @@ import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
-import ListEmpty from './ListEmpty';
+import NoResults from './NoResults';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -199,11 +199,12 @@ const EpisodeList = ({
           paddingHorizontal: 16,
           paddingVertical: 8,
         }}
-        ListEmptyComponent={<ListEmpty />}
+        ListEmptyComponent={<NoResults />}
         ListFooterComponent={<View height={100} />}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
         estimatedFirstItemOffset={900}
+        drawDistance={500}
         onLoad={(e) => {
           flashListRef?.current?.scrollToItem({
             item: currentEpisode,

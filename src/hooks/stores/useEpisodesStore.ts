@@ -15,15 +15,6 @@ export const useEpisodesIdStore = create<EpisodesIdState>((set) => ({
   setEpisodeIds: (current, prev, next) => set({ currentEpisodeId: current, prevEpisodeId: prev, nextEpisodeId: next }),
 }));
 
-interface WatchEpisodeMetaData {
-  episodeId: string;
-  episodeDubId?: string;
-  isDub?: string;
-  poster?: string;
-  title: string;
-  description?: string;
-}
-
 interface EpisodesState {
   episodes: Episode[];
   setEpisodes: (episodes: Episode[]) => void;

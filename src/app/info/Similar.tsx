@@ -1,4 +1,4 @@
-import { View, Text, YStack } from 'tamagui';
+import { View } from 'tamagui';
 import React from 'react';
 import { IAnimeInfo } from '@/constants/types';
 import CardList from '@/components/CardList';
