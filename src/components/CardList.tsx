@@ -1,25 +1,27 @@
-import React, { memo, useEffect, useState } from 'react';
+/* eslint-disable react/display-name */
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamagui';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { AnimatedCustomImage } from './CustomImage';
-import { IAnimeResult, ISearch } from '@/constants/types';
+import { IAnimeResult, IMovieResult, ISearch } from '@/constants/types';
 import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
+import { Image } from 'react-native';
 export interface CardListProps {
-  data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined;
-  error: Error | null;
+  data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | InfiniteData<ISearch<IMovieResult>> | undefined;
+  error?: Error | null;
   hasNextPage?: boolean | undefined;
   fetchNextPage?: () => void;
   refetch?: () => void;
   isLoading?: boolean;
 }
 
-interface AnimeCardProps {
-  item: IAnimeResult;
+interface CardProps {
+  item: IAnimeResult | IMovieResult;
   index: number;
 }
 
@@ -38,7 +40,7 @@ const StyledCard = styled(Card, {
 
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
-const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
+const CustomCard: React.FC<CardProps> = memo(({ item, index }) => {
   return (
     <Link
       asChild
@@ -90,23 +92,23 @@ const CustomCard: React.FC<AnimeCardProps> = ({ item, index }) => {
       </AnimatedStyledCard>
     </Link>
   );
-};
+});
 
 const CardList: React.FC<CardListProps> = ({ data, error, hasNextPage, fetchNextPage, refetch, isLoading }) => {
   const isInfiniteData = (
-    data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | undefined,
-  ): data is InfiniteData<ISearch<IAnimeResult>> => {
+    data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | InfiniteData<ISearch<IMovieResult>> | undefined,
+  ): data is InfiniteData<ISearch<IAnimeResult>> | InfiniteData<ISearch<IMovieResult>> => {
     return !!data && 'pages' in data;
   };
-
+  console.log('CardList was rendered');
   // Get the correct data array based on type
-  const getItems = () => {
+  const getItems = useMemo(() => {
     if (!data) return [];
     if (isInfiniteData(data)) {
-      return data.pages.flatMap((page) => page.results);
+      return data.pages.flatMap((page) => page.results as (IAnimeResult | IMovieResult)[]);
     }
     return data;
-  };
+  }, [data]);
 
   if (isLoading && !data) {
     return (
@@ -130,8 +132,8 @@ const CardList: React.FC<CardListProps> = ({ data, error, hasNextPage, fetchNext
   return (
     <YStack flex={1}>
       <FlashList
-        data={getItems() || []}
-        renderItem={({ item, index }: { item: IAnimeResult; index: number }) => (
+        data={getItems || []}
+        renderItem={({ item, index }: CardProps) => (
           <View flex={1} paddingVertical={4} paddingHorizontal={4}>
             <CustomCard item={item} index={index} />
           </View>

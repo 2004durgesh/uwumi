@@ -3,10 +3,14 @@ import React, { memo } from 'react';
 import { XStack, YStack, Spinner, Tabs, View, Card } from 'tamagui';
 import CardList, { CardListProps } from '@/components/CardList';
 import { ChartNoAxesCombined, Heart, Search } from '@tamagui/lucide-icons';
-import { useTabsStore } from '@/hooks/stores/useSearchStore';
+import { useSearchStore, useTabsStore } from '@/hooks/stores/useSearchStore';
 import IconTitle from '@/components/IconTitle';
 import SearchBar from '@/components/SearchBar';
-
+import { MediaType } from '@/constants/types';
+import { useAnimePopular, useAnimeSearch, useAnimeTrending } from '@/hooks/queries';
+interface MediaBrowserProps {
+  mediaType: MediaType;
+}
 const TabTextStyle = {
   fontSize: 13,
   fontWeight: '600',
@@ -24,7 +28,62 @@ const TABS = [
   { id: 'tab3', icon: Search, text: 'Search' },
 ] as const;
 
-const MediaBrowser = ({ tabsData }: { tabsData: Record<string, CardListProps> }) => {
+const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
+  const {
+    data: trendingData,
+    isLoading: trendingLoading,
+    error: trendingError,
+    refetch: refetchTrending,
+    fetchNextPage: fetchNextTrending,
+    hasNextPage: hasNextTrending,
+  } = useAnimeTrending();
+
+  const {
+    data: popularData,
+    isLoading: popularLoading,
+    error: popularError,
+    refetch: refetchPopular,
+    fetchNextPage: fetchNextPopular,
+    hasNextPage: hasNextPopular,
+  } = useAnimePopular();
+
+  const debouncedQuery = useSearchStore((state) => state.debouncedQuery);
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    error: searchError,
+    refetch: refetchSearch,
+    fetchNextPage: fetchNextSearch,
+    hasNextPage: hasNextSearch,
+  } = useAnimeSearch(debouncedQuery);
+
+  const tabsData = {
+    tab1: {
+      data: trendingData,
+      error: trendingError,
+      isLoading: trendingLoading,
+      refetch: refetchTrending,
+      fetchNextPage: fetchNextTrending,
+      hasNextPage: hasNextTrending,
+    },
+    tab2: {
+      data: popularData,
+      error: popularError,
+      isLoading: popularLoading,
+      refetch: refetchPopular,
+      fetchNextPage: fetchNextPopular,
+      hasNextPage: hasNextPopular,
+    },
+    tab3: {
+      data: searchData,
+      error: searchError,
+      isLoading: searchLoading,
+      refetch: refetchSearch,
+      fetchNextPage: fetchNextSearch,
+      hasNextPage: hasNextSearch,
+    },
+  };
+
   const currentTab = useTabsStore((state) => state.currentTab);
   const setCurrentTab = useTabsStore((state) => state.setCurrentTab);
   const TabList = memo(() => (
@@ -45,6 +104,7 @@ const MediaBrowser = ({ tabsData }: { tabsData: Record<string, CardListProps> })
     </Tabs.List>
   ));
   const TabContent = memo(({ data, error, isLoading, refetch, fetchNextPage, hasNextPage }: CardListProps) => {
+    console.log('TabContent was rendered');
     return (
       <View height="100%">
         <CardList

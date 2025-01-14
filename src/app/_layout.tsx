@@ -2,10 +2,9 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { Button, TamaguiProvider, XStack, createTamagui } from 'tamagui';
+import { TamaguiProvider, createTamagui } from 'tamagui';
 import { PortalProvider } from '@tamagui/portal';
 import config from '../../tamagui.config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -60,7 +59,6 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
               <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
-              <Stack.Screen name="search/[mediaType]" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
           </PortalProvider>

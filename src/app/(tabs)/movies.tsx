@@ -1,13 +1,33 @@
 import { ThemedView } from '@/components/ThemedView';
+import { useMovieTrending } from '@/hooks/queries';
 import React from 'react';
-import { Text } from 'tamagui';
+import { useSearchStore } from '@/hooks/stores/useSearchStore';
+import MediaBrowser from '@/components/MediaBrowser';
 
-const movies = () => {
+const Movies = () => {
+  const {
+    data: trendingData,
+    isLoading: trendingLoading,
+    error: trendingError,
+    refetch: refetchTrending,
+    fetchNextPage: fetchNextTrending,
+    hasNextPage: hasNextTrending,
+  } = useMovieTrending();
+  const tabsData = {
+    tab1: {
+      data: trendingData,
+      error: trendingError,
+      isLoading: trendingLoading,
+      refetch: refetchTrending,
+      fetchNextPage: fetchNextTrending,
+      hasNextPage: hasNextTrending,
+    },
+  };
   return (
     <ThemedView>
-      <Text>movies</Text>
+      <MediaBrowser tabsData={tabsData} />
     </ThemedView>
   );
 };
 
-export default movies;
+export default Movies;

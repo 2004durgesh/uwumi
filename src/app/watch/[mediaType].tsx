@@ -1,28 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Dimensions, TouchableOpacity, StyleProp, ViewStyle, Pressable, StyleSheet } from 'react-native';
-import Video, {
-  ISO639_1,
-  SelectedTrackType,
-  SelectedVideoTrackType,
-  TextTrackType,
-  type VideoRef,
-} from 'react-native-video';
-import VideoPlayer from 'react-native-media-console';
+import { Dimensions, StyleProp, ViewStyle, StyleSheet, TouchableOpacity } from 'react-native';
+import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { YStack, Spinner, Text, View } from 'tamagui';
+import { YStack, Spinner, Text, View, styled, XStack } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { ISubtitle } from '@/constants/types';
-import { useWatchAnimeEpisodes } from '@/hooks/queries/watchQueries';
+import { useWatchAnimeEpisodes } from '@/hooks/queries';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, withSpring, withSequence, withTiming, runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS } from 'react-native-reanimated';
 import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
+import { useEpisodesIdStore } from '@/hooks/stores/useEpisodesStore';
+import EpisodeList from '@/components/EpisodeList';
 
 export interface SubtitleTrack {
   index: number;
@@ -38,10 +33,36 @@ interface PlaybackState {
   isSeeking: boolean;
 }
 
+const SeekText = styled(Text, {
+  fontSize: 10,
+  fontWeight: 'bold',
+  color: 'white',
+  padding: 10,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  borderRadius: 8,
+});
+const OverlayedView = styled(Animated.View, {
+  position: 'absolute',
+  top: 0,
+  // width: 200,
+  // height: 200,
+  width: '50%',
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
+  pointerEvents: 'none',
+  zIndex: 10,
+  overflow: 'hidden',
+  borderRadius: '50%',
+  transform: [{ scale: 1.5 }],
+  // backgroundColor: 'red',
+});
+
 const Watch = () => {
-  const { mediaType, provider, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
+  const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
     mediaType: string;
     provider: string;
+    id: string;
     episodeId: string;
     episodeDubId: string;
     isDub: string;
@@ -54,6 +75,15 @@ const Watch = () => {
     provider,
   });
   const { top, right, bottom, left } = useSafeAreaInsets();
+  const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
+  useEffect(() => {
+    if (episodeId) {
+      setEpisodeIds(episodeId);
+    }
+    return () => {
+      setEpisodeIds('');
+    };
+  }, [episodeId]);
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -77,8 +107,6 @@ const Watch = () => {
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [showSkipAnimation, setShowSkipAnimation] = useState(false);
-  const [skipDirection, setSkipDirection] = useState<'forward' | 'backward'>('forward');
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
   const [systemVolume, setSystemVolume] = useState(1);
@@ -151,13 +179,22 @@ const Watch = () => {
   }, []);
 
   // Double tap gesture handlers for skip forward/backward
-  const { doubleTapGesture, isDoubleTap, doubleTapValue, forwardAnimatedStyle, backwardAnimatedStyle } =
-    useDoubleTapGesture({
-      videoRef,
-      seekInterval: 10,
-      onSeekStart: () => console.log('Seeking started'),
-      onSeekEnd: () => console.log('Seeking ended'),
-    });
+  const {
+    doubleTapGesture,
+    isDoubleTap,
+    doubleTapValue,
+    forwardAnimatedStyle,
+    backwardAnimatedStyle,
+    backwardRippleRef,
+    forwardRippleRef,
+    backwardAnimatedRipple,
+    forwardAnimatedRipple,
+  } = useDoubleTapGesture({
+    videoRef,
+    seekInterval: 10,
+    onSeekStart: () => console.log('Seeking started'),
+    onSeekEnd: () => console.log('Seeking ended'),
+  });
   const updateBrightness = useCallback(async (value: number) => {
     await Brightness.setBrightnessAsync(value);
     setBrightness(value);
@@ -191,38 +228,56 @@ const Watch = () => {
   }, []);
 
   // Vertical gesture handler for brightness/volume
-  const verticalGesture = Gesture.Pan()
-    .activeOffsetY([-10, 10])
-    .onUpdate((event) => {
-      'worklet';
-      const side = event.x < dimensions.width / 2 ? 'brightness' : 'volume';
-      const delta = -event.translationY / 200;
-
-      if (side === 'brightness') {
-        const newBrightness = Math.max(0, Math.min(1, brightness + delta));
-        runOnJS(updateBrightness)(newBrightness);
-      } else {
-        const newVolume = Math.max(0, Math.min(1, volume + delta));
-        runOnJS(updateVolume)(newVolume);
-      }
-    });
+  const brightnessVolumeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetY([-10, 10])
+        .onUpdate((event) => {
+          'worklet';
+          const side = event.x < dimensions.width / 2 ? 'brightness' : 'volume';
+          const delta = -event.translationY / 200;
+          if (side === 'brightness') {
+            const newBrightness = Math.max(0, Math.min(1, brightness + delta));
+            runOnJS(updateBrightness)(newBrightness);
+          } else {
+            const newVolume = Math.max(0, Math.min(1, volume + delta));
+            runOnJS(updateVolume)(newVolume);
+          }
+        }),
+    [brightness, volume, dimensions.width, updateBrightness, updateVolume],
+  );
 
   // Horizontal gesture handler for seeking
-  const seekGesture = Gesture.Pan()
-    .activeOffsetX([-10, 10])
-    .onUpdate((event) => {
-      'worklet';
-      const MAX_SEEK_SECONDS = 15;
-      const direction = Math.sign(event.translationX);
-      const absTranslation = Math.abs(event.translationX);
+  // const seekGesture = useMemo(
+  //   () =>
+  //     Gesture.Pan()
+  //       .activeOffsetX([-10, 10])
+  //       .onUpdate((event) => {
+  //         'worklet';
+  //         const MAX_SEEK_SECONDS = 15;
+  //         const direction = Math.sign(event.translationX);
+  //         const absTranslation = Math.abs(event.translationX);
+  //         // Non-linear scaling for smoother control
+  //         const scale = Math.min(absTranslation / dimensions.width, 1);
+  //         const seekDelta = direction * scale * MAX_SEEK_SECONDS;
+  //         const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
+  //         runOnJS(handleSeek)(newTime);
+  //       }),
+  //   [dimensions.width, seekableDuration, currentTime, handleSeek],
+  // );
 
-      // Non-linear scaling for smoother control
-      const scale = Math.min(absTranslation / dimensions.width, 1);
-      const seekDelta = direction * scale * MAX_SEEK_SECONDS;
+  const toggleControls = useCallback(() => {
+    setShowControls((isShowControls) => !isShowControls);
+  }, []);
 
-      const newTime = Math.max(0, Math.min(seekableDuration, currentTime + seekDelta));
-      runOnJS(handleSeek)(newTime);
-    });
+  const singleTapGesture = useMemo(
+    () =>
+      Gesture.Tap().onEnd(() => {
+        runOnJS(toggleControls)();
+        console.log('single tap');
+      }),
+    [],
+  );
 
   const videoStyle = useMemo<StyleProp<ViewStyle>>(
     () => ({
@@ -246,6 +301,8 @@ const Watch = () => {
     [data?.sources],
   );
 
+  const gestures = Gesture.Exclusive(doubleTapGesture, singleTapGesture, brightnessVolumeGesture);
+
   useEffect(() => {
     if (data?.subtitles && data?.subtitles?.length > 0) {
       setSubtitleTracks(data?.subtitles);
@@ -264,13 +321,9 @@ const Watch = () => {
   }
   return (
     <ThemedView useSafeArea={false} useStatusBar>
-      <GestureDetector gesture={Gesture.Race(verticalGesture, seekGesture, doubleTapGesture)}>
-        <View height={isVideoReady ? playerDimensions.height : 250} top={top}>
-          <TouchableOpacity
-            onPress={() => {
-              setShowControls(!showControls);
-            }}
-            style={{ flex: 1 }}>
+      <View height="100%" top={top}>
+        <GestureDetector gesture={gestures}>
+          <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>
             <View
               style={{ height: playerDimensions.height, position: 'relative' }}
               // style={{height:"100%", position: 'relative' }} //keep for future ref
@@ -290,6 +343,10 @@ const Watch = () => {
                 }}
                 style={videoStyle}
                 resizeMode={'contain'}
+                poster={{
+                  source: { uri: poster },
+                  resizeMode: 'contain',
+                }}
                 onProgress={handleProgress}
                 onPlaybackStateChanged={handlePlaybackStateChange}
                 onLayout={(e) => {
@@ -301,7 +358,7 @@ const Watch = () => {
                 onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
                 onError={(error) => console.log('Video Error:', error)}
                 onLoad={(value) => {
-                  console.log('Video loaded:', value);
+                  // console.log('Video loaded:', value);
                   setIsVideoReady(true);
                 }}
                 // selectedVideoTrack={{
@@ -312,21 +369,23 @@ const Watch = () => {
                   type: SelectedTrackType.INDEX,
                   value: (selectedSubtitleIndex ?? 0) + 1,
                 }}
-                onTextTracks={(tracks) => {
-                  console.log('Text Tracks:', tracks);
-                }}
+                // onTextTracks={(tracks) => {
+                //   console.log('Text Tracks:', tracks);
+                // }}
                 subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
               />
 
               {isVideoReady && (
                 <ControlsOverlay
                   showControls={showControls}
+                  routeInfo={{ mediaType, provider, id }}
                   isPlaying={playbackState.isPlaying}
                   isMuted={isMuted}
                   isFullscreen={isFullscreen}
                   currentTime={currentTime}
                   seekableDuration={seekableDuration}
                   title={title}
+                  isBuffering={isBuffering}
                   subtitleTracks={subtitleTracks}
                   selectedSubtitleIndex={selectedSubtitleIndex}
                   setSelectedSubtitleIndex={setSelectedSubtitleIndex}
@@ -337,20 +396,29 @@ const Watch = () => {
                 />
               )}
             </View>
-          </TouchableOpacity>
-          <Animated.View style={[styles.forwardIndicator, forwardAnimatedStyle]}>
-            <Text style={styles.seekText}>+{doubleTapValue.forward}s</Text>
-          </Animated.View>
-          {isBuffering && (
-            <View style={styles.centerOverlay}>
-              <Spinner size="large" color="white" />
-            </View>
+            <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
+              <Animated.View style={[backwardAnimatedRipple]}>
+                <SeekText>-{doubleTapValue.backward}s</SeekText>
+              </Animated.View>
+            </OverlayedView>
+            <OverlayedView ref={forwardRippleRef} style={{ right: 0 }}>
+              <Animated.View style={[forwardAnimatedRipple]}>
+                <SeekText>+{doubleTapValue.forward}s</SeekText>
+              </Animated.View>
+            </OverlayedView>
+          </View>
+        </GestureDetector>
+        <YStack flex={1} gap="$2">
+          {description && (
+            <Text textAlign="justify" padding="$2">
+              {description}
+            </Text>
           )}
-          <Animated.View style={[styles.backwardIndicator, backwardAnimatedStyle]}>
-            <Text style={styles.seekText}>-{doubleTapValue.backward}s</Text>
-          </Animated.View>
-        </View>
-      </GestureDetector>
+          <View flex={1}>
+            <EpisodeList mediaType={mediaType} provider={provider} id={id} swipeable={false} />
+          </View>
+        </YStack>
+      </View>
     </ThemedView>
   );
 };

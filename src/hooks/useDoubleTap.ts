@@ -194,6 +194,7 @@ export const useDoubleTapGesture = ({
             runOnJS(onSeekEnd)();
           }
           rippleOpacity.value = withTiming(0, { duration: 500 });
+          console.log('double tap');
         })
         .runOnJS(true),
     [

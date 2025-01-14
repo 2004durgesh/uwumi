@@ -63,6 +63,11 @@ enum MediaStatus {
   NOT_YET_AIRED = 'Not yet aired',
   UNKNOWN = 'Unknown',
 }
+export enum MediaType {
+  ANIME = 'anime',
+  MANGA = 'manga',
+  MOVIE = 'movie',
+}
 
 enum SubOrSub {
   SUB = 'sub',
@@ -92,22 +97,13 @@ export interface IAnimeInfo extends IAnimeResult {
   description?: string;
   status?: MediaStatus;
   totalEpisodes?: number;
-  /**
-   * @deprecated use `hasSub` or `hasDub` instead
-   */
   subOrDub?: SubOrSub;
   hasSub?: boolean;
   hasDub?: boolean;
   synonyms?: string[];
-  /**
-   * two letter representation of coutnry: e.g JP for japan
-   */
   countryOfOrigin?: string;
   isAdult?: boolean;
   isLicensed?: boolean;
-  /**
-   * `FALL`, `WINTER`, `SPRING`, `SUMMER`
-   */
   season?: string;
   studios?: string[];
   color?: string;
@@ -190,5 +186,34 @@ export interface IVideo {
   isM3U8?: boolean;
   isDASH?: boolean;
   size?: number;
+  [x: string]: unknown;
+}
+
+export interface IMovieEpisode {
+  id: string;
+  title: string;
+  url?: string;
+  number?: number;
+  season?: number;
+  description?: string;
+  image?: string;
+  releaseDate?: string;
+  [x: string]: unknown; // other fields
+}
+
+export enum TvType {
+  TVSERIES = 'TV Series',
+  MOVIE = 'Movie',
+  ANIME = 'Anime',
+  PEOPLE = 'People',
+}
+
+export interface IMovieResult {
+  id: string;
+  title: string | ITitle;
+  url?: string;
+  image?: string;
+  releaseDate?: string;
+  type?: TvType;
   [x: string]: unknown;
 }

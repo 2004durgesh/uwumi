@@ -12,7 +12,9 @@ export const useEpisodesIdStore = create<EpisodesIdState>((set) => ({
   currentEpisodeId: null,
   prevEpisodeId: null,
   nextEpisodeId: null,
-  setEpisodeIds: (current, prev, next) => set({ currentEpisodeId: current, prevEpisodeId: prev, nextEpisodeId: next }),
+  setEpisodeIds: (current, prev, next) => {
+    set({ currentEpisodeId: current, prevEpisodeId: prev, nextEpisodeId: next });
+  },
 }));
 
 interface EpisodesState {
