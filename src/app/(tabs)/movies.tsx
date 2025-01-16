@@ -1,12 +1,9 @@
 import { ThemedView } from '@/components/ThemedView';
-import { useMovieTrending } from '@/hooks/queries';
 import React from 'react';
-import { useSearchStore } from '@/hooks/stores/useSearchStore';
 import MediaBrowser from '@/components/MediaBrowser';
 import { MediaType } from '@/constants/types';
 
 const Movies = () => {
- 
   return (
     <ThemedView>
       <MediaBrowser mediaType={MediaType.MOVIE} />

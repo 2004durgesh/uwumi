@@ -1,4 +1,4 @@
-import { IAnimeResult, ISearch, MediaFeedType, MediaType } from '@/constants/types';
+import { ISearch, MediaFeedType, MediaType } from '@/constants/types';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
