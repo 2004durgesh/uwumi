@@ -1,23 +1,22 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/display-name */
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamagui';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { AnimatedCustomImage } from './CustomImage';
-import { IAnimeResult, IMovieResult, ISearch } from '@/constants/types';
+import { IAnimeResult, IMovieResult, ISearch, MediaFeedType, MediaType } from '@/constants/types';
 import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
-import { Image } from 'react-native';
+import { useMediaFeed, useSearch } from '@/hooks/queries';
+import { useSearchStore } from '@/hooks/stores/useSearchStore';
+
 export interface CardListProps {
-  data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | InfiniteData<ISearch<IMovieResult>> | undefined;
-  error?: Error | null;
-  hasNextPage?: boolean | undefined;
-  fetchNextPage?: () => void;
-  refetch?: () => void;
-  isLoading?: boolean;
+  type: MediaFeedType;
+  mediaType: MediaType;
 }
 
 interface CardProps {
@@ -94,14 +93,18 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index }) => {
   );
 });
 
-const CardList: React.FC<CardListProps> = ({ data, error, hasNextPage, fetchNextPage, refetch, isLoading }) => {
+const CardList: React.FC<CardListProps> = ({ type, mediaType }) => {
+  const debouncedQuery = useSearchStore((state) => state.debouncedQuery);
+
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage } =
+    type === 'search'
+      ? useSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery, 'anilist', type)
+      : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, 'anilist', type);
   const isInfiniteData = (
-    data: InfiniteData<ISearch<IAnimeResult>> | IAnimeResult[] | InfiniteData<ISearch<IMovieResult>> | undefined,
-  ): data is InfiniteData<ISearch<IAnimeResult>> | InfiniteData<ISearch<IMovieResult>> => {
+    data: InfiniteData<ISearch<IAnimeResult | IMovieResult>> | (IAnimeResult | IMovieResult)[] | undefined,
+  ): data is InfiniteData<ISearch<IAnimeResult | IMovieResult>> => {
     return !!data && 'pages' in data;
   };
-  console.log('CardList was rendered');
-  // Get the correct data array based on type
   const getItems = useMemo(() => {
     if (!data) return [];
     if (isInfiniteData(data)) {

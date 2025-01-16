@@ -3,29 +3,13 @@ import { useMovieTrending } from '@/hooks/queries';
 import React from 'react';
 import { useSearchStore } from '@/hooks/stores/useSearchStore';
 import MediaBrowser from '@/components/MediaBrowser';
+import { MediaType } from '@/constants/types';
 
 const Movies = () => {
-  const {
-    data: trendingData,
-    isLoading: trendingLoading,
-    error: trendingError,
-    refetch: refetchTrending,
-    fetchNextPage: fetchNextTrending,
-    hasNextPage: hasNextTrending,
-  } = useMovieTrending();
-  const tabsData = {
-    tab1: {
-      data: trendingData,
-      error: trendingError,
-      isLoading: trendingLoading,
-      refetch: refetchTrending,
-      fetchNextPage: fetchNextTrending,
-      hasNextPage: hasNextTrending,
-    },
-  };
+ 
   return (
     <ThemedView>
-      <MediaBrowser tabsData={tabsData} />
+      <MediaBrowser mediaType={MediaType.MOVIE} />
     </ThemedView>
   );
 };

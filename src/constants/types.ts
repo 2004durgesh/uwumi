@@ -69,6 +69,8 @@ export enum MediaType {
   MOVIE = 'movie',
 }
 
+export type MediaFeedType = 'trending' | 'popular' | 'search';
+
 enum SubOrSub {
   SUB = 'sub',
   DUB = 'dub',

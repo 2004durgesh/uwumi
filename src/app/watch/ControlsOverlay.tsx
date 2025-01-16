@@ -169,7 +169,7 @@ const ControlsOverlay = memo(
                     </YStack>
                   </Sheet.ScrollView>
                 </Sheet.Frame>
-              </Sheet> 
+              </Sheet>
             </XStack>
           </XStack>
 
