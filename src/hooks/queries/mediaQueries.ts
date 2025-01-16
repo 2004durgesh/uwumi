@@ -25,7 +25,6 @@ export function useMediaFeed<T>(
         },
         timeout: 5000,
       });
-      console.log(data);
       return data;
     },
     getNextPageParam: (lastPage: ISearch<T>, pages) => {

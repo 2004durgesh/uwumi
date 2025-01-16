@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
 import { YStack, XStack, Button, Text, View, Slider, Sheet, ScrollView, Spinner } from 'tamagui';
 import {
   Play,
@@ -59,8 +60,20 @@ export const formatTime = (seconds: number): string => {
   const minutes = Math.max(0, m);
   return `${minutes}:${s.toString().padStart(2, '0')}`;
 };
-
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
+const CustomPressable: FC<{ onPress: () => void; children?: React.ReactNode }> = ({ onPress, children }) => {
+  return (
+    <Pressable
+      onPress={(e) => {
+        onPress();
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+      {children}
+    </Pressable>
+  );
+};
 
 const ControlsOverlay = memo(
   ({
@@ -121,13 +134,12 @@ const ControlsOverlay = memo(
               ) : (
                 <CaptionsOff color="white" size={20} onPress={() => setSelectedSubtitleIndex(0)} />
               )}
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
+              <CustomPressable
+                onPress={() => {
                   setOpenSettings(!openSettings);
                 }}>
                 <Settings color="white" size={20} />
-              </Pressable>
+              </CustomPressable>
               <Sheet
                 forceRemoveScrollEnabled={false}
                 modal={true}
@@ -172,10 +184,9 @@ const ControlsOverlay = memo(
               </Sheet>
             </XStack>
           </XStack>
-
           {/* Center play/pause button */}
           <XStack alignItems="center" justifyContent="center" gap="$8">
-            <Pressable
+            <CustomPressable
               onPress={() => {
                 if (prevEpisodeIndex >= 0) {
                   router.push({
@@ -196,19 +207,18 @@ const ControlsOverlay = memo(
                 }
               }}>
               <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-            </Pressable>
+            </CustomPressable>
             {isBuffering ? (
               <Spinner size="large" color="white" />
             ) : (
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
+              <CustomPressable
+                onPress={() => {
                   onPlayPress();
                 }}>
                 {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
-              </Pressable>
+              </CustomPressable>
             )}
-            <Pressable
+            <CustomPressable
               onPress={() => {
                 if (nextEpisodeIndex >= 0) {
                   router.push({
@@ -229,15 +239,14 @@ const ControlsOverlay = memo(
                 }
               }}>
               <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-            </Pressable>
+            </CustomPressable>
           </XStack>
-
           {/* Bottom Controls */}
           <YStack gap="$2">
             <XStack gap="$2" alignItems="center" justifyContent="space-between" width="100%">
-              <Pressable onPress={onMutePress}>
+              <CustomPressable onPress={onMutePress}>
                 {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
-              </Pressable>
+              </CustomPressable>
               <XStack gap="$2" marginLeft="auto" alignItems="center">
                 <Button
                   backgroundColor="$color"
@@ -250,9 +259,9 @@ const ControlsOverlay = memo(
                   fontSize={13}>
                   +85 s
                 </Button>
-                <Pressable onPress={onFullscreenPress}>
+                <CustomPressable onPress={onFullscreenPress}>
                   {isFullscreen ? <Minimize color="white" size={20} /> : <Maximize color="white" size={20} />}
-                </Pressable>
+                </CustomPressable>
               </XStack>
             </XStack>
             <XStack width="100%" alignItems="center" gap="$4" justifyContent="space-between">

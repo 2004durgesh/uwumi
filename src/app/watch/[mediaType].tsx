@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Dimensions, StyleProp, ViewStyle, StyleSheet, TouchableOpacity } from 'react-native';
+import { Dimensions, StyleProp, ViewStyle, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { YStack, Spinner, Text, View, styled, XStack } from 'tamagui';
@@ -12,7 +12,7 @@ import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
@@ -270,14 +270,15 @@ const Watch = () => {
     setShowControls((isShowControls) => !isShowControls);
   }, []);
 
-  const singleTapGesture = useMemo(
-    () =>
-      Gesture.Tap().onEnd(() => {
-        runOnJS(toggleControls)();
-        console.log('single tap');
-      }),
-    [],
-  );
+  // const singleTapGesture = useMemo(
+  //   () =>
+  //     Gesture.Tap().onEnd(() => {
+  //       'worklet';
+  //       runOnJS(toggleControls)();
+  //       console.log('Toggled controls');
+  //     }),
+  //   [toggleControls],
+  // );
 
   const videoStyle = useMemo<StyleProp<ViewStyle>>(
     () => ({
@@ -301,7 +302,7 @@ const Watch = () => {
     [data?.sources],
   );
 
-  const gestures = Gesture.Exclusive(doubleTapGesture, singleTapGesture, brightnessVolumeGesture);
+  const gestures = Gesture.Exclusive(doubleTapGesture, brightnessVolumeGesture);
 
   useEffect(() => {
     if (data?.subtitles && data?.subtitles?.length > 0) {
@@ -324,78 +325,92 @@ const Watch = () => {
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
           <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>
-            <View
-              style={{ height: playerDimensions.height, position: 'relative' }}
-              // style={{height:"100%", position: 'relative' }} //keep for future ref
-            >
-              <Video
-                ref={videoRef}
-                source={{
-                  uri: source,
-                  textTracks: subtitleTracks?.map((track, index) => ({
-                    title: track.lang || 'Untitled',
-                    language: track.lang?.toLowerCase() as ISO639_1,
-                    type: TextTrackType.VTT,
-                    uri: track.url || '',
-                    index,
-                  })),
-                  textTracksAllowChunklessPreparation: false,
-                }}
-                style={videoStyle}
-                resizeMode={'contain'}
-                poster={{
-                  source: { uri: poster },
-                  resizeMode: 'contain',
-                }}
-                onProgress={handleProgress}
-                onPlaybackStateChanged={handlePlaybackStateChange}
-                onLayout={(e) => {
-                  setPlayerDimensions({
-                    width: e.nativeEvent.layout.width,
-                    height: e.nativeEvent.layout.height,
-                  });
-                }}
-                onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
-                onError={(error) => console.log('Video Error:', error)}
-                onLoad={(value) => {
-                  // console.log('Video loaded:', value);
-                  setIsVideoReady(true);
-                }}
-                // selectedVideoTrack={{
-                //   type: SelectedVideoTrackType.INDEX,
-                //   value: 0,
-                // }}
-                selectedTextTrack={{
-                  type: SelectedTrackType.INDEX,
-                  value: (selectedSubtitleIndex ?? 0) + 1,
-                }}
-                // onTextTracks={(tracks) => {
-                //   console.log('Text Tracks:', tracks);
-                // }}
-                subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
-              />
-
-              {isVideoReady && (
-                <ControlsOverlay
-                  showControls={showControls}
-                  routeInfo={{ mediaType, provider, id }}
-                  isPlaying={playbackState.isPlaying}
-                  isMuted={isMuted}
-                  isFullscreen={isFullscreen}
-                  currentTime={currentTime}
-                  seekableDuration={seekableDuration}
-                  title={title}
-                  isBuffering={isBuffering}
-                  subtitleTracks={subtitleTracks}
-                  selectedSubtitleIndex={selectedSubtitleIndex}
-                  setSelectedSubtitleIndex={setSelectedSubtitleIndex}
-                  onPlayPress={handlePlayPress}
-                  onMutePress={handleMutePress}
-                  onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
-                  onSeek={handleSeek}
+            <Pressable
+              onPressIn={(e) => {
+                if (isDoubleTap) {
+                  e.preventDefault();
+                  return;
+                }
+              }}
+              onPress={(e) => {
+                if (isDoubleTap) {
+                  e.preventDefault();
+                  return;
+                }
+                toggleControls();
+              }}>
+              <View
+                style={{ height: playerDimensions.height, position: 'relative' }}
+                // style={{height:"100%", position: 'relative' }} //keep for future ref
+              >
+                <Video
+                  ref={videoRef}
+                  source={{
+                    uri: source,
+                    textTracks: subtitleTracks?.map((track, index) => ({
+                      title: track.lang || 'Untitled',
+                      language: track.lang?.toLowerCase() as ISO639_1,
+                      type: TextTrackType.VTT,
+                      uri: track.url || '',
+                      index,
+                    })),
+                    textTracksAllowChunklessPreparation: false,
+                  }}
+                  style={videoStyle}
+                  resizeMode={'contain'}
+                  poster={{
+                    source: { uri: poster },
+                    resizeMode: 'contain',
+                  }}
+                  onProgress={handleProgress}
+                  onPlaybackStateChanged={handlePlaybackStateChange}
+                  onLayout={(e) => {
+                    setPlayerDimensions({
+                      width: e.nativeEvent.layout.width,
+                      height: e.nativeEvent.layout.height,
+                    });
+                  }}
+                  onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
+                  onError={(error) => console.log('Video Error:', error)}
+                  onLoad={(value) => {
+                    // console.log('Video loaded:', value);
+                    setIsVideoReady(true);
+                  }}
+                  // selectedVideoTrack={{
+                  //   type: SelectedVideoTrackType.INDEX,
+                  //   value: 0,
+                  // }}
+                  selectedTextTrack={{
+                    type: SelectedTrackType.INDEX,
+                    value: (selectedSubtitleIndex ?? 0) + 1,
+                  }}
+                  // onTextTracks={(tracks) => {
+                  //   console.log('Text Tracks:', tracks);
+                  // }}
+                  subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
                 />
-              )}
-            </View>
+                {isVideoReady && (
+                  <ControlsOverlay
+                    showControls={showControls}
+                    routeInfo={{ mediaType, provider, id }}
+                    isPlaying={playbackState.isPlaying}
+                    isMuted={isMuted}
+                    isFullscreen={isFullscreen}
+                    currentTime={currentTime}
+                    seekableDuration={seekableDuration}
+                    title={title}
+                    isBuffering={isBuffering}
+                    subtitleTracks={subtitleTracks}
+                    selectedSubtitleIndex={selectedSubtitleIndex}
+                    setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                    onPlayPress={handlePlayPress}
+                    onMutePress={handleMutePress}
+                    onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+                    onSeek={handleSeek}
+                  />
+                )}
+              </View>
+            </Pressable>
             <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
               <Animated.View style={[backwardAnimatedRipple]}>
                 <SeekText>-{doubleTapValue.backward}s</SeekText>

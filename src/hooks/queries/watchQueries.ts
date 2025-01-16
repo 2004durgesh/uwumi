@@ -17,7 +17,6 @@ export function useWatchAnimeEpisodes({
       const { data } = await axios.get(
         `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/watch/${episodeId}?provider=${provider}`,
       );
-      console.log(data);
       return data;
     },
   });
