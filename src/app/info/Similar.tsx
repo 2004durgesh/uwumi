@@ -6,7 +6,8 @@ import CardList from '@/components/CardList';
 const Similar = ({ data }: { data: IAnimeInfo }) => {
   return (
     <View height="100%">
-      <CardList data={data?.recommendations} />
+      {/* @ts-ignore */}
+      <CardList staticData={data?.recommendations} />
     </View>
   );
 };

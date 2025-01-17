@@ -5,18 +5,20 @@ import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamag
 import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { AnimatedCustomImage } from './CustomImage';
-import { IAnimeResult, IMovieResult, ISearch, MediaFeedType, MediaType } from '@/constants/types';
+import { IAnimeResult, IMovieResult, ISearch, MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
 import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
-import { useMediaFeed, useSearch } from '@/hooks/queries';
+import { useAnimeAndMangaSearch, useMediaFeed } from '@/hooks/queries';
 import { useSearchStore } from '@/hooks/stores/useSearchStore';
 
 export interface CardListProps {
+  staticData?: (IAnimeResult | IMovieResult)[] | undefined;
   type: MediaFeedType;
   mediaType: MediaType;
+  metaProvider: MetaProvider;
 }
 
 interface CardProps {
@@ -93,13 +95,24 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index }) => {
   );
 });
 
-const CardList: React.FC<CardListProps> = ({ type, mediaType }) => {
+const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaProvider }) => {
   const debouncedQuery = useSearchStore((state) => state.debouncedQuery);
 
-  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage } =
-    type === 'search'
-      ? useSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery, 'anilist', type)
-      : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, 'anilist', type);
+  const {
+    data: dynamicData,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = staticData
+    ? { data: undefined, isLoading: false, error: null, refetch: () => {}, fetchNextPage: () => {}, hasNextPage: false }
+    : type === 'search'
+      ? useAnimeAndMangaSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery, type)
+      : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, type);
+
+  const data = staticData || dynamicData;
+  console.log(data, 'data cardlist');
   const isInfiniteData = (
     data: InfiniteData<ISearch<IAnimeResult | IMovieResult>> | (IAnimeResult | IMovieResult)[] | undefined,
   ): data is InfiniteData<ISearch<IAnimeResult | IMovieResult>> => {

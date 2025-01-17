@@ -1,10 +1,11 @@
-import { ISearch, MediaFeedType, MediaType } from '@/constants/types';
+import { ISearch, MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
+import { getFetchUrl } from '@/constants/utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 export function useMediaFeed<T>(
   mediaType: MediaType,
-  provider: string,
+  metaProvider: MetaProvider,
   type: MediaFeedType,
   options?: {
     params?: Record<string, unknown>;
@@ -12,9 +13,10 @@ export function useMediaFeed<T>(
   },
 ) {
   return useInfiniteQuery({
-    queryKey: [mediaType, type, provider],
+    queryKey: [mediaType, type, metaProvider],
     queryFn: async ({ pageParam = 1 }) => {
-      const { data } = await axios.get<ISearch<T>>(`${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/${provider}/${type}`, {
+      console.log(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${type}?page=${pageParam}`);
+      const { data } = await axios.get<ISearch<T>>(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${type}`, {
         params: {
           page: pageParam,
           ...options?.params,
@@ -38,12 +40,13 @@ export function useMediaFeed<T>(
   });
 }
 
-export function useSearch<T>(mediaType: MediaType, query: string, provider: string, type: MediaFeedType) {
+export function useAnimeAndMangaSearch<T>(mediaType: MediaType, query: string, type: MediaFeedType) {
   return useInfiniteQuery({
-    queryKey: [mediaType, type, provider, query],
+    queryKey: [mediaType, type, query],
     queryFn: async ({ pageParam = 1 }) => {
-      const url = `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/${provider}/advanced-search`;
-      const params = { page: pageParam.toString(), query: query };
+      const url = `${getFetchUrl().apiUrl}/meta/anilist/advanced-search`;
+      const params = { page: pageParam.toString(), query: query, type: mediaType.toUpperCase() };
+      console.log(url, params);
 
       const { data } = await axios.get<ISearch<T>>(url, {
         params,

@@ -70,6 +70,7 @@ export enum MediaType {
 }
 
 export type MediaFeedType = 'trending' | 'popular' | 'search';
+export type MetaProvider = 'anilist' | 'anilist-manga' | 'tmdb';
 
 enum SubOrSub {
   SUB = 'sub',

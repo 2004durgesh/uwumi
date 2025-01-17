@@ -1,5 +1,6 @@
 import { DEFAULT_ANIME_PROVIDER } from '@/constants/provider';
 import { Episode, IAnimeInfo } from '@/constants/types';
+import { getFetchUrl } from '@/constants/utils';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -7,7 +8,7 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
   return useQuery<IAnimeInfo>({
     queryKey: ['anime', 'info', id, provider],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/data/${id}`, {
+      const { data } = await axios.get(`${getFetchUrl().apiUrl}/meta/anilist/data/${id}`, {
         params: { provider },
         headers: {
           Accept: 'application/json',
@@ -15,6 +16,7 @@ export function useAnimeInfo({ id, provider }: { id: string; provider: string })
         },
         timeout: 5000,
       });
+      console.log(data);
       return data;
     },
   });
@@ -24,7 +26,7 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_ANIME_PROVIDER }: { id
   return useQuery<Episode>({
     queryKey: ['anime', 'episodes', id, provider],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.EXPO_PUBLIC_EPISODE_API_URL_DEV}/${id}?provider=${provider}`);
+      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/${id}?provider=${provider}`);
       return data;
     },
   });

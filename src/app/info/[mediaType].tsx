@@ -29,7 +29,7 @@ const Info = () => {
 
   return (
     <>
-      <ThemedView useSafeArea={false} useStatusBar>
+      <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>
         <ZStack height={300}>
           <ImageBackground source={{ uri: data?.cover }} style={{ width: '100%', height: 300 }} />
           <BlurView

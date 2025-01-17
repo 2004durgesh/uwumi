@@ -321,7 +321,7 @@ const Watch = () => {
     );
   }
   return (
-    <ThemedView useSafeArea={false} useStatusBar>
+    <ThemedView useSafeArea={false} useStatusBar={isFullscreen}>
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
           <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>

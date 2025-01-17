@@ -47,7 +47,9 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
       ))}
     </Tabs.List>
   ));
-
+  const metaProvider =
+    mediaType === MediaType.ANIME ? 'anilist' : mediaType === MediaType.MANGA ? 'anilist-manga' : 'tmdb';
+    console.log(metaProvider,mediaType);
   return (
     <YStack gap="$2">
       <SearchBar />
@@ -62,7 +64,7 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
         {TABS.map(({ id, type }) => (
           <Tabs.Content value={id} key={id}>
             <View height="100%">
-              <CardList type={type} mediaType={mediaType} />
+              <CardList type={type} mediaType={mediaType} metaProvider={metaProvider} />
             </View>
           </Tabs.Content>
         ))}
