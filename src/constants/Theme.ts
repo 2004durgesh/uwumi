@@ -1,4 +1,3 @@
-import { defaultSubThemes, defaultComponentThemes } from '@tamagui/themes/v3-themes';
 import { createThemeBuilder } from '@tamagui/theme-builder';
 // palettes array should be in form [accentBackground,background, color, color2, color3, color4, color5, color6]
 const palettes = {

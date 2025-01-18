@@ -11,7 +11,7 @@ import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
-import { useAnimeAndMangaSearch, useMediaFeed } from '@/hooks/queries';
+import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch } from '@/hooks/queries';
 import { useSearchStore } from '@/hooks/stores/useSearchStore';
 
 export interface CardListProps {
@@ -24,6 +24,8 @@ export interface CardListProps {
 interface CardProps {
   item: IAnimeResult | IMovieResult;
   index: number;
+  mediaType: MediaType;
+  metaProvider: MetaProvider;
 }
 
 const StyledCard = styled(Card, {
@@ -41,57 +43,63 @@ const StyledCard = styled(Card, {
 
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
-const CustomCard: React.FC<CardProps> = memo(({ item, index }) => {
+const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProvider }) => {
   return (
-    <Link
-      asChild
-      href={{
-        pathname: '/info/[mediaType]',
-        params: {
-          mediaType: 'anime',
-          provider: 'zoro',
-          id: item.id,
-          image: item.image,
-        },
-      }}>
-      <AnimatedStyledCard entering={FadeInDown.delay(50 * index)} flex={1} elevate animation="bouncy">
-        <Card.Footer paddingVertical="$2" paddingHorizontal="$2">
-          <Text
-            numberOfLines={2}
-            ellipsizeMode="tail"
-            fontSize="$3"
-            fontWeight="500"
-            margin={0}
-            width={100}
-            color="#ffffff">
-            {typeof item.title === 'string' ? item.title : item.title.romaji}
-          </Text>
-        </Card.Footer>
-        <Card.Background>
-          <ZStack width="100%" height="100%" alignItems="center">
-            <AnimatedCustomImage
-              source={{
-                uri: item.image,
-              }}
-              style={{ borderRadius: 10 }}
-              width={'100%'}
-              height={190}
-              contentFit="cover"
-              sharedTransitionTag="shared-image"
-            />
-            <LinearGradient
-              width={'100%'}
-              height="100%"
-              colors={['rgba(0,0,0,0.8)', 'transparent']}
-              start={[0, 1]}
-              end={[0, 0.3]}
-              borderRadius={10}
-              opacity={0.9}
-            />
-          </ZStack>
-        </Card.Background>
-      </AnimatedStyledCard>
-    </Link>
+    item.image &&
+    !item.image.includes('/originalundefined') &&
+    !item.image.includes('/originalnull') && (
+      <Link
+        asChild
+        href={{
+          pathname: '/info/[mediaType]',
+          params: {
+            mediaType: mediaType,
+            metaProvider: metaProvider,
+            type: item?.type,
+            provider: 'zoro',
+            id: item.id,
+            image: item.image,
+          },
+        }}>
+        <AnimatedStyledCard entering={FadeInDown.delay(50 * index)} flex={1} elevate animation="bouncy">
+          <Card.Footer paddingVertical="$2" paddingHorizontal="$2">
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              fontSize="$3"
+              fontWeight="500"
+              margin={0}
+              width={100}
+              color="#ffffff">
+              {typeof item.title === 'string' ? item.title : item.title.romaji}
+            </Text>
+          </Card.Footer>
+          <Card.Background>
+            <ZStack width="100%" height="100%" alignItems="center">
+              <AnimatedCustomImage
+                source={{
+                  uri: item.image,
+                }}
+                style={{ borderRadius: 10 }}
+                width={'100%'}
+                height={190}
+                contentFit="cover"
+                sharedTransitionTag="shared-image"
+              />
+              <LinearGradient
+                width={'100%'}
+                height="100%"
+                colors={['rgba(0,0,0,0.8)', 'transparent']}
+                start={[0, 1]}
+                end={[0, 0.3]}
+                borderRadius={10}
+                opacity={0.9}
+              />
+            </ZStack>
+          </Card.Background>
+        </AnimatedStyledCard>
+      </Link>
+    )
   );
 });
 
@@ -107,12 +115,14 @@ const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaPr
     hasNextPage,
   } = staticData
     ? { data: undefined, isLoading: false, error: null, refetch: () => {}, fetchNextPage: () => {}, hasNextPage: false }
-    : type === 'search'
-      ? useAnimeAndMangaSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery, type)
-      : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, type);
+    : type === 'search' && mediaType === MediaType.MOVIE
+      ? useMovieSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
+      : type === 'search'
+        ? useAnimeAndMangaSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
+        : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, type);
 
   const data = staticData || dynamicData;
-  console.log(data, 'data cardlist');
+  // console.log(data, 'data cardlist');
   const isInfiniteData = (
     data: InfiniteData<ISearch<IAnimeResult | IMovieResult>> | (IAnimeResult | IMovieResult)[] | undefined,
   ): data is InfiniteData<ISearch<IAnimeResult | IMovieResult>> => {
@@ -149,9 +159,9 @@ const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaPr
     <YStack flex={1}>
       <FlashList
         data={getItems || []}
-        renderItem={({ item, index }: CardProps) => (
+        renderItem={({ item, index }: { item: IAnimeResult | IMovieResult; index: number }) => (
           <View flex={1} paddingVertical={4} paddingHorizontal={4}>
-            <CustomCard item={item} index={index} />
+            <CustomCard item={item} index={index} mediaType={mediaType} metaProvider={metaProvider} />
           </View>
         )}
         ListEmptyComponent={<NoResults />}

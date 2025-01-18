@@ -1,14 +1,31 @@
 import { DEFAULT_ANIME_PROVIDER } from '@/constants/provider';
-import { Episode, IAnimeInfo } from '@/constants/types';
+import { Episode, IAnimeInfo, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { getFetchUrl } from '@/constants/utils';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-export function useAnimeInfo({ id, provider }: { id: string; provider: string }) {
+export function useInfo({
+  mediaType,
+  metaProvider,
+  type,
+  id,
+  provider,
+}: {
+  mediaType: MediaType;
+  metaProvider: MetaProvider;
+  type: MediaFormat | TvType;
+  id: string;
+  provider: string;
+}) {
   return useQuery<IAnimeInfo>({
-    queryKey: ['anime', 'info', id, provider],
+    queryKey: [mediaType, 'info', id, metaProvider, type, provider],
     queryFn: async () => {
-      const { data } = await axios.get(`${getFetchUrl().apiUrl}/meta/anilist/data/${id}`, {
+      const url =
+        metaProvider === 'tmdb'
+          ? `${getFetchUrl().apiUrl}/meta/${metaProvider}/info/${id}?type=${type.split(' ')[0]}`
+          : `${getFetchUrl().apiUrl}/meta/${metaProvider}/data/${id}`;
+      console.log(url);
+      const { data } = await axios.get(url, {
         params: { provider },
         headers: {
           Accept: 'application/json',

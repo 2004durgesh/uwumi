@@ -1,6 +1,6 @@
 import { MotiView } from 'moti';
 import { LinearGradient } from 'tamagui/linear-gradient';
-import { Text, Stack, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
+import { Text, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
 import { Pressable } from 'react-native';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
@@ -10,7 +10,6 @@ import { useThemeStore } from '@/hooks/stores';
 
 type DetailsProps = {
   data?: IAnimeInfo;
-  previewLines?: number;
   lineHeight?: number;
 };
 
@@ -34,7 +33,7 @@ const StatisticItem = ({ label, value }: { label: string; value: string }) => (
   </StatisticsXStack>
 );
 
-const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 20 }) => {
+const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
   const themeName = useThemeStore((state: any) => state.themeName);
@@ -107,7 +106,7 @@ const Details: React.FC<DetailsProps> = ({ data, previewLines = 3, lineHeight = 
                     <YStack flex={1} height="100%" width="100%" gap="$2">
                       <StatisticItem label="Type" value={data?.type || ''} />
                       <StatisticItem label="Country" value={data?.countryOfOrigin || ''} />
-                      <StatisticItem label="Season" value={`${data?.season}, ${data?.releaseDate}`} />
+                      <StatisticItem label="Season" value={`${data?.season || ''} ${data?.releaseDate}`} />
                       <StatisticItem label="Duration" value={`${data?.duration}m`} />
                       <YStack height={200} position="relative">
                         <ZStack height={200}>

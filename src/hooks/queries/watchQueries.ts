@@ -1,6 +1,7 @@
 import { DEFAULT_ANIME_PROVIDER } from '@/constants/provider';
-import { IAnimeInfo, ISource } from '@/constants/types';
+import { ISource } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
+import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
 
 export function useWatchAnimeEpisodes({
@@ -13,10 +14,8 @@ export function useWatchAnimeEpisodes({
   return useQuery<ISource>({
     queryKey: ['watch', episodeId, provider],
     queryFn: async () => {
-      console.log(`${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/watch/${episodeId}?provider=${provider}`);
-      const { data } = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL_DEV}/meta/anilist/watch/${episodeId}?provider=${provider}`,
-      );
+      console.log(`${getFetchUrl().apiUrl}/meta/anilist/watch/${episodeId}?provider=${provider}`);
+      const { data } = await axios.get(`${getFetchUrl().apiUrl}/meta/anilist/watch/${episodeId}?provider=${provider}`);
       return data;
     },
   });

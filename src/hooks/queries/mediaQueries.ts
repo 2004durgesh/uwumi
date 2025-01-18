@@ -40,12 +40,40 @@ export function useMediaFeed<T>(
   });
 }
 
-export function useAnimeAndMangaSearch<T>(mediaType: MediaType, query: string, type: MediaFeedType) {
+export function useAnimeAndMangaSearch<T>(mediaType: MediaType, query: string) {
   return useInfiniteQuery({
-    queryKey: [mediaType, type, query],
+    queryKey: [mediaType, query],
     queryFn: async ({ pageParam = 1 }) => {
       const url = `${getFetchUrl().apiUrl}/meta/anilist/advanced-search`;
       const params = { page: pageParam.toString(), query: query, type: mediaType.toUpperCase() };
+      console.log(url, params);
+
+      const { data } = await axios.get<ISearch<T>>(url, {
+        params,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        timeout: 5000,
+      });
+      return data;
+    },
+    enabled: query.length > 0,
+    getNextPageParam: (lastPage: ISearch<T>, pages) => {
+      if (lastPage.hasNextPage) {
+        return pages.length + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+  });
+}
+export function useMovieSearch<T>(mediaType: MediaType, query: string) {
+  return useInfiniteQuery({
+    queryKey: [mediaType, query],
+    queryFn: async ({ pageParam = 1 }) => {
+      const url = `${getFetchUrl().apiUrl}/meta/tmdb/${query}`;
+      const params = { page: pageParam.toString() };
       console.log(url, params);
 
       const { data } = await axios.get<ISearch<T>>(url, {

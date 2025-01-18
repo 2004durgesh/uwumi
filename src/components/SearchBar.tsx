@@ -1,6 +1,6 @@
 import { useSearchStore, useTabsStore } from '@/hooks/stores/useSearchStore';
 import { X } from '@tamagui/lucide-icons';
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { TextInput } from 'react-native';
 import { View, XStack } from 'tamagui';
 

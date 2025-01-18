@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import Animated, { withRepeat, withTiming, useAnimatedStyle, useSharedValue, withDelay } from 'react-native-reanimated';
 import { XStack, useTheme } from 'tamagui';
 

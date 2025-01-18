@@ -1,5 +1,5 @@
 import { type ViewProps } from 'react-native';
-import { View, Theme, useTheme } from 'tamagui';
+import { View, Theme } from 'tamagui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore, useAccentStore } from '@/hooks/stores';
 import { StatusBar, StatusBarProps } from 'expo-status-bar';

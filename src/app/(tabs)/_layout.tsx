@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Image, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { Image, StyleSheet } from 'react-native';
 import { BookImage, Settings, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { Stack, YStack } from 'tamagui';

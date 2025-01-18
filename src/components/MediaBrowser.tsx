@@ -49,7 +49,7 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
   ));
   const metaProvider =
     mediaType === MediaType.ANIME ? 'anilist' : mediaType === MediaType.MANGA ? 'anilist-manga' : 'tmdb';
-    console.log(metaProvider,mediaType);
+  console.log(metaProvider, mediaType);
   return (
     <YStack gap="$2">
       <SearchBar />

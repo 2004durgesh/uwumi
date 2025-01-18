@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, YStack } from 'tamagui';
+import { Text, YStack } from 'tamagui';
 
 const KAOMOJI = [
   'Σ(ಠ_ಠ)',

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Dimensions } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
 import Animated, {
   measure,
   useAnimatedRef,

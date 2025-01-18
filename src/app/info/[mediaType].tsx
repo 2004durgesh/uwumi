@@ -1,30 +1,31 @@
-import { View, Text, ZStack, XStack, YStack } from 'tamagui';
-import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { useAnimeInfo } from '@/hooks/queries';
-import { ImageBackground, StyleSheet } from 'react-native';
-import { useThemeStore } from '@/hooks/stores';
 import AnimatedCountdown from '@/components/AnimatedCountdown';
-import { ArrowLeft, Captions, CaptionsOff, Clock, Heart, Star } from '@tamagui/lucide-icons';
+import { AnimatedCustomImage } from '@/components/CustomImage';
+import IconTitle from '@/components/IconTitle';
+import { ThemedView } from '@/components/ThemedView';
+import { useInfo } from '@/hooks/queries';
+import { useThemeStore } from '@/hooks/stores';
+import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
+import { BlurView } from 'expo-blur';
+import { useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { ImageBackground, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from './HorizontalTabs';
-import { BlurView } from 'expo-blur';
-import IconTitle from '@/components/IconTitle';
-import CustomImage, { AnimatedCustomImage } from '@/components/CustomImage';
-import Animated from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 
 const Info = () => {
-  const { mediaType, provider, id, image } = useLocalSearchParams<{
-    mediaType: string;
+  const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
+    mediaType: MediaType;
+    metaProvider: MetaProvider;
+    type: MediaFormat | TvType;
     provider: string;
     id: string;
     image: string;
   }>();
   const insets = useSafeAreaInsets();
-  const { data, isLoading } = useAnimeInfo({ id, provider });
-  // console.log(data);
+  const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
   const themeName = useThemeStore((state: any) => state.themeName);
 
   return (

@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, ScrollView, Spinner } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
 import {
   Play,
   Pause,
