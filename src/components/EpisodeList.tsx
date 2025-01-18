@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
-import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
+import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
 import NoResults from './NoResults';

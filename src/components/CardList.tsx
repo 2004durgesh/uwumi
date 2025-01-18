@@ -12,7 +12,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
 import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch } from '@/hooks/queries';
-import { useSearchStore } from '@/hooks/stores/useSearchStore';
+import { useSearchStore } from '@/hooks/stores';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;

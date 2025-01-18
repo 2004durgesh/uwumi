@@ -1,4 +1,4 @@
-import { useSearchStore, useTabsStore } from '@/hooks/stores/useSearchStore';
+import { useSearchStore, useTabsStore } from '@/hooks/stores';
 import { X } from '@tamagui/lucide-icons';
 import React, { useCallback } from 'react';
 import { TextInput } from 'react-native';

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner, ViewStyle } from 'tamagui';
 import {
   Play,
   Pause,
@@ -15,10 +15,15 @@ import {
   SkipBack,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
-import { Pressable } from 'react-native';
+import { Pressable, PressableProps } from 'react-native';
 import { ISubtitle } from '@/constants/types';
 import { useRouter } from 'expo-router';
-import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores/useEpisodesStore';
+import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
+
+interface CustomPressableProps extends PressableProps {
+  onPress: () => void;
+  children?: React.ReactNode;
+}
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -61,7 +66,8 @@ export const formatTime = (seconds: number): string => {
   return `${minutes}:${s.toString().padStart(2, '0')}`;
 };
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
-const CustomPressable: FC<{ onPress: () => void; children?: React.ReactNode }> = ({ onPress, children }) => {
+
+const CustomPressable: FC<CustomPressableProps> = ({ onPress, children, style, ...props }) => {
   return (
     <Pressable
       onPress={(e) => {
@@ -69,7 +75,14 @@ const CustomPressable: FC<{ onPress: () => void; children?: React.ReactNode }> =
         e.preventDefault();
         e.stopPropagation();
       }}
-      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+      android_ripple={{
+        color: 'rgba(255, 255, 255, 0.7)',
+        borderless: true,
+        foreground: true,
+      }}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      style={[{ padding: 10 }, style as any]}
+      {...props}>
       {children}
     </Pressable>
   );
@@ -130,9 +143,13 @@ const ControlsOverlay = memo(
             </Text>
             <XStack gap="$4">
               {(selectedSubtitleIndex ?? -1) > -1 ? (
-                <Captions color="white" size={20} onPress={() => setSelectedSubtitleIndex(-1)} />
+                <CustomPressable onPress={() => setSelectedSubtitleIndex(-1)}>
+                  <Captions color="white" size={20} />
+                </CustomPressable>
               ) : (
-                <CaptionsOff color="white" size={20} onPress={() => setSelectedSubtitleIndex(0)} />
+                <CustomPressable onPress={() => setSelectedSubtitleIndex(0)}>
+                  <CaptionsOff color="white" size={20} />
+                </CustomPressable>
               )}
               <CustomPressable
                 onPress={() => {
@@ -157,26 +174,20 @@ const ControlsOverlay = memo(
                   enterStyle={{ opacity: 0 }}
                   exitStyle={{ opacity: 0 }}
                 />
-                <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width="95%">
+                <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <YStack gap="$2">
-                      <Button
-                        backgroundColor={selectedSubtitleIndex === undefined ? '$color' : '#0e0f15'}
-                        onPress={() => {
-                          setSelectedSubtitleIndex(undefined);
-                        }}>
-                        Off
-                      </Button>
+                    <YStack gap="$4" alignSelf="flex-start" padding="$4">
                       {subtitleTracks?.map((track, index) => (
-                        <Button
+                        <CustomPressable
                           key={index}
-                          backgroundColor={'#0e0f15'}
-                          color={selectedSubtitleIndex === index ? '$color' : '$color1'}
+                          style={{
+                            backgroundColor: '#0e0f15',
+                          }}
                           onPress={() => {
                             setSelectedSubtitleIndex(index);
                           }}>
-                          {track.lang}
-                        </Button>
+                          <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
+                        </CustomPressable>
                       ))}
                     </YStack>
                   </Sheet.ScrollView>
@@ -185,7 +196,15 @@ const ControlsOverlay = memo(
             </XStack>
           </XStack>
           {/* Center play/pause button */}
-          <XStack alignItems="center" justifyContent="center" gap="$8">
+          <XStack
+            alignItems="center"
+            justifyContent="center"
+            gap="$8"
+            // backgroundColor= 'red'
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)">
             <CustomPressable
               onPress={() => {
                 if (prevEpisodeIndex >= 0) {

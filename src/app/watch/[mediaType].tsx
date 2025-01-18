@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Dimensions, StyleProp, ViewStyle, StyleSheet, Pressable } from 'react-native';
 import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { YStack, Spinner, Text, View, styled } from 'tamagui';
+import { YStack, Spinner, Text, View, styled, Button } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
-import { ISubtitle } from '@/constants/types';
+import { ISubtitle, MediaType } from '@/constants/types';
 import { useWatchAnimeEpisodes } from '@/hooks/queries';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
@@ -16,8 +16,9 @@ import Animated, { runOnJS } from 'react-native-reanimated';
 import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
-import { useEpisodesIdStore } from '@/hooks/stores/useEpisodesStore';
+import { useEpisodesIdStore, useWatchProgressStore } from '@/hooks/stores';
 import EpisodeList from '@/components/EpisodeList';
+import { get } from 'lodash';
 
 export interface SubtitleTrack {
   index: number;
@@ -46,7 +47,7 @@ const OverlayedView = styled(Animated.View, {
   top: 0,
   // width: 200,
   // height: 200,
-  width: '50%',
+  width: '35%',
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
@@ -60,7 +61,7 @@ const OverlayedView = styled(Animated.View, {
 
 const Watch = () => {
   const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
-    mediaType: string;
+    mediaType: MediaType;
     provider: string;
     id: string;
     episodeId: string;
@@ -75,15 +76,26 @@ const Watch = () => {
     provider,
   });
   const { top, right, bottom, left } = useSafeAreaInsets();
+  const { setProgress, getProgress } = useWatchProgressStore();
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   useEffect(() => {
     if (episodeId) {
       setEpisodeIds(episodeId);
+      console.log(getProgress(episodeId), 'saved progress');
     }
     return () => {
       setEpisodeIds('');
     };
   }, [episodeId]);
+  useEffect(() => {
+    if (episodeId && videoRef.current) {
+      const savedProgress = getProgress(episodeId);
+      console.log('Loading saved progress:', savedProgress);
+      if (savedProgress && savedProgress.currentTime > 0) {
+        videoRef.current.seek(savedProgress.currentTime);
+      }
+    }
+  }, [episodeId, getProgress]);
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -152,6 +164,15 @@ const Watch = () => {
   const handleProgress = ({ currentTime, seekableDuration }: { currentTime: number; seekableDuration: number }) => {
     setCurrentTime(currentTime);
     setSeekableDuration(seekableDuration);
+    if (episodeId && seekableDuration > 0 && Math.floor(currentTime) % 5 === 0) {
+      const progress = {
+        currentTime: currentTime,
+        duration: seekableDuration,
+        progress: (currentTime / seekableDuration) * 100,
+      };
+      console.log('Saving progress:', progress);
+      setProgress(episodeId, progress);
+    }
   };
 
   const handlePlaybackStateChange = useCallback((state: PlaybackState) => {
@@ -198,7 +219,7 @@ const Watch = () => {
   const updateBrightness = useCallback(async (value: number) => {
     await Brightness.setBrightnessAsync(value);
     setBrightness(value);
-    console.log('bright:', value);
+    console.log('bright:', value * 100);
   }, []);
 
   useEffect(() => {
@@ -222,6 +243,7 @@ const Watch = () => {
     try {
       await VolumeManager.setVolume(value, { showUI: false });
       setVolume(value);
+      console.log('volume:', value * 100);
     } catch (error) {
       console.error('Failed to update volume:', error);
     }
@@ -375,6 +397,7 @@ const Watch = () => {
                   onLoad={(value) => {
                     // console.log('Video loaded:', value);
                     setIsVideoReady(true);
+                    videoRef?.current?.seek(getProgress(episodeId)?.currentTime || 0);
                   }}
                   // selectedVideoTrack={{
                   //   type: SelectedVideoTrackType.INDEX,
@@ -425,9 +448,17 @@ const Watch = () => {
         </GestureDetector>
         <YStack flex={1} gap="$2">
           {description && (
-            <Text textAlign="justify" padding="$2">
-              {description}
-            </Text>
+            <>
+              <Text textAlign="justify" padding="$2">
+                {description}
+              </Text>
+              {/* <Button
+                onPress={() => {
+                  videoRef?.current?.save();
+                }}>
+                Watch
+              </Button> */}
+            </>
           )}
           <View flex={1}>
             <EpisodeList mediaType={mediaType} provider={provider} id={id} swipeable={false} />
@@ -440,38 +471,38 @@ const Watch = () => {
 
 export default Watch;
 
-const styles = StyleSheet.create({
-  centerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
-  },
-  forwardIndicator: {
-    position: 'absolute',
-    right: '25%',
-    top: '50%',
-    transform: [{ translateY: -25 }], // Center the element by offsetting half its height
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 15,
-    borderRadius: 40,
-  },
-  backwardIndicator: {
-    position: 'absolute',
-    left: '25%',
-    top: '50%',
-    transform: [{ translateY: -25 }], // Center the element by offsetting half its height
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 15,
-    borderRadius: 40,
-  },
-  seekText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+// const styles = StyleSheet.create({
+//   centerOverlay: {
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     pointerEvents: 'none',
+//   },
+//   forwardIndicator: {
+//     position: 'absolute',
+//     right: '25%',
+//     top: '50%',
+//     transform: [{ translateY: -25 }], // Center the element by offsetting half its height
+//     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+//     padding: 15,
+//     borderRadius: 40,
+//   },
+//   backwardIndicator: {
+//     position: 'absolute',
+//     left: '25%',
+//     top: '50%',
+//     transform: [{ translateY: -25 }], // Center the element by offsetting half its height
+//     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+//     padding: 15,
+//     borderRadius: 40,
+//   },
+//   seekText: {
+//     color: 'white',
+//     fontSize: 16,
+//     fontWeight: 'bold',
+//   },
+// });
