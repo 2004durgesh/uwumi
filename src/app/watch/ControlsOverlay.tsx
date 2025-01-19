@@ -13,12 +13,14 @@ import {
   CaptionsOff,
   SkipForward,
   SkipBack,
+  PictureInPicture2,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { Pressable, PressableProps } from 'react-native';
 import { ISubtitle } from '@/constants/types';
 import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
+import { formatTime } from '@/constants/utils';
 
 interface CustomPressableProps extends PressableProps {
   onPress: () => void;
@@ -46,25 +48,9 @@ interface ControlsOverlayProps {
   onMutePress: () => void;
   onFullscreenPress: () => void;
   onSeek: (time: number) => void;
+  onEnterPictureInPicture: () => void;
 }
 
-export const formatTime = (seconds: number): string => {
-  // Handle invalid inputs
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return '0:00';
-  }
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-
-  // Format with hours if present
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  }
-  // Ensure minutes are never negative
-  const minutes = Math.max(0, m);
-  return `${minutes}:${s.toString().padStart(2, '0')}`;
-};
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 
 const CustomPressable: FC<CustomPressableProps> = ({ onPress, children, style, ...props }) => {
@@ -106,6 +92,7 @@ const ControlsOverlay = memo(
     onMutePress,
     onFullscreenPress,
     onSeek,
+    onEnterPictureInPicture
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     // console.log("settings are being shown", openSettings);
@@ -132,7 +119,7 @@ const ControlsOverlay = memo(
         <AnimatedYStack
           flex={1}
           justifyContent="space-between"
-          paddingHorizontal={isFullscreen ? '$10' : '$2'}
+          // paddingHorizontal={isFullscreen ? '$10' : '$2'}
           paddingVertical={isFullscreen ? '$5' : '$2'}
           backgroundColor="rgba(0, 0, 0, 0.5)"
           entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
@@ -151,6 +138,12 @@ const ControlsOverlay = memo(
                   <CaptionsOff color="white" size={20} />
                 </CustomPressable>
               )}
+              <CustomPressable
+                onPress={() => {
+                  onEnterPictureInPicture();
+                }}>
+                <PictureInPicture2 color="white" size={20} />
+              </CustomPressable>
               <CustomPressable
                 onPress={() => {
                   setOpenSettings(!openSettings);
@@ -198,7 +191,6 @@ const ControlsOverlay = memo(
           {/* Center play/pause button */}
           <XStack
             alignItems="center"
-            justifyContent="center"
             gap="$8"
             // backgroundColor= 'red'
             position="absolute"

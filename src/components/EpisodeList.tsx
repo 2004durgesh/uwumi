@@ -16,10 +16,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
-import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
+import { useEpisodesIdStore, useEpisodesStore, useWatchProgressStore } from '@/hooks/stores';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
 import NoResults from './NoResults';
+import { formatTime } from '@/constants/utils';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -44,6 +45,7 @@ const EpisodeList = ({
   const flashListRef = useRef<FlashList<Episode>>(null);
   const hasScrolledRef = useRef(false);
 
+  const { setProgress, getProgress } = useWatchProgressStore();
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
   const episodesList = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
@@ -160,22 +162,48 @@ const EpisodeList = ({
                 </Text>
               </View>
             </View>
-            <YStack padding={2} flex={1}>
-              <XStack alignItems="center" justifyContent="space-between" gap={2}>
-                <Text fontSize="$3" fontWeight="700" numberOfLines={2} flex={1}>
-                  {item.title}
-                </Text>
-                <XStack gap={2}>
-                  <Captions size={20} color="$color2" />
-                  {item?.isDub && <Mic size={20} color="$color2" />}
+            <YStack padding={2} flex={1} justifyContent="space-between">
+              <YStack>
+                <XStack alignItems="center" justifyContent="space-between" gap={2}>
+                  <Text fontSize="$3" fontWeight="700" numberOfLines={2} flex={1}>
+                    {item.title}
+                  </Text>
+                  <XStack gap={2}>
+                    <Captions size={20} color="$color2" />
+                    {item?.isDub && <Mic size={20} color="$color2" />}
+                  </XStack>
                 </XStack>
-              </XStack>
-              <Text fontSize="$2.5" color="$color2" fontWeight="500" numberOfLines={3}>
-                {item?.description}
-              </Text>
+                <Text fontSize="$2.5" color="$color2" fontWeight="500" numberOfLines={2}>
+                  {item?.description}
+                </Text>
+              </YStack>
 
               <XStack justifyContent="space-between" alignItems="center">
-                <View>{currentEpisodeId === item?.id ? <WavyAnimation /> : null}</View>
+                <View>
+                  {
+                    // Check if this is the currently playing episode
+                    currentEpisodeId === item?.id ? (
+                      // Show animated waves for current episode
+                      <WavyAnimation />
+                    ) : // Check if episode has progress and is less than 90% complete
+                    getProgress(item?.id) &&
+                      getProgress(item?.id)?.currentTime &&
+                      getProgress(item?.id)?.progress! < 90 ? (
+                      // Show progress time for partially watched episodes
+                      <Text fontSize="$2.5" fontWeight="500" color="$color2">
+                        Progress: {formatTime(getProgress(item?.id)?.currentTime as number)}/
+                        {formatTime(getProgress(item?.id)?.duration as number)}
+                      </Text>
+                    ) : // Check if episode is more than 90% complete
+                    getProgress(item?.id)?.progress! > 90 ? (
+                      // Show completed episode icon
+                      <EyeOff color="white" size={15} />
+                    ) : (
+                      // Show unwatched episode icon
+                      <Eye color="white" size={15} />
+                    )
+                  }
+                </View>
                 <Text fontSize="$2.5" fontWeight="500" color="$color2">
                   {new Date(item?.airDate).toDateString()}
                 </Text>

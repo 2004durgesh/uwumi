@@ -18,7 +18,7 @@ import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
 import { useEpisodesIdStore, useWatchProgressStore } from '@/hooks/stores';
 import EpisodeList from '@/components/EpisodeList';
-import { get } from 'lodash';
+import { toast } from 'sonner-native';
 
 export interface SubtitleTrack {
   index: number;
@@ -333,6 +333,15 @@ const Watch = () => {
     console.log('subtitle useeffect');
   }, [data?.subtitles]);
 
+  useEffect(() => {
+    if (!isLoading && source === '') {
+      toast.error('No video source found', { description: 'Try changing servers' });
+    }
+    if (!isLoading && error) {
+      toast.error('Error', { description: error?.message });
+    }
+  }, [source, isLoading, error]);
+
   if (isLoading) {
     return (
       <ThemedView useSafeArea={false}>
@@ -342,6 +351,7 @@ const Watch = () => {
       </ThemedView>
     );
   }
+
   return (
     <ThemedView useSafeArea={false} useStatusBar={isFullscreen}>
       <View height="100%" top={top}>
@@ -430,6 +440,9 @@ const Watch = () => {
                     onMutePress={handleMutePress}
                     onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
                     onSeek={handleSeek}
+                    onEnterPictureInPicture={() => {
+                      videoRef.current?.enterPictureInPicture();
+                    }}
                   />
                 )}
               </View>

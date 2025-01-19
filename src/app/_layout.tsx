@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { TamaguiProvider, createTamagui } from 'tamagui';
 import { PortalProvider } from '@tamagui/portal';
+import { Toaster } from 'sonner-native';
 import config from '../../tamagui.config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -39,7 +40,6 @@ export default function RootLayout() {
       },
     },
   });
-
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -53,7 +53,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={tamaguiConfig}>
+        <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <PortalProvider>
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -62,6 +62,13 @@ export default function RootLayout() {
               <Stack.Screen name="+not-found" />
             </Stack>
           </PortalProvider>
+          <Toaster
+            position="bottom-center"
+            invert
+            autoWiggleOnUpdate="always"
+            richColors
+            swipeToDismissDirection="left"
+          />
         </TamaguiProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
