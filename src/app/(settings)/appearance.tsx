@@ -2,7 +2,6 @@ import { Button, XStack, YStack } from 'tamagui';
 import React, { memo, useCallback } from 'react';
 import { useThemeStore, useAccentStore } from '@/hooks/stores';
 import { ThemedView } from '@/components/ThemedView';
-import { storage } from '@/hooks/stores/MMKV';
 
 const ThemeSelector = memo(() => {
   const setThemeName = useThemeStore((state) => state.setThemeName);
@@ -55,21 +54,11 @@ const AccentSelector = memo(() => {
   );
 });
 
-const Settings = () => {
+const Appearance = () => {
   return (
     <ThemedView>
       <ThemeSelector />
       <AccentSelector />
-      {process.env.NODE_ENV === 'development' && (
-        <Button
-          padding={10}
-          themeInverse
-          onPress={() => {
-            console.log(storage.getAllKeys(), storage);
-          }}>
-          Get Storage Keys
-        </Button>
-      )}
     </ThemedView>
   );
 };
@@ -77,4 +66,4 @@ const Settings = () => {
 ThemeSelector.displayName = 'ThemeSelector';
 AccentSelector.displayName = 'AccentSelector';
 
-export default Settings;
+export default Appearance;

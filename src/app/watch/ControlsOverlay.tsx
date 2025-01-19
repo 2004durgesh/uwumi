@@ -92,7 +92,7 @@ const ControlsOverlay = memo(
     onMutePress,
     onFullscreenPress,
     onSeek,
-    onEnterPictureInPicture
+    onEnterPictureInPicture,
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     // console.log("settings are being shown", openSettings);

@@ -1,9 +1,13 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet } from 'react-native';
-import { BookImage, Settings, TvMinimalPlay } from '@tamagui/lucide-icons';
+import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { Stack, YStack } from 'tamagui';
+export const unstable_settings = {
+  // Ensure any route can link back to `/`
+  initialRouteName: 'index',
+};
 
 export default function TabLayout() {
   return (
@@ -84,10 +88,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="more"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ focused }) => <Settings />,
+          title: 'More',
+          tabBarIcon: ({ focused }) => <Ellipsis />,
         }}
       />
     </Tabs>

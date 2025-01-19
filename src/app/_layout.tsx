@@ -55,10 +55,11 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <PortalProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="info/[mediaType]" options={{ headerShown: false }} />
-              <Stack.Screen name="watch/[mediaType]" options={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="info/[mediaType]" />
+              <Stack.Screen name="watch/[mediaType]" />
+              <Stack.Screen name="(settings)" />
               <Stack.Screen name="+not-found" />
             </Stack>
           </PortalProvider>
