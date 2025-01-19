@@ -1,16 +1,17 @@
 # Development Dependencies
-node_modules/
-.expo/
-.expo-shared/
-.vscode/
-.android/
-.ios/
-.github/
+node_modules
+.expo
+.expo-shared
+.vscode
+.android
+android/**/*
+.ios
+.github
 
 # Build and Output
-dist/
-build/
-web-build/
+dist
+build
+web-build
 *.jsbundle
 *.bundle
 

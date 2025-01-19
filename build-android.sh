@@ -13,8 +13,8 @@ echo "Changing directory to android.............................................
 cd android
 
 # The following commands use Gradle, a build tool for Android, to build the APK.
-./gradlew clean
-./gradlew --stop
+# ./gradlew clean
+# ./gradlew --stop
 # assembleRelease: Builds the release APK.
 echo "Building release APK........................................................................."
 ./gradlew assembleRelease 

@@ -1,9 +1,10 @@
 ### Instructions for Color-Theme Generation
 
-#### Purpose:
+#### Purpose
+
 This file defines a structure for creating, customizing, and managing color themes for a UI using the `@tamagui` library. It provides palettes, templates, and configurations for generating themes dynamically based on the input. These themes can be used to ensure consistent styling across light and dark modes, as well as custom variations like "Cloudflare" and "Cotton Candy."
 
-#### Instruction for LLM:
+#### Instruction for LLM
 
 1. **Understand the File Structure:**
    - **Palettes**: Contains predefined sets of colors grouped under names like `light`, `dark`, `light_cloudflare`, etc. Each palette is an array where specific indices represent unique color roles (e.g., `background`, `accentColor`).
@@ -11,7 +12,7 @@ This file defines a structure for creating, customizing, and managing color them
    - **Themes**: Uses templates and palettes to define the base themes (e.g., `light`, `dark`) and their child variations (e.g., `cloudflare`, `cottonCandy`).
 
 2. **Key Components:**
-   - **Palette**: Provide an array of colors. Ensure it matches the required structure: 
+   - **Palette**: Provide an array of colors. Ensure it matches the required structure:
      `[background, primary color, color1, color2, color3, color4, color5]`.
    - **Template**: Map color roles to indices in a palette. Roles include `accentBackground`, `color1`, `borderColor`, etc.
    - **Theme Definitions**: Assign templates and palettes to specific theme names.
@@ -37,10 +38,11 @@ This file defines a structure for creating, customizing, and managing color them
 
 ### Instructions for Configuring Tamagui with Custom Themes, Animations, and Fonts
 
-#### Purpose:
+#### Purpose
+
 This file sets up the core configuration for a Tamagui-based UI framework, including custom themes, animations, and fonts. It centralizes style tokens, animation presets, and typography to maintain consistency across the application.
 
-#### Instruction for LLM:
+#### Instruction for LLM
 
 1. **File Overview:**
    - **Themes:** Dynamically imported from a separate file (`theme-out`) to manage color schemes and style configurations.
@@ -69,6 +71,7 @@ This file sets up the core configuration for a Tamagui-based UI framework, inclu
 
 4. **How to Use in the Application:**
    - Export the `config` and integrate it with the Tamagui provider to apply it globally:
+
      ```javascript
      import { TamaguiProvider } from 'tamagui';
      import config from './config';
@@ -80,6 +83,7 @@ This file sets up the core configuration for a Tamagui-based UI framework, inclu
      );
      export default App;
      ```
+
    - Themes, animations, and fonts will be available throughout the app for consistent styling.
 
 5. **Constraints and Best Practices:**
