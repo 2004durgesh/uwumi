@@ -1,9 +1,6 @@
 #!/bin/bash
 
 
-# Generate themes
-npm run generate-themes
-
 # Bundle JavaScript code
 echo "Bundling JavaScript code........................................................................."
 npx react-native bundle --platform android --dev false --entry-file ./src/app/_layout.tsx --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res

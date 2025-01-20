@@ -21,9 +21,9 @@ export function useInfo({
     queryKey: [mediaType, 'info', id, metaProvider, type, provider],
     queryFn: async () => {
       const url =
-        metaProvider === 'tmdb'
-          ? `${getFetchUrl().apiUrl}/meta/${metaProvider}/info/${id}?type=${type.split(' ')[0]}`
-          : `${getFetchUrl().apiUrl}/meta/${metaProvider}/data/${id}`;
+        metaProvider === 'anilist'
+          ? `${getFetchUrl().apiUrl}/meta/${metaProvider}/data/${id}`
+          : `${getFetchUrl().apiUrl}/meta/${metaProvider}/info/${id}?type=${type.split(' ')[0]}`;
       console.log(url);
       const { data } = await axios.get(url, {
         params: { provider },
@@ -33,7 +33,7 @@ export function useInfo({
         },
         timeout: 5000,
       });
-      console.log(data);
+      // console.log(data);
       return data;
     },
   });

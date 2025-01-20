@@ -11,8 +11,8 @@ const palettes = {
     '#006e1b', //color5                  6
   ],
   dark: ['#000000', '#b0c6ff', '#ffffff', '#b4b5b9', '#44464f', '#0058ca', '#7adc77'],
-  light_cloudflare: ['#eff2f5', '#f38020', '#1b1b22', '#5a5666', '#cac4d0', '#f38020', '#eff2f5'],
-  dark_cloudflare: ['#000000', '#f38020', '#ffffff', '#b2b2b5', '#49454f', '#f38020', '#1b1b22'],
+  light_cloudflare: ['#eff2f5', '#1b1b22', '#f38020', '#1b1b22', '#5a5666', '#cac4d0', '#f38020'],
+  dark_cloudflare: ['#000000', '#eff2f5', '#f38020', '#ffffff', '#b2b2b5', '#49454f', '#f38020'],
   light_cotton_candy: ['#fffbff', '#9a4058', '#201a1b', '#74686a', '#cac4d0', '#5bcefa', '#9a4058'],
   dark_cotton_candy: ['#000000', '#ffb1c1', '#ffffff', '#bab4b5', '#49454f', '#004d63', '#ffb1c1'],
 };

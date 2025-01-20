@@ -145,6 +145,7 @@ const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaPr
   }
 
   if (error) {
+    console.log(error);
     return (
       <YStack justifyContent="center" alignItems="center">
         <NoResults />

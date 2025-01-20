@@ -1,10 +1,12 @@
 import { Tabs, YStack, Text, styled, AnimatePresence } from 'tamagui';
 import React, { useState } from 'react';
 import type { StackProps, TabLayout, TabsTabProps } from 'tamagui';
-import { IAnimeInfo } from '@/constants/types';
+import { IAnimeInfo, MediaType } from '@/constants/types';
 import Details from '@/app/info/Details';
 import Similar from './Similar';
 import Episodes from './Episodes';
+import Chapters from './Chapters';
+import { useLocalSearchParams } from 'expo-router';
 interface TabsProps {
   data: IAnimeInfo;
 }
@@ -61,7 +63,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
   });
 
   const { currentTab, intentAt, activeAt, prevActiveAt } = tabState;
-
+  const { mediaType } = useLocalSearchParams<{ mediaType: MediaType }>();
   // Calculate direction for animation
   const direction = (() => {
     if (!activeAt || !prevActiveAt || activeAt.x === prevActiveAt.x) {
@@ -120,7 +122,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             <Text
               fontWeight={currentTab === 'tab1' ? '800' : '400'}
               color={currentTab === 'tab1' ? '$color' : '$color2'}>
-              Episodes
+              {mediaType === MediaType.ANIME ? 'Episodes' : 'Chapters'}
             </Text>
           </Tabs.Tab>
           <Tabs.Tab
@@ -153,7 +155,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
       <AnimatePresence exitBeforeEnter custom={{ direction }} initial={false}>
         <AnimatedYStack key={currentTab}>
           <Tabs.Content value={currentTab} forceMount justifyContent="center">
-            {currentTab === 'tab1' && <Episodes />}
+            {currentTab === 'tab1' && mediaType === MediaType.ANIME ? <Episodes /> : <Chapters />}
 
             {currentTab === 'tab2' && <Details data={data} />}
 

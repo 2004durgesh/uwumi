@@ -53,7 +53,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <TamaguiProvider config={tamaguiConfig}>
           <PortalProvider>
             <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
               <Stack.Screen name="(tabs)" />

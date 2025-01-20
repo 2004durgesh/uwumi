@@ -13,12 +13,12 @@ interface MediaBrowserProps {
 const TabTextStyle = {
   fontSize: 13,
   fontWeight: '600',
-  color: '$color2',
+  // color: '$color2',
 };
 
 const TabIconStyle = {
   size: 15,
-  color: '$color2',
+  // color: '$color2',
 };
 
 const TABS = [
@@ -40,7 +40,7 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
           height={35}
           value={id}
           borderWidth={2}
-          borderColor={currentTab === id ? '$color4' : '$color2'}
+          borderColor={currentTab === id ? '$color4' : '$color1'}
           backgroundColor={currentTab === id ? '$color4' : '$background'}>
           <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
         </Tabs.Tab>

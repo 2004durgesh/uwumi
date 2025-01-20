@@ -3,73 +3,73 @@ import React from 'react';
 import { Image, StyleSheet } from 'react-native';
 import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
-import { Stack, YStack } from 'tamagui';
+import { Stack, useTheme, View, YStack } from 'tamagui';
+import { useThemeStore } from '@/hooks/stores';
 export const unstable_settings = {
   // Ensure any route can link back to `/`
   initialRouteName: 'index',
 };
+const TabBarCapsule = ({
+  focused,
+  color,
+  children,
+}: {
+  focused: boolean;
+  color?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <View
+      width={focused ? 70 : 30}
+      height={30}
+      alignItems="center"
+      justifyContent="center"
+      borderRadius={100}
+      animation="quick"
+      backgroundColor={focused ? '$color4' : 'transparent'}>
+      {children}
+    </View>
+  );
+};
 
 export default function TabLayout() {
+  const themeName = useThemeStore((state) => state.themeName);
+  console.log(themeName, 'tabs layout');
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        animation: 'shift',
+        tabBarActiveTintColor: themeName === 'dark' ? '#fff' : '#000',
+        tabBarInactiveTintColor: themeName === 'dark' ? '#ccc' : '#333',
         tabBarHideOnKeyboard: true,
+        tabBarLabelStyle: {
+          fontSize: 13,
+          fontWeight: 'bold',
+        },
         tabBarStyle: {
-          position: 'absolute',
           height: 64,
-          backgroundColor: 'transparent',
+          backgroundColor: 'red',
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
         },
-        tabBarBackground: () => (
-          <Stack
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            overflow="hidden"
-            borderTopLeftRadius={20}
-            borderTopRightRadius={20}>
-            <BlurView
-              intensity={80}
-              tint="systemChromeMaterialDark"
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                backgroundColor: 'transparent',
-              }}
-            />
-            <YStack
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              backgroundColor="$background"
-              opacity={0.7}
-            />
-          </Stack>
-        ),
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Anime',
           tabBarIcon: ({ focused }) => (
-            <Image
-              source={
-                focused
-                  ? require('../../../assets/images/anime.png')
-                  : require('../../../assets/images/anime-outlined.png')
-              }
-              style={{ width: 30, height: 30 }}
-            />
+            <TabBarCapsule focused={focused}>
+              <Image
+                source={
+                  focused
+                    ? require('../../../assets/images/anime.png')
+                    : require('../../../assets/images/anime-outlined.png')
+                }
+                style={{ width: 30, height: 30 }}
+              />
+            </TabBarCapsule>
           ),
         }}
       />
@@ -77,21 +77,33 @@ export default function TabLayout() {
         name="manga"
         options={{
           title: 'Manga',
-          tabBarIcon: ({ focused }) => <BookImage />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarCapsule focused={focused} color={color}>
+              <BookImage color={color} />
+            </TabBarCapsule>
+          ),
         }}
       />
       <Tabs.Screen
         name="movies"
         options={{
           title: 'Movies',
-          tabBarIcon: ({ focused }) => <TvMinimalPlay />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarCapsule focused={focused} color={color}>
+              <TvMinimalPlay color={color} />
+            </TabBarCapsule>
+          ),
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
           title: 'More',
-          tabBarIcon: ({ focused }) => <Ellipsis />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarCapsule focused={focused} color={color}>
+              <Ellipsis color={color} />
+            </TabBarCapsule>
+          ),
         }}
       />
     </Tabs>
