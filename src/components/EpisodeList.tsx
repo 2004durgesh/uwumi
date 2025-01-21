@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
 import { Pressable, StyleSheet } from 'react-native';
@@ -45,10 +46,13 @@ const EpisodeList = ({
   const flashListRef = useRef<FlashList<Episode>>(null);
   const hasScrolledRef = useRef(false);
 
-  const { setProgress, getProgress } = useWatchProgressStore();
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
   const episodesList = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
+  const progresses = useWatchProgressStore((state) => state.progresses);
+  // useEffect(() => {
+  //   console.log("i cam in to pic");
+  // }, []);
 
   const setEpisodes = useEpisodesStore((state) => state.setEpisodes);
   useEffect(() => {
@@ -119,6 +123,26 @@ const EpisodeList = ({
     );
   };
 
+  const renderEpisodeProgress = useMemo(
+    () => (item: Episode) => {
+      if (currentEpisodeId === item?.id) {
+        return <WavyAnimation />;
+      }
+
+      const progress = progresses[item?.id];
+      if (progress?.currentTime && progress?.progress < 90) {
+        return (
+          <Text fontSize="$2.5" fontWeight="500" color="$color2">
+            Progress: {formatTime(progress.currentTime)}/{formatTime(progress.duration)}
+          </Text>
+        );
+      }
+
+      return progress?.progress > 90 ? <EyeOff color="white" size={15} /> : <Eye color="white" size={15} />;
+    },
+    [currentEpisodeId, progresses],
+  );
+
   const renderPressableItem = ({ item }: { item: Episode }) => {
     return (
       <Pressable
@@ -179,31 +203,7 @@ const EpisodeList = ({
               </YStack>
 
               <XStack justifyContent="space-between" alignItems="center">
-                <View>
-                  {
-                    // Check if this is the currently playing episode
-                    currentEpisodeId === item?.id ? (
-                      // Show animated waves for current episode
-                      <WavyAnimation />
-                    ) : // Check if episode has progress and is less than 90% complete
-                    getProgress(item?.id) &&
-                      getProgress(item?.id)?.currentTime &&
-                      getProgress(item?.id)?.progress! < 90 ? (
-                      // Show progress time for partially watched episodes
-                      <Text fontSize="$2.5" fontWeight="500" color="$color2">
-                        Progress: {formatTime(getProgress(item?.id)?.currentTime as number)}/
-                        {formatTime(getProgress(item?.id)?.duration as number)}
-                      </Text>
-                    ) : // Check if episode is more than 90% complete
-                    getProgress(item?.id)?.progress! > 90 ? (
-                      // Show completed episode icon
-                      <EyeOff color="white" size={15} />
-                    ) : (
-                      // Show unwatched episode icon
-                      <Eye color="white" size={15} />
-                    )
-                  }
-                </View>
+                <View>{renderEpisodeProgress(item)}</View>
                 <Text fontSize="$2.5" fontWeight="500" color="$color2">
                   {new Date(item?.airDate).toDateString()}
                 </Text>
@@ -262,5 +262,4 @@ const EpisodeList = ({
     </YStack>
   );
 };
-
 export default EpisodeList;

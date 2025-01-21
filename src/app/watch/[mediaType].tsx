@@ -19,6 +19,7 @@ import { VolumeManager } from 'react-native-volume-manager';
 import { useEpisodesIdStore, useWatchProgressStore } from '@/hooks/stores';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
+import Ripple from 'react-native-material-ripple';
 
 export interface SubtitleTrack {
   index: number;
@@ -81,21 +82,20 @@ const Watch = () => {
   useEffect(() => {
     if (episodeId) {
       setEpisodeIds(episodeId);
-      console.log(getProgress(episodeId), 'saved progress');
     }
     return () => {
       setEpisodeIds('');
     };
   }, [episodeId]);
-  useEffect(() => {
-    if (episodeId && videoRef.current) {
-      const savedProgress = getProgress(episodeId);
-      console.log('Loading saved progress:', savedProgress);
-      if (savedProgress && savedProgress.currentTime > 0) {
-        videoRef.current.seek(savedProgress.currentTime);
-      }
-    }
-  }, [episodeId, getProgress]);
+  // useEffect(() => {
+  //   if (episodeId && videoRef.current) {
+  //     const savedProgress = getProgress(episodeId);
+  //     // console.log('Loading saved progress:', savedProgress);
+  //     if (savedProgress && savedProgress.currentTime > 0) {
+  //       videoRef.current.seek(savedProgress.currentTime);
+  //     }
+  //   }
+  // }, [episodeId, getProgress]);
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -115,6 +115,10 @@ const Watch = () => {
   const [dimensions, setDimensions] = useState({
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
+  });
+  const [wrapperDimensions, setWrapperDimensions] = useState({
+    width: 0,
+    height: 0,
   });
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
@@ -170,7 +174,7 @@ const Watch = () => {
         duration: seekableDuration,
         progress: (currentTime / seekableDuration) * 100,
       };
-      console.log('Saving progress:', progress);
+      // console.log('Saving progress:', progress);
       setProgress(episodeId, progress);
     }
   };
@@ -356,7 +360,10 @@ const Watch = () => {
     <ThemedView useSafeArea={false} useStatusBar={isFullscreen}>
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
-          <View overflow="hidden" height={isVideoReady ? playerDimensions.height : 250}>
+          <View
+            overflow="hidden"
+            // height={isVideoReady ? playerDimensions.height : '100%'}
+            style={{ aspectRatio: 16 / 9 }}>
             <Pressable
               onPressIn={(e) => {
                 if (isDoubleTap) {
@@ -374,7 +381,12 @@ const Watch = () => {
               <View
                 style={{ height: playerDimensions.height, position: 'relative' }}
                 // style={{height:"100%", position: 'relative' }} //keep for future ref
-              >
+                onLayout={(e) => {
+                  setWrapperDimensions({
+                    width: e.nativeEvent.layout.width,
+                    height: e.nativeEvent.layout.height,
+                  });
+                }}>
                 <Video
                   ref={videoRef}
                   source={{
@@ -465,12 +477,6 @@ const Watch = () => {
               <Text textAlign="justify" padding="$2">
                 {description}
               </Text>
-              {/* <Button
-                onPress={() => {
-                  videoRef?.current?.save();
-                }}>
-                Watch
-              </Button> */}
             </>
           )}
           <View flex={1}>

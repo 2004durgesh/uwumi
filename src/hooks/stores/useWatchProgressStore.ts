@@ -21,7 +21,7 @@ export const useWatchProgressStore = create<WatchProgressState>()(
     (set, get) => ({
       progresses: {},
       setProgress: (episodeId, progress) => {
-        console.log('Setting progress:', { episodeId, progress });
+        // console.log('Setting progress:', { episodeId, progress });
         set((state) => ({
           progresses: {
             ...state.progresses,
@@ -32,7 +32,7 @@ export const useWatchProgressStore = create<WatchProgressState>()(
       },
       getProgress: (episodeId) => {
         const progress = get().progresses[episodeId] || null;
-        console.log('Getting progress:', { episodeId, progress });
+        // console.log('Getting progress:', { episodeId, progress });
         return progress;
       },
       removeProgress: (episodeId) => {

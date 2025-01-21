@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner, ViewStyle } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
 import {
   Play,
   Pause,
@@ -16,13 +16,14 @@ import {
   PictureInPicture2,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
-import { Pressable, PressableProps } from 'react-native';
+import { Pressable, TouchableWithoutFeedbackProps } from 'react-native';
 import { ISubtitle } from '@/constants/types';
 import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
 import { formatTime } from '@/constants/utils';
+import Ripple from 'react-native-material-ripple';
 
-interface CustomPressableProps extends PressableProps {
+interface CustomPressableProps extends TouchableWithoutFeedbackProps {
   onPress: () => void;
   children?: React.ReactNode;
 }
@@ -53,24 +54,20 @@ interface ControlsOverlayProps {
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 
-const CustomPressable: FC<CustomPressableProps> = ({ onPress, children, style, ...props }) => {
+const CustomPressable: FC<CustomPressableProps> = ({ onPress, children, style, onFocus, onBlur, ...props }) => {
   return (
-    <Pressable
+    <Ripple
       onPress={(e) => {
         onPress();
-        e.preventDefault();
-        e.stopPropagation();
+        // e.preventDefault();
+        // e.stopPropagation();
       }}
-      android_ripple={{
-        color: 'rgba(255, 255, 255, 0.7)',
-        borderless: true,
-        foreground: true,
-      }}
-      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      style={[{ padding: 10 }, style as any]}
-      {...props}>
-      {children}
-    </Pressable>
+      rippleColor="white"
+      rippleDuration={700}
+      rippleContainerBorderRadius={50}
+      rippleOpacity={1}>
+      <View style={[{ padding: 10 }, style as any]}>{children}</View>
+    </Ripple>
   );
 };
 
@@ -108,6 +105,7 @@ const ControlsOverlay = memo(
     const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
     const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].id : null;
     const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
+    // temp
     useEffect(() => {
       if (prevId || nextId) {
         setEpisodeIds(currentEpisodeId!, prevId, nextId);
@@ -119,7 +117,6 @@ const ControlsOverlay = memo(
         <AnimatedYStack
           flex={1}
           justifyContent="space-between"
-          // paddingHorizontal={isFullscreen ? '$10' : '$2'}
           paddingVertical={isFullscreen ? '$5' : '$2'}
           backgroundColor="rgba(0, 0, 0, 0.5)"
           entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
@@ -169,7 +166,7 @@ const ControlsOverlay = memo(
                 />
                 <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <YStack gap="$4" alignSelf="flex-start" padding="$4">
+                    <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
                       {subtitleTracks?.map((track, index) => (
                         <CustomPressable
                           key={index}
