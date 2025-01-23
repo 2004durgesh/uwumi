@@ -137,7 +137,7 @@ const EpisodeList = ({
       const progress = progresses[item?.id];
       if (progress?.currentTime && progress?.progress < 90) {
         return (
-          <Text fontSize="$2.5" fontWeight="500" color="$color2">
+          <Text fontSize="$2.5" fontWeight="500" color="$color1">
             Progress: {formatTime(progress.currentTime)}/{formatTime(progress.duration)}
           </Text>
         );
@@ -198,18 +198,18 @@ const EpisodeList = ({
                     {item.title}
                   </Text>
                   <XStack gap={2}>
-                    <Captions size={20} color="$color2" />
-                    {item?.isDub && <Mic size={20} color="$color2" />}
+                    <Captions size={20} color="$color1" />
+                    {item?.isDub && <Mic size={20} color="$color1" />}
                   </XStack>
                 </XStack>
-                <Text fontSize="$2.5" color="$color2" fontWeight="500" numberOfLines={2}>
+                <Text fontSize="$2.5" color="$color1" fontWeight="500" numberOfLines={2}>
                   {item?.description}
                 </Text>
               </YStack>
 
               <XStack justifyContent="space-between" alignItems="center">
                 <View>{renderEpisodeProgress(item)}</View>
-                <Text fontSize="$2.5" fontWeight="500" color="$color2">
+                <Text fontSize="$2.5" fontWeight="500" color="$color1">
                   {new Date(item?.airDate).toDateString()}
                 </Text>
               </XStack>

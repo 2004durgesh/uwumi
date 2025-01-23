@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import { IAnimeInfo } from '@/constants/types';
 import { WebView } from 'react-native-webview';
 import { useThemeStore } from '@/hooks/stores';
+import { hexToRGB } from '@/constants/utils';
+import { useCurrentTheme } from '@/hooks';
 
 type DetailsProps = {
   data?: IAnimeInfo;
@@ -22,7 +24,7 @@ const StatisticItem = ({ label, value }: { label: string; value: string }) => (
   <StatisticsXStack>
     {value && (
       <>
-        <Text fontSize="$4" fontWeight={700} color="$color2">
+        <Text fontSize="$4" fontWeight={700} color="$color1">
           {label}
         </Text>
         <Text fontSize="$4" fontWeight={700} color="$color">
@@ -36,8 +38,7 @@ const StatisticItem = ({ label, value }: { label: string; value: string }) => (
 const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
-  const themeName = useThemeStore((state: any) => state.themeName);
-
+  const currentTheme = useCurrentTheme();
   return (
     <YStack gap={2}>
       <ScrollView
@@ -75,11 +76,11 @@ const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
                 }}>
                 <LinearGradient
                   locations={[0, 0.05, 0.1]}
-                  colors={
-                    themeName === 'dark'
-                      ? ['rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 1)']
-                      : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.7)', 'rgba(255, 255, 255, 1)']
-                  }
+                  colors={[
+                    hexToRGB(currentTheme?.background, 0.5),
+                    hexToRGB(currentTheme?.background, 0.7),
+                    hexToRGB(currentTheme?.background, 1),
+                  ]}
                   start={{ x: 0.0, y: 0.0 }}
                   end={{ x: 0.0, y: 0.1 }}
                   style={{ height: '100%', width: '100%' }}>

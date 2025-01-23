@@ -2,7 +2,7 @@ import AnimatedCountdown from '@/components/AnimatedCountdown';
 import { AnimatedCustomImage } from '@/components/CustomImage';
 import IconTitle from '@/components/IconTitle';
 import { ThemedView } from '@/components/ThemedView';
-import { useInfo, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useInfo, useThemeStore } from '@/hooks';
 import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams } from 'expo-router';
@@ -13,6 +13,7 @@ import { Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from './HorizontalTabs';
 import { MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
+import { hexToRGB } from '@/constants/utils';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -26,6 +27,7 @@ const Info = () => {
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
   const themeName = useThemeStore((state: any) => state.themeName);
+  const currentTheme = useCurrentTheme();
 
   return (
     <>
@@ -43,11 +45,11 @@ const Info = () => {
             <LinearGradient
               width="100%"
               height="300"
-              colors={
-                themeName === 'dark'
-                  ? ['rgba(0,0,0,1)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.4)']
-                  : ['rgba(255,255,255,1)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.4)']
-              }
+              colors={[
+                hexToRGB(currentTheme?.background, 1),
+                hexToRGB(currentTheme?.background, 0.7),
+                hexToRGB(currentTheme?.background, 0.4)
+              ]}
               start={[0, 1]}
               end={[0, 0.5]}
               flex={1}

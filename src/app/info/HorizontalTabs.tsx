@@ -121,7 +121,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab1' ? '800' : '400'}
-              color={currentTab === 'tab1' ? '$color' : '$color2'}>
+              color={currentTab === 'tab1' ? '$color' : '$color1'}>
               {mediaType === MediaType.ANIME ? 'Episodes' : 'Chapters'}
             </Text>
           </Tabs.Tab>
@@ -133,7 +133,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab2' ? '800' : '400'}
-              color={currentTab === 'tab2' ? '$color' : '$color2'}>
+              color={currentTab === 'tab2' ? '$color' : '$color1'}>
               Details
             </Text>
           </Tabs.Tab>
@@ -145,7 +145,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab3' ? '800' : '400'}
-              color={currentTab === 'tab3' ? '$color' : '$color2'}>
+              color={currentTab === 'tab3' ? '$color' : '$color1'}>
               Similar
             </Text>
           </Tabs.Tab>
@@ -155,10 +155,9 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
       <AnimatePresence exitBeforeEnter custom={{ direction }} initial={false}>
         <AnimatedYStack key={currentTab}>
           <Tabs.Content value={currentTab} forceMount justifyContent="center">
-            {currentTab === 'tab1' && mediaType === MediaType.ANIME ? <Episodes /> : <Chapters />}
-
+            {currentTab === 'tab1' && mediaType === MediaType.ANIME && <Episodes />}
+            {currentTab === 'tab1' && mediaType !== MediaType.ANIME && <Chapters />}
             {currentTab === 'tab2' && <Details data={data} />}
-
             {currentTab === 'tab3' && <Similar data={data} />}
           </Tabs.Content>
         </AnimatedYStack>

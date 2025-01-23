@@ -29,3 +29,25 @@ export const formatTime = (seconds: number): string => {
   const minutes = Math.max(0, m);
   return `${minutes}:${s.toString().padStart(2, '0')}`;
 };
+
+export const hexToRGB = (hex: string, alpha?: number): string => {
+  // Remove # if present
+  const cleanHex = hex.replace('#', '');
+
+  // Convert 3-digit hex to 6-digit
+  const fullHex =
+    cleanHex.length === 3
+      ? cleanHex
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : cleanHex;
+
+  // Parse hex values
+  const r = parseInt(fullHex.substring(0, 2), 16);
+  const g = parseInt(fullHex.substring(2, 4), 16);
+  const b = parseInt(fullHex.substring(4, 6), 16);
+
+  // Return RGB or RGBA
+  return alpha !== undefined ? `rgba(${r}, ${g}, ${b}, ${alpha})` : `rgb(${r}, ${g}, ${b})`;
+};

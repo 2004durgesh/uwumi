@@ -8,13 +8,12 @@ export const palettes = {
     '#6a6a71', //color2,borderColor      3
     '#e9eefb', //color3                  4
     '#b0c6ff', //color4                  5
-    '#006e1b', //color5                  6
   ],
-  dark: ['#1b1b1f', '#b0c6ff', '#fefbff', '#b4b5b9', '#272931', '#0058ca', '#7adc77'],
-  light_cloudflare: ['#eff2f5', '#1b1b22', '#f38020', '#1b1b22', '#5a5666', '#cac4d0', '#f38020'],
-  dark_cloudflare: ['#1b1b22', '#eff2f5', '#f38020', '#ffffff', '#b2b2b5', '#49454f', '#f38020'],
-  light_cotton_candy: ['#fffbff', '#9a4058', '#201a1b', '#74686a', '#f7ecf1', '#5bcefa', '#9a4058'],
-  dark_cotton_candy: ['#201a1b', '#ffb1c1', '#ffffff', '#bab4b5', '#322629', '#004d63', '#ffb1c1'],
+  dark: ['#1b1b1f', '#b0c6ff', '#fefbff', '#44464f', '#272931', '#0058ca'],
+  light_cloudflare: ['#eff2f5', '#f38020', '#1b1b22', '#cac4d0', '#efe9e3', '#f38020'],
+  dark_cloudflare: ['#1b1b22', '#f38020', '#eff2f5', '#49454f', '#2d2322', '#f38020'],
+  light_cotton_candy: ['#fffbff', '#9a4058', '#201a1b', '#f3dde0', '#f7ecf1', '#5bcefa'],
+  dark_cotton_candy: ['#201a1b', '#ffb1c1', '#ece0e0', '#524345', '#322629', '#004d63'],
 };
 const templates = {
   light_base: {
@@ -25,7 +24,6 @@ const templates = {
     color2: 3,
     color3: 4,
     color4: 5,
-    color5: 6,
     background: 0,
     borderColor: 3,
   },
@@ -37,7 +35,6 @@ const templates = {
     color2: 3,
     color3: 4,
     color4: 5,
-    color5: 6,
     background: 0,
     borderColor: 3,
   },

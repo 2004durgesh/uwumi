@@ -7,30 +7,7 @@ import { useThemeStore, useCurrentTheme } from '@/hooks';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 export const unstable_settings = {
-  // Ensure any route can link back to `/`
   initialRouteName: 'index',
-};
-const TabBarCapsule = ({
-  focused,
-  color,
-  children,
-}: {
-  focused: boolean;
-  color?: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <View
-      width={focused ? 70 : 30}
-      height={30}
-      alignItems="center"
-      justifyContent="center"
-      borderRadius={100}
-      animation="quick"
-      backgroundColor={focused ? '$color4' : 'transparent'}>
-      {children}
-    </View>
-  );
 };
 
 export default function TabLayout() {
@@ -38,6 +15,21 @@ export default function TabLayout() {
   const currentTheme = useCurrentTheme();
   // console.log(currentTheme, 'tabs');
   SystemNavigationBar.setNavigationColor(currentTheme?.color3 || 'black');
+
+  const TabBarCapsule = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
+    return (
+      <View
+        width={focused ? 70 : 30}
+        height={30}
+        alignItems="center"
+        justifyContent="center"
+        borderRadius={100}
+        animation="quick"
+        backgroundColor={focused ? currentTheme?.color4 : 'transparent'}>
+        {children}
+      </View>
+    );
+  };
 
   return (
     <Tabs
@@ -82,7 +74,7 @@ export default function TabLayout() {
         options={{
           title: 'Manga',
           tabBarIcon: ({ focused, color }) => (
-            <TabBarCapsule focused={focused} color={color}>
+            <TabBarCapsule focused={focused}>
               <BookImage color={color} />
             </TabBarCapsule>
           ),
@@ -93,7 +85,7 @@ export default function TabLayout() {
         options={{
           title: 'Movies',
           tabBarIcon: ({ focused, color }) => (
-            <TabBarCapsule focused={focused} color={color}>
+            <TabBarCapsule focused={focused}>
               <TvMinimalPlay color={color} />
             </TabBarCapsule>
           ),
@@ -104,7 +96,7 @@ export default function TabLayout() {
         options={{
           title: 'More',
           tabBarIcon: ({ focused, color }) => (
-            <TabBarCapsule focused={focused} color={color}>
+            <TabBarCapsule focused={focused}>
               <Ellipsis color={color} />
             </TabBarCapsule>
           ),
