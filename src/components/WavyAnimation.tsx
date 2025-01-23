@@ -1,15 +1,16 @@
+import { useCurrentTheme } from '@/hooks';
 import React, { memo, useEffect } from 'react';
 import Animated, { withRepeat, withTiming, useAnimatedStyle, useSharedValue, withDelay } from 'react-native-reanimated';
-import { XStack, useTheme } from 'tamagui';
+import { XStack } from 'tamagui';
 
 const AnimatedBar = memo(({ delay }: { delay: number }) => {
   const height = useSharedValue(3);
-  const theme = useTheme();
+  const currentTheme = useCurrentTheme();
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: 2,
     height: height.value,
-    backgroundColor: theme?.color4?.val,
+    backgroundColor: currentTheme?.color4,
     borderRadius: 1,
   }));
 

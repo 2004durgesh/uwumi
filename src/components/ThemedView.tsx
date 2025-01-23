@@ -1,7 +1,7 @@
 import { type ViewProps } from 'react-native';
 import { View, Theme } from 'tamagui';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeStore, useAccentStore } from '@/hooks/stores';
+import { useThemeStore, useAccentStore, useCurrentTheme } from '@/hooks';
 import { StatusBar, StatusBarProps } from 'expo-status-bar';
 
 export type ThemedViewProps = {
@@ -21,6 +21,7 @@ export function ThemedView({
 }: ThemedViewProps) {
   const themeName = useThemeStore((state) => state.themeName);
   const accentName = useAccentStore((state) => state.accentName);
+  const currentTheme = useCurrentTheme();
   const content = (
     <View flex={1} backgroundColor="$background" {...otherProps}>
       {children}
@@ -29,22 +30,20 @@ export function ThemedView({
   // console.log(themeName,accentName,useTheme())
 
   return (
-    <Theme name={themeName}>
-      <Theme name={accentName}>
-        {useSafeArea ? (
-          <SafeAreaView style={{ flex: 1, backgroundColor: '$background' }}>{content}</SafeAreaView>
-        ) : (
-          content
-        )}
-        <StatusBar
-          animated
-          hideTransitionAnimation="slide"
-          hidden={useStatusBar}
-          style={themeName === 'dark' ? 'light' : 'dark'}
-          backgroundColor={themeName === 'dark' ? 'black' : 'white'}
-          {...statusBarProps}
-        />
-      </Theme>
+    <Theme name={accentName}>
+      {useSafeArea ? (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '$background' }}>{content}</SafeAreaView>
+      ) : (
+        content
+      )}
+      <StatusBar
+        animated
+        hideTransitionAnimation="slide"
+        hidden={useStatusBar}
+        style={themeName === 'dark' ? 'light' : 'dark'}
+        backgroundColor={currentTheme?.background}
+        {...statusBarProps}
+      />
     </Theme>
   );
 }

@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { YStack, Tabs, View } from 'tamagui';
 import CardList from '@/components/CardList';
 import { ChartNoAxesCombined, Heart, Search } from '@tamagui/lucide-icons';
-import { useTabsStore } from '@/hooks/stores';
+import { useTabsStore } from '@/hooks';
 import IconTitle from '@/components/IconTitle';
 import SearchBar from '@/components/SearchBar';
 import { MediaType } from '@/constants/types';

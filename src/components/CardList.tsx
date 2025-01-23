@@ -11,8 +11,7 @@ import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
-import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch } from '@/hooks/queries';
-import { useSearchStore } from '@/hooks/stores';
+import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch, useSearchStore } from '@/hooks';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;

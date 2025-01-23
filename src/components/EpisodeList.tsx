@@ -1,11 +1,10 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react-hooks/rules-of-hooks */
-import { View, Text, YStack, XStack, Spinner, useTheme } from 'tamagui';
+import { View, Text, YStack, XStack, Spinner } from 'tamagui';
 import { Pressable, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useEffect, useRef, useMemo } from 'react';
 import CustomImage from '@/components/CustomImage';
-import { useAnimeEpisodes } from '@/hooks/queries';
 import { useRouter } from 'expo-router';
 import ReanimatedSwipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, {
@@ -17,7 +16,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
-import { useEpisodesIdStore, useEpisodesStore, useWatchProgressStore } from '@/hooks/stores';
+import {
+  useEpisodesIdStore,
+  useEpisodesStore,
+  useWatchProgressStore,
+  useAnimeEpisodes,
+  useCurrentTheme,
+} from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
 import NoResults from './NoResults';
@@ -42,7 +47,7 @@ const EpisodeList = ({
 }) => {
   const swipeRef = useRef<SwipeableMethods>(null);
   const router = useRouter();
-  const theme = useTheme();
+  const currentTheme = useCurrentTheme();
   const flashListRef = useRef<FlashList<Episode>>(null);
   const hasScrolledRef = useRef(false);
 
@@ -105,7 +110,7 @@ const EpisodeList = ({
       <Animated.View
         style={[
           animatedStyle,
-          { width: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: theme?.color4?.val },
+          { width: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: currentTheme?.color4 },
         ]}>
         <Animated.View
           style={[{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' }, eyeIconStyle]}>

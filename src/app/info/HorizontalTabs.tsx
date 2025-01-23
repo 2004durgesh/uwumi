@@ -110,7 +110,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
           borderBottomLeftRadius={0}
           borderBottomRightRadius={0}
           paddingBottom="$1.5"
-          borderColor="$color3"
+          borderColor="$color2"
           borderBottomWidth="$0.5"
           backgroundColor="transparent">
           <Tabs.Tab

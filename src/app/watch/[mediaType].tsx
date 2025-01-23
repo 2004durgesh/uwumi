@@ -1,25 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Dimensions, StyleProp, ViewStyle, StyleSheet, Pressable } from 'react-native';
+import { Dimensions, StyleProp, ViewStyle, Pressable } from 'react-native';
 import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { YStack, Spinner, Text, View, styled, Button } from 'tamagui';
+import { YStack, Spinner, Text, View, styled } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { ISubtitle, MediaType } from '@/constants/types';
-import { useWatchAnimeEpisodes } from '@/hooks/queries';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
-import { useDoubleTapGesture } from '@/hooks/useDoubleTap';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
-import { useEpisodesIdStore, useWatchProgressStore } from '@/hooks/stores';
+import { useEpisodesIdStore, useWatchProgressStore, useDoubleTapGesture, useWatchAnimeEpisodes } from '@/hooks';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
-import Ripple from 'react-native-material-ripple';
 
 export interface SubtitleTrack {
   index: number;

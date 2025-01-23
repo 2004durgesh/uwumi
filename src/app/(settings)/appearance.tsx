@@ -1,6 +1,6 @@
 import { Button, XStack, YStack } from 'tamagui';
 import React, { memo, useCallback } from 'react';
-import { useThemeStore, useAccentStore } from '@/hooks/stores';
+import { useThemeStore, useAccentStore } from '@/hooks';
 import { ThemedView } from '@/components/ThemedView';
 
 const ThemeSelector = memo(() => {

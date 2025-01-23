@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { Image } from 'react-native';
 import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
-import { BlurView } from 'expo-blur';
-import { Stack, useTheme, View, YStack } from 'tamagui';
-import { useThemeStore } from '@/hooks/stores';
+import { View } from 'tamagui';
+import { useThemeStore, useCurrentTheme } from '@/hooks';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
+
 export const unstable_settings = {
   // Ensure any route can link back to `/`
   initialRouteName: 'index',
@@ -34,7 +35,10 @@ const TabBarCapsule = ({
 
 export default function TabLayout() {
   const themeName = useThemeStore((state) => state.themeName);
-  console.log(themeName, 'tabs layout');
+  const currentTheme = useCurrentTheme();
+  // console.log(currentTheme, 'tabs');
+  SystemNavigationBar.setNavigationColor(currentTheme?.color3 || 'black');
+
   return (
     <Tabs
       screenOptions={{
@@ -49,7 +53,7 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           height: 64,
-          backgroundColor: 'red',
+          backgroundColor: currentTheme?.color3,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,

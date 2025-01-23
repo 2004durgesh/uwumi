@@ -16,10 +16,10 @@ import {
   PictureInPicture2,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
-import { Pressable, TouchableWithoutFeedbackProps } from 'react-native';
+import { TouchableWithoutFeedbackProps } from 'react-native';
 import { ISubtitle } from '@/constants/types';
 import { useRouter } from 'expo-router';
-import { useEpisodesIdStore, useEpisodesStore } from '@/hooks/stores';
+import { useEpisodesIdStore, useEpisodesStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
 import Ripple from 'react-native-material-ripple';
 

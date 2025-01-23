@@ -1,4 +1,4 @@
-import { useSearchStore, useTabsStore } from '@/hooks/stores';
+import { useCurrentTheme, useSearchStore, useTabsStore } from '@/hooks';
 import { X } from '@tamagui/lucide-icons';
 import React, { useCallback } from 'react';
 import { TextInput } from 'react-native';
@@ -9,6 +9,7 @@ const SearchBar: React.FC = () => {
   const setSearchQuery = useSearchStore((state) => state.setSearchQuery);
   const setDebouncedQuery = useSearchStore((state) => state.setDebouncedQuery);
   const setCurrentTab = useTabsStore((state) => state.setCurrentTab);
+  const currentTheme = useCurrentTheme();
 
   const handleTextChange = useCallback((text: string) => {
     setSearchQuery(text);
@@ -32,7 +33,7 @@ const SearchBar: React.FC = () => {
   return (
     <View width="100%">
       <XStack
-        borderWidth={1}
+        borderWidth={2}
         borderColor="$color2"
         borderRadius={10}
         padding="$2"
@@ -44,12 +45,13 @@ const SearchBar: React.FC = () => {
           keyboardType="web-search"
           returnKeyType="search"
           onSubmitEditing={handleSearch}
-          placeholderTextColor={'white'}
+          placeholderTextColor={currentTheme?.color1}
           placeholder="Search..."
           style={{
             color: 'white',
             padding: 10,
             flex: 1,
+            fontWeight: 500,
           }}
         />
         {searchQuery && <X onPress={handleClear} color="$color" />}

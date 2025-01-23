@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { TamaguiProvider, createTamagui } from 'tamagui';
+import { TamaguiProvider, Theme, createTamagui } from 'tamagui';
 import { PortalProvider } from '@tamagui/portal';
 import { Toaster } from 'sonner-native';
 import config from '../../tamagui.config';
@@ -15,6 +15,7 @@ import {
   Inter_800ExtraBold as InterBold,
 } from '@expo-google-fonts/inter';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useThemeStore } from '@/hooks';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -27,7 +28,7 @@ export default function RootLayout() {
     InterSemiBold,
     InterBold,
   });
-
+  const themeName = useThemeStore((state) => state.themeName);
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -55,13 +56,15 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig}>
           <PortalProvider>
-            <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="info/[mediaType]" />
-              <Stack.Screen name="watch/[mediaType]" />
-              <Stack.Screen name="(settings)" />
-              <Stack.Screen name="+not-found" />
-            </Stack>
+            <Theme name={themeName}>
+              <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="info/[mediaType]" />
+                <Stack.Screen name="watch/[mediaType]" />
+                <Stack.Screen name="(settings)" />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </Theme>
           </PortalProvider>
           <Toaster
             position="bottom-center"
