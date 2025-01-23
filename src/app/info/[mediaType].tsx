@@ -48,7 +48,7 @@ const Info = () => {
               colors={[
                 hexToRGB(currentTheme?.background, 1),
                 hexToRGB(currentTheme?.background, 0.7),
-                hexToRGB(currentTheme?.background, 0.4)
+                hexToRGB(currentTheme?.background, 0.4),
               ]}
               start={[0, 1]}
               end={[0, 0.5]}

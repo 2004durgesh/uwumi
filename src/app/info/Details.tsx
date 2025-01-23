@@ -6,7 +6,6 @@ import { ChevronDown } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { IAnimeInfo } from '@/constants/types';
 import { WebView } from 'react-native-webview';
-import { useThemeStore } from '@/hooks/stores';
 import { hexToRGB } from '@/constants/utils';
 import { useCurrentTheme } from '@/hooks';
 
