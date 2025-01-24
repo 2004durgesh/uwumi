@@ -1,5 +1,6 @@
 import { themes } from '@/constants/Theme';
-import { useThemeStore, useAccentStore } from '@/hooks';
+import { useAccentStore } from './stores/useAccentStore';
+import { useThemeStore } from './stores/useThemeStore';
 
 export const useCurrentTheme = () => {
   const themeName = useThemeStore((state) => state.themeName);

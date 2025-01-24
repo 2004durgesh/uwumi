@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 /* eslint-disable react-hooks/rules-of-hooks */
-import { View, Text, YStack, XStack, Spinner } from 'tamagui';
+import { View, Text, YStack, XStack, Spinner, styled, Progress } from 'tamagui';
 import { Pressable, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import React, { useEffect, useRef, useMemo } from 'react';
@@ -22,6 +22,7 @@ import {
   useWatchProgressStore,
   useAnimeEpisodes,
   useCurrentTheme,
+  usePureBlackBackground,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { Episode } from '@/constants/types';
@@ -33,6 +34,13 @@ const LoadingState = () => (
     <Spinner size="large" color="$color" />
   </YStack>
 );
+
+const StyledText = styled(Text, {
+  fontWeight: '500',
+  color: '$color1',
+  fontSize: '$2.5',
+  opacity: 0.7,
+});
 
 const EpisodeList = ({
   mediaType,
@@ -55,6 +63,7 @@ const EpisodeList = ({
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
   const episodesList = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
   const progresses = useWatchProgressStore((state) => state.progresses);
+  const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   // useEffect(() => {
   //   console.log("i cam in to pic");
   // }, []);
@@ -137,13 +146,17 @@ const EpisodeList = ({
       const progress = progresses[item?.id];
       if (progress?.currentTime && progress?.progress < 90) {
         return (
-          <Text fontSize="$2.5" fontWeight="500" color="$color1">
+          <StyledText>
             Progress: {formatTime(progress.currentTime)}/{formatTime(progress.duration)}
-          </Text>
+          </StyledText>
         );
       }
 
-      return progress?.progress > 90 ? <EyeOff color="white" size={15} /> : <Eye color="white" size={15} />;
+      return progress?.progress > 90 ? (
+        <EyeOff opacity={0.7} color="white" size={15} />
+      ) : (
+        <Eye opacity={0.7} color="white" size={15} />
+      );
     },
     [currentEpisodeId, progresses],
   );
@@ -172,15 +185,15 @@ const EpisodeList = ({
           gap={'$4'}
           padding={2}
           borderWidth={1}
-          borderColor={currentEpisodeId === item.id ? '$color4' : '$background'}
-          backgroundColor="$background">
+          borderColor={currentEpisodeId === item.id ? '$color4' : ''}
+          backgroundColor={pureBlackBackground ? '#000' : '$background'}>
           <XStack gap={'$4'}>
-            <View position="relative">
-              <CustomImage source={item?.image} style={{ width: 160, height: 107, bordeRadius: 4 }} />
+            <View position="relative" overflow='hidden' borderRadius={10}>
+              <CustomImage source={item?.image} style={{ width: 160, height: 107, borderRadius: 10 }} />
               <View
                 position="absolute"
-                bottom="$1"
-                left="$1"
+                bottom="$2.5"
+                left="$2.5"
                 backgroundColor="$background"
                 opacity={0.8}
                 borderRadius="$4"
@@ -190,28 +203,37 @@ const EpisodeList = ({
                   EP {item.number}
                 </Text>
               </View>
+              {progresses[item?.id] && swipeable && (
+                <View position="absolute" bottom="$0" left="50%" transform={[{ translateX: '-50%' }]}>
+                  <Progress
+                    size={'$2'}
+                    scaleX={1.15}
+                    borderRadius={0}
+                    backgroundColor="$color1"
+                    value={Math.round(progresses[item?.id]?.progress) || 0}
+                    max={100}>
+                    <Progress.Indicator animation="bouncy" backgroundColor="$color4" />
+                  </Progress>
+                </View>
+              )}
             </View>
             <YStack padding={2} flex={1} justifyContent="space-between">
               <YStack>
                 <XStack alignItems="center" justifyContent="space-between" gap={2}>
-                  <Text fontSize="$3" fontWeight="700" numberOfLines={2} flex={1}>
+                  <Text fontSize="$3" fontWeight="700" numberOfLines={1} flex={1}>
                     {item.title}
                   </Text>
                   <XStack gap={2}>
-                    <Captions size={20} color="$color1" />
-                    {item?.isDub && <Mic size={20} color="$color1" />}
+                    <Captions size={20} color="$color1" opacity={0.7} />
+                    {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
                   </XStack>
                 </XStack>
-                <Text fontSize="$2.5" color="$color1" fontWeight="500" numberOfLines={2}>
-                  {item?.description}
-                </Text>
+                <StyledText numberOfLines={4}>{item?.description}</StyledText>
               </YStack>
 
               <XStack justifyContent="space-between" alignItems="center">
                 <View>{renderEpisodeProgress(item)}</View>
-                <Text fontSize="$2.5" fontWeight="500" color="$color1">
-                  {new Date(item?.airDate).toDateString()}
-                </Text>
+                <StyledText>{new Date(item?.airDate).toDateString()}</StyledText>
               </XStack>
             </YStack>
           </XStack>

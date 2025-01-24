@@ -2,7 +2,7 @@ import AnimatedCountdown from '@/components/AnimatedCountdown';
 import { AnimatedCustomImage } from '@/components/CustomImage';
 import IconTitle from '@/components/IconTitle';
 import { ThemedView } from '@/components/ThemedView';
-import { useCurrentTheme, useInfo, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useInfo, usePureBlackBackground, useThemeStore } from '@/hooks';
 import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams } from 'expo-router';
@@ -26,7 +26,7 @@ const Info = () => {
   }>();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
-  const themeName = useThemeStore((state: any) => state.themeName);
+  const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
 
   return (
@@ -45,11 +45,15 @@ const Info = () => {
             <LinearGradient
               width="100%"
               height="300"
-              colors={[
-                hexToRGB(currentTheme?.background, 1),
-                hexToRGB(currentTheme?.background, 0.7),
-                hexToRGB(currentTheme?.background, 0.4),
-              ]}
+              colors={
+                pureBlackBackground
+                  ? [hexToRGB('#000000', 1), hexToRGB('#000000', 0.7), hexToRGB('#000000', 0.4)]
+                  : [
+                      hexToRGB(currentTheme?.background, 1),
+                      hexToRGB(currentTheme?.background, 0.7),
+                      hexToRGB(currentTheme?.background, 0.4),
+                    ]
+              }
               start={[0, 1]}
               end={[0, 0.5]}
               flex={1}

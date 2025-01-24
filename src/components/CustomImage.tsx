@@ -12,7 +12,7 @@ const CustomImage = forwardRef<Image, CustomImageProps>((props, ref) => {
   const { source, style, ...rest } = props;
   const imageSource = typeof source === 'string' ? { uri: source } : source;
 
-  return <Image ref={ref} source={imageSource} transition={1000} style={style} {...rest} />;
+  return <Image ref={ref} source={imageSource} transition={1000} style={[{ overflow: 'hidden' }, style]} {...rest} />;
 });
 
 CustomImage.displayName = 'CustomImage';

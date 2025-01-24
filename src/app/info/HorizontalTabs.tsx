@@ -118,6 +118,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             paddingHorizontal="$3"
             paddingVertical="$2"
             value="tab1"
+            backgroundColor="transparent"
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab1' ? '800' : '400'}
@@ -130,6 +131,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             paddingHorizontal="$3"
             paddingVertical="$2"
             value="tab2"
+            backgroundColor="transparent"
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab2' ? '800' : '400'}
@@ -142,6 +144,7 @@ const HorizontalTabs: React.FC<TabsProps> = ({ data }) => {
             paddingHorizontal="$3"
             paddingVertical="$2"
             value="tab3"
+            backgroundColor="transparent"
             onInteraction={handleOnInteraction}>
             <Text
               fontWeight={currentTab === 'tab3' ? '800' : '400'}

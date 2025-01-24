@@ -5,6 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Pressable } from 'react-native';
 import { themes } from '@/constants/Theme';
 import { FlatList } from 'react-native';
+import { Check } from '@tamagui/lucide-icons';
 
 const Appearance = () => {
   const setThemeName = useThemeStore((state) => state.setThemeName);
@@ -39,7 +40,7 @@ const Appearance = () => {
       })
       .filter((item) => item !== undefined);
 
-    console.log(allThemes, accentThemes);
+    // console.log(allThemes, accentThemes);
 
     const handleAccentChange = useCallback(
       (accent: string) => {
@@ -62,7 +63,7 @@ const Appearance = () => {
                 style={{
                   height: 150,
                   width: 100,
-                  backgroundColor: themes[`${themeName}_${accent}`]?.background,
+                  backgroundColor: pureBlackBackground ? '#000' : themes[`${themeName}_${accent}`]?.background,
                   borderRadius: 10,
                   borderColor:
                     accentName === accent
@@ -75,13 +76,12 @@ const Appearance = () => {
                   <YStack flex={1} justifyContent="space-between">
                     <YStack gap={4} margin="$2">
                       <XStack height={15} gap={8}>
-                        <View
-                          flex={1}
-                          width="70%"
-                          borderRadius={10}
-                          backgroundColor={themes[`${themeName}_${accent}`]?.color1}
-                        />
-                        <Circle size={15} backgroundColor={themes[`${themeName}_${accent}`]?.color} />
+                        <View width={50} borderRadius={10} backgroundColor={themes[`${themeName}_${accent}`]?.color1} />
+                        {accentName === accent && (
+                          <Circle size={15} backgroundColor={themes[`${themeName}_${accent}`]?.color}>
+                            <Check size={12} strokeWidth={3.5} color={themes[`${themeName}_${accent}`]?.color4} />
+                          </Circle>
+                        )}
                       </XStack>
                       <View
                         width="50%"
