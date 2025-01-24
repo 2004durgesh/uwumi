@@ -1,6 +1,6 @@
-import { Button, Circle, Switch, Text, View, XStack, YStack } from 'tamagui';
+import { Button, Circle, Separator, Switch, Text, View, XStack, YStack } from 'tamagui';
 import React, { memo, useCallback } from 'react';
-import { useThemeStore, useAccentStore, usePureBlackBackground } from '@/hooks';
+import { useThemeStore, useAccentStore, usePureBlackBackground, useCurrentTheme } from '@/hooks';
 import { ThemedView } from '@/components/ThemedView';
 import { Pressable } from 'react-native';
 import { themes } from '@/constants/Theme';
@@ -14,17 +14,38 @@ const Appearance = () => {
   const accentName = useAccentStore((state) => state.accentName);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const setPureBlackBackground = usePureBlackBackground((state) => state.setPureBlackBackground);
+  const currentTheme = useCurrentTheme();
 
   const ThemeSelector = memo(() => {
     return (
-      <XStack gap={10} justifyContent="center">
-        <Button themeInverse onPress={() => setThemeName('light')} opacity={themeName === 'light' ? 0.5 : 1}>
-          Light Theme
-        </Button>
-        <Button themeInverse onPress={() => setThemeName('dark')} opacity={themeName === 'dark' ? 0.5 : 1}>
-          Dark Theme
-        </Button>
-      </XStack>
+      <View alignItems="center" justifyContent="center" marginVertical={24}>
+        <XStack width="50%" borderWidth={2} borderColor="$color2" overflow="hidden" borderRadius={10}>
+          <Pressable
+            style={{
+              flex: 1,
+              backgroundColor: themeName === 'light' ? currentTheme?.color4 : 'transparent',
+            }}
+            onPress={() => {
+              setThemeName('light');
+              setPureBlackBackground(false);
+            }}>
+            <Text color={currentTheme?.color1} fontWeight="500" fontSize={18} textAlign="center">
+              Light
+            </Text>
+          </Pressable>
+          <Separator vertical />
+          <Pressable
+            style={{
+              flex: 1,
+              backgroundColor: themeName === 'dark' ? currentTheme?.color4 : 'transparent',
+            }}
+            onPress={() => setThemeName('dark')}>
+            <Text color={currentTheme?.color1} fontWeight="500" fontSize={18} textAlign="center">
+              Dark
+            </Text>
+          </Pressable>
+        </XStack>
+      </View>
     );
   });
 
@@ -128,26 +149,28 @@ const Appearance = () => {
   ThemeSelector.displayName = 'ThemeSelector';
   AccentSelector.displayName = 'AccentSelector';
   return (
-    <ThemedView>
+    <ThemedView padding={10}>
       <ThemeSelector />
       <AccentSelector />
-      <XStack alignItems="center" padding={10} justifyContent="space-between" gap="$3">
-        <Text fontWeight={500}>Pure black dark background</Text>
-        <Switch
-          borderWidth={2}
-          borderColor={pureBlackBackground ? '$color' : '$color2'}
-          size="$4"
-          backgroundColor={pureBlackBackground ? '$color' : 'transparent'}
-          checked={pureBlackBackground}
-          onCheckedChange={setPureBlackBackground}>
-          <Switch.Thumb
-            borderWidth={0}
-            scale={0.7}
-            backgroundColor={pureBlackBackground ? '$color4' : '$color2'}
-            animation="quick"
-          />
-        </Switch>
-      </XStack>
+      {themeName === 'dark' && (
+        <XStack alignItems="center" padding={10} justifyContent="space-between" gap="$3">
+          <Text fontWeight={500}>Pure black dark background</Text>
+          <Switch
+            borderWidth={2}
+            borderColor={pureBlackBackground ? '$color' : '$color2'}
+            size="$4"
+            backgroundColor={pureBlackBackground ? '$color' : 'transparent'}
+            checked={pureBlackBackground}
+            onCheckedChange={setPureBlackBackground}>
+            <Switch.Thumb
+              borderWidth={0}
+              scale={0.7}
+              backgroundColor={pureBlackBackground ? '$color4' : '$color2'}
+              animation="quick"
+            />
+          </Switch>
+        </XStack>
+      )}
     </ThemedView>
   );
 };

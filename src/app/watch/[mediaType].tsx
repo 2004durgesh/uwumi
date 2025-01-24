@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Dimensions, StyleProp, ViewStyle, Pressable } from 'react-native';
-import Video, { ISO639_1, SelectedTrackType, TextTrackType, type VideoRef } from 'react-native-video';
+import Video, {
+  ISO639_1,
+  SelectedTrackType,
+  TextTrackType,
+  SelectedVideoTrackType,
+  type VideoRef,
+} from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { YStack, Spinner, Text, View, styled } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -17,6 +23,7 @@ import { VolumeManager } from 'react-native-volume-manager';
 import { useEpisodesIdStore, useWatchProgressStore, useDoubleTapGesture, useWatchAnimeEpisodes } from '@/hooks';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
+import axios from 'axios';
 
 export interface SubtitleTrack {
   index: number;
@@ -30,6 +37,14 @@ export interface SubtitleTrack {
 interface PlaybackState {
   isPlaying: boolean;
   isSeeking: boolean;
+}
+
+export interface VideoTrack {
+  width: number;
+  height: number;
+  codecs: string;
+  index: number;
+  bitrate: number;
 }
 
 const SeekText = styled(Text, {
@@ -119,6 +134,8 @@ const Watch = () => {
   });
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
+  const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
+  const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
   const [isBuffering, setIsBuffering] = useState(false);
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
@@ -325,6 +342,47 @@ const Watch = () => {
     [data?.sources],
   );
 
+  useEffect(() => {
+    if (source) {
+      const fetchQuality = async () => {
+        try {
+          const { data } = await axios.get(`${source}?quality`);
+
+          // Extract resolutions using regex
+          const regex =
+            /^#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+),FRAME-RATE=(\d+\.\d+),CODECS="([^,]+)/;
+          const lines = data.split('\n');
+          const tracks = [];
+          for (const line of lines) {
+            const match = regex.exec(line);
+            if (match) {
+              tracks.push({
+                bitrate: parseInt(match[1]),
+                width: parseInt(match[2]),
+                height: parseInt(match[3]),
+                codecs: match[5],
+                index: tracks.length,
+              });
+            }
+          }
+
+          console.log('Available qualities:', tracks);
+          setVideoTracks(tracks);
+        } catch (error) {
+          console.error('Failed to fetch quality:', error);
+        }
+      };
+      fetchQuality();
+    }
+  }, [source]);
+
+  // useEffect(() => {
+  //   console.log('Selected quality changed:', {
+  //     index: selectedVideoTrackIndex,
+  //     quality: videoTracks?.[selectedVideoTrackIndex || 0],
+  //   });
+  // }, [selectedVideoTrackIndex, videoTracks]);
+
   const gestures = Gesture.Exclusive(doubleTapGesture, brightnessVolumeGesture);
 
   useEffect(() => {
@@ -418,14 +476,17 @@ const Watch = () => {
                     setIsVideoReady(true);
                     videoRef?.current?.seek(getProgress(episodeId)?.currentTime || 0);
                   }}
-                  // selectedVideoTrack={{
-                  //   type: SelectedVideoTrackType.INDEX,
-                  //   value: 0,
-                  // }}
+                  selectedVideoTrack={{
+                    type: SelectedVideoTrackType.INDEX,
+                    value: selectedVideoTrackIndex ?? 0,
+                  }}
                   selectedTextTrack={{
                     type: SelectedTrackType.INDEX,
                     value: (selectedSubtitleIndex ?? 0) + 1,
                   }}
+                  // onVideoTracks={(tracks) => {
+                  //   console.log('Video Tracks:', tracks);
+                  // }}
                   // onTextTracks={(tracks) => {
                   //   console.log('Text Tracks:', tracks);
                   // }}
@@ -445,13 +506,13 @@ const Watch = () => {
                     subtitleTracks={subtitleTracks}
                     selectedSubtitleIndex={selectedSubtitleIndex}
                     setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                    videoTracks={videoTracks}
+                    selectedVideoTrackIndex={selectedVideoTrackIndex}
+                    setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}
                     onPlayPress={handlePlayPress}
                     onMutePress={handleMutePress}
                     onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
                     onSeek={handleSeek}
-                    onEnterPictureInPicture={() => {
-                      videoRef.current?.enterPictureInPicture();
-                    }}
                   />
                 )}
               </View>

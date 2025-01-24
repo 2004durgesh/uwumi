@@ -1,5 +1,4 @@
-import { type ViewProps } from 'react-native';
-import { View, Theme } from 'tamagui';
+import { View, Theme, ViewProps } from 'tamagui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore, useAccentStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { StatusBar, StatusBarProps } from 'expo-status-bar';
@@ -9,15 +8,14 @@ export type ThemedViewProps = {
   useSafeArea?: boolean;
   useStatusBar?: boolean;
   statusBarProps?: StatusBarProps;
-  otherProps?: ViewProps;
-};
+} & ViewProps;
 
 export function ThemedView({
   children,
   useSafeArea = true,
   useStatusBar = false,
   statusBarProps,
-  ...otherProps
+  ...props
 }: ThemedViewProps) {
   const themeName = useThemeStore((state) => state.themeName);
   const accentName = useAccentStore((state) => state.accentName);
@@ -25,7 +23,7 @@ export function ThemedView({
 
   const currentTheme = useCurrentTheme();
   const content = (
-    <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} {...otherProps}>
+    <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} {...props}>
       {children}
     </View>
   );

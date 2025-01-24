@@ -185,11 +185,13 @@ const EpisodeList = ({
           gap={'$4'}
           padding={2}
           borderWidth={1}
+          borderRadius={10}
           borderColor={currentEpisodeId === item.id ? '$color4' : ''}
           backgroundColor={pureBlackBackground ? '#000' : '$background'}>
           <XStack gap={'$4'}>
-            <View position="relative" overflow='hidden' borderRadius={10}>
-              <CustomImage source={item?.image} style={{ width: 160, height: 107, borderRadius: 10 }} />
+            <View position="relative" overflow="hidden" borderRadius={8}>
+              {/* 10 - 2 (of gap) = 8 */}
+              <CustomImage source={item?.image} style={{ width: 160, height: 107 }} />
               <View
                 position="absolute"
                 bottom="$2.5"

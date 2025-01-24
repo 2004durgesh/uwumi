@@ -27,6 +27,7 @@ export function useMediaFeed<T>(
         },
         timeout: 5000,
       });
+      // console.log(data,"mediaquery");
       return data;
     },
     getNextPageParam: (lastPage: ISearch<T>, pages) => {

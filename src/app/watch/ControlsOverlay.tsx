@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner, Tabs } from 'tamagui';
 import {
   Play,
   Pause,
@@ -13,7 +13,6 @@ import {
   CaptionsOff,
   SkipForward,
   SkipBack,
-  PictureInPicture2,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { TouchableWithoutFeedbackProps } from 'react-native';
@@ -22,6 +21,7 @@ import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
 import Ripple from 'react-native-material-ripple';
+import { VideoTrack } from './[mediaType]';
 
 interface CustomPressableProps extends TouchableWithoutFeedbackProps {
   onPress: () => void;
@@ -42,6 +42,9 @@ interface ControlsOverlayProps {
   subtitleTracks: ISubtitle[] | undefined;
   selectedSubtitleIndex: number | undefined;
   setSelectedSubtitleIndex: (index: number | undefined) => void;
+  videoTracks: VideoTrack[] | undefined;
+  selectedVideoTrackIndex: number | undefined;
+  setSelectedVideoTrackIndex: (height: number | undefined) => void;
   currentTime: number;
   seekableDuration: number;
   title: string;
@@ -49,7 +52,6 @@ interface ControlsOverlayProps {
   onMutePress: () => void;
   onFullscreenPress: () => void;
   onSeek: (time: number) => void;
-  onEnterPictureInPicture: () => void;
 }
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
@@ -82,6 +84,9 @@ const ControlsOverlay = memo(
     subtitleTracks,
     selectedSubtitleIndex,
     setSelectedSubtitleIndex,
+    videoTracks,
+    selectedVideoTrackIndex,
+    setSelectedVideoTrackIndex,
     currentTime,
     seekableDuration,
     title,
@@ -89,7 +94,6 @@ const ControlsOverlay = memo(
     onMutePress,
     onFullscreenPress,
     onSeek,
-    onEnterPictureInPicture,
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     // console.log("settings are being shown", openSettings);
@@ -137,12 +141,6 @@ const ControlsOverlay = memo(
               )}
               <CustomPressable
                 onPress={() => {
-                  onEnterPictureInPicture();
-                }}>
-                <PictureInPicture2 color="white" size={20} />
-              </CustomPressable>
-              <CustomPressable
-                onPress={() => {
                   setOpenSettings(!openSettings);
                 }}>
                 <Settings color="white" size={20} />
@@ -166,20 +164,67 @@ const ControlsOverlay = memo(
                 />
                 <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-                      {subtitleTracks?.map((track, index) => (
-                        <CustomPressable
-                          key={index}
-                          style={{
-                            backgroundColor: '#0e0f15',
-                          }}
-                          onPress={() => {
-                            setSelectedSubtitleIndex(index);
-                          }}>
-                          <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
-                        </CustomPressable>
-                      ))}
-                    </YStack>
+                    <Tabs
+                      defaultValue="tab1"
+                      orientation="horizontal"
+                      flexDirection="column"
+                      // width={'100%'}
+                      // height={150}
+                      borderRadius="$4"
+                      overflow="hidden"
+                      borderColor="$borderColor">
+                      <Tabs.List disablePassBorderRadius="bottom">
+                        <Tabs.Tab flex={1} value="tab1">
+                          <Text>Quality</Text>
+                        </Tabs.Tab>
+                        <Tabs.Tab flex={1} value="tab2">
+                          <Text>Subtitle</Text>
+                        </Tabs.Tab>
+                        <Tabs.Tab flex={1} value="tab3">
+                          <Text>Audio</Text>
+                        </Tabs.Tab>
+                      </Tabs.List>
+                      <Tabs.Content value="tab1">
+                        <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                          {videoTracks?.map((track, index) => (
+                            <CustomPressable
+                              key={index}
+                              style={{
+                                backgroundColor: '#0e0f15',
+                              }}
+                              onPress={() => {
+                                console.log(index, selectedSubtitleIndex,track.index);
+                                setSelectedVideoTrackIndex(track.index);
+                              }}>
+                              <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>
+                                {track.height}p
+                              </Text>
+                            </CustomPressable>
+                          ))}
+                        </YStack>
+                      </Tabs.Content>
+
+                      <Tabs.Content value="tab2">
+                        <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                          {subtitleTracks?.map((track, index) => (
+                            <CustomPressable
+                              key={index}
+                              style={{
+                                backgroundColor: '#0e0f15',
+                              }}
+                              onPress={() => {
+                                setSelectedSubtitleIndex(index);
+                              }}>
+                              <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
+                            </CustomPressable>
+                          ))}
+                        </YStack>
+                      </Tabs.Content>
+
+                      <Tabs.Content value="tab3">
+                        <Text>Working on it</Text>
+                      </Tabs.Content>
+                    </Tabs>
                   </Sheet.ScrollView>
                 </Sheet.Frame>
               </Sheet>
