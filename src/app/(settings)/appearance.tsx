@@ -1,4 +1,4 @@
-import { Button, Circle, Separator, Switch, Text, View, XStack, YStack } from 'tamagui';
+import { Circle, Separator, Switch, Text, View, XStack, YStack } from 'tamagui';
 import React, { memo, useCallback } from 'react';
 import { useThemeStore, useAccentStore, usePureBlackBackground, useCurrentTheme } from '@/hooks';
 import { ThemedView } from '@/components/ThemedView';

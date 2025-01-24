@@ -193,7 +193,7 @@ const ControlsOverlay = memo(
                                 backgroundColor: '#0e0f15',
                               }}
                               onPress={() => {
-                                console.log(index, selectedSubtitleIndex,track.index);
+                                console.log(index, selectedSubtitleIndex, track.index);
                                 setSelectedVideoTrackIndex(track.index);
                               }}>
                               <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>

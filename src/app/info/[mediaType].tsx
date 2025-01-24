@@ -2,7 +2,7 @@ import AnimatedCountdown from '@/components/AnimatedCountdown';
 import { AnimatedCustomImage } from '@/components/CustomImage';
 import IconTitle from '@/components/IconTitle';
 import { ThemedView } from '@/components/ThemedView';
-import { useCurrentTheme, useInfo, usePureBlackBackground, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useInfo, usePureBlackBackground } from '@/hooks';
 import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams } from 'expo-router';
