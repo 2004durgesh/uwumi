@@ -220,3 +220,20 @@ export interface IMovieResult {
   type?: TvType;
   [x: string]: unknown;
 }
+
+export interface IMovieInfo extends IMovieResult {
+  cover?: string;
+  recommendations?: IMovieResult[];
+  genres?: string[];
+  description?: string;
+  rating?: number;
+  status?: MediaStatus;
+  duration?: string;
+  production?: string;
+  casts?: string[];
+  tags?: string[];
+  totalEpisodes?: number;
+  trailer?: Trailer;
+  seasons?: { season: number; image?: string; episodes: IMovieEpisode[] }[];
+  episodes?: IMovieEpisode[];
+}

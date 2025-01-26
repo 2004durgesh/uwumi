@@ -18,7 +18,7 @@ const Appearance = () => {
 
   const ThemeSelector = memo(() => {
     return (
-      <View alignItems="center" justifyContent="center" marginVertical={24}>
+      <View alignItems="center" justifyContent="center">
         <XStack width="50%" borderWidth={2} borderColor="$color2" overflow="hidden" borderRadius={10}>
           <Pressable
             style={{

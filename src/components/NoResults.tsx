@@ -19,10 +19,10 @@ const NoResults = () => {
 
   return (
     <YStack padding="$4" alignItems="center" justifyContent="center" gap="$4">
-      <Text fontSize={46} fontWeight={500} textAlign="center" color="$color2">
+      <Text fontSize={46} fontWeight={500} textAlign="center" color="$color1">
         {randomKaomoji}
       </Text>
-      <Text fontSize={16} color="$color2">
+      <Text fontSize={16} color="$color">
         No results found
       </Text>
     </YStack>

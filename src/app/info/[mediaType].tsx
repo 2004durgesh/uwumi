@@ -28,7 +28,7 @@ const Info = () => {
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
-
+  console.log(data);
   return (
     <>
       <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>

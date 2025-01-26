@@ -1,16 +1,16 @@
 import { MotiView } from 'moti';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { Text, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
-import { Pressable } from 'react-native';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
-import { IAnimeInfo } from '@/constants/types';
+import { IAnimeInfo, IMovieInfo } from '@/constants/types';
 import { WebView } from 'react-native-webview';
 import { hexToRGB } from '@/constants/utils';
 import { useCurrentTheme, usePureBlackBackground } from '@/hooks';
+import RippleButton from '@/components/RippleButton';
 
 type DetailsProps = {
-  data?: IAnimeInfo;
+  data?: IAnimeInfo | IMovieInfo;
   lineHeight?: number;
 };
 
@@ -102,15 +102,15 @@ const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
                         type: 'timing',
                         duration: 500,
                       }}>
-                      <Pressable
+                      <RippleButton
                         style={{ width: '100%', height: 25, alignItems: 'center' }}
                         onPress={() => setIsExpanded(!isExpanded)}>
                         <ChevronDown size={24} color="$color" />
-                      </Pressable>
+                      </RippleButton>
                     </MotiView>
                     <YStack flex={1} height="100%" width="100%" gap="$2">
                       <StatisticItem label="Type" value={data?.type || ''} />
-                      <StatisticItem label="Country" value={data?.countryOfOrigin || ''} />
+                      <StatisticItem label="Country" value={String(data?.countryOfOrigin || '')} />
                       <StatisticItem label="Season" value={`${data?.season || ''} ${data?.releaseDate}`} />
                       <StatisticItem label="Duration" value={`${data?.duration}m`} />
                       <YStack height={200} position="relative">

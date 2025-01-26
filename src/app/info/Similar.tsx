@@ -1,9 +1,9 @@
 import { View } from 'tamagui';
 import React from 'react';
-import { IAnimeInfo } from '@/constants/types';
+import { IAnimeInfo, IMovieInfo } from '@/constants/types';
 import CardList from '@/components/CardList';
 
-const Similar = ({ data }: { data: IAnimeInfo }) => {
+const Similar = ({ data }: { data: IAnimeInfo | IMovieInfo }) => {
   return (
     <View height="100%">
       {/* @ts-ignore */}
