@@ -130,7 +130,11 @@ const Appearance = () => {
                           flex={1}
                           width="70%"
                           borderRadius={10}
-                          backgroundColor={themes[`${themeName}_${accent}`]?.color3}
+                          backgroundColor={
+                            pureBlackBackground
+                              ? themes[`${themeName}_${accent}`]?.color5
+                              : themes[`${themeName}_${accent}`]?.color3
+                          }
                         />
                       </XStack>
                     </View>
@@ -165,7 +169,11 @@ const Appearance = () => {
             <Switch.Thumb
               borderWidth={0}
               scale={0.7}
-              backgroundColor={pureBlackBackground ? '$color4' : '$color2'}
+              backgroundColor={
+                pureBlackBackground
+                  ? themes[`${themeName}_${accentName}`]?.color4
+                  : themes[`${themeName}_${accentName}`]?.color2
+              }
               animation="quick"
             />
           </Switch>

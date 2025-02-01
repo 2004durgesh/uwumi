@@ -3,7 +3,7 @@ import React from 'react';
 import { Image } from 'react-native';
 import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { View } from 'tamagui';
-import { useThemeStore, useCurrentTheme } from '@/hooks';
+import { useThemeStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 export const unstable_settings = {
@@ -13,8 +13,9 @@ export const unstable_settings = {
 export default function TabLayout() {
   const themeName = useThemeStore((state) => state.themeName);
   const currentTheme = useCurrentTheme();
-  // console.log(currentTheme, 'tabs');
-  SystemNavigationBar.setNavigationColor(currentTheme?.color3 || 'black');
+  const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
+  // console.log(currentTheme, 'tabs',themeName);
+  SystemNavigationBar.setNavigationColor(pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black');
 
   const TabBarCapsule = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
     return (
@@ -45,7 +46,7 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           height: 64,
-          backgroundColor: currentTheme?.color3,
+          backgroundColor: pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,

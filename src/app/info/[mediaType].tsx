@@ -11,9 +11,13 @@ import { ImageBackground, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
-import HorizontalTabs from './HorizontalTabs';
+import HorizontalTabs from '@/components/HorizontalTabs';
 import { MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { hexToRGB } from '@/constants/utils';
+import Episodes from './Episodes';
+import Chapters from './Chapters';
+import Details from './Details';
+import Similar from './Similar';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -28,6 +32,23 @@ const Info = () => {
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
+  const tabItems = [
+    {
+      key: 'tab1',
+      label: mediaType === MediaType.ANIME ? 'Episodes' : 'Chapters',
+      content: mediaType === MediaType.ANIME ? <Episodes /> : <Chapters />,
+    },
+    {
+      key: 'tab2',
+      label: 'Details',
+      content: <Details data={data} />,
+    },
+    {
+      key: 'tab3',
+      label: 'Similar',
+      content: <Similar data={data} />,
+    },
+  ];
   console.log(data);
   return (
     <>
@@ -94,7 +115,7 @@ const Info = () => {
         </ZStack>
 
         <YStack alignItems="center" marginTop={20} flex={1}>
-          {data && <HorizontalTabs data={data} />}
+          {data && <HorizontalTabs items={tabItems} initialTab="tab1" />}
         </YStack>
       </ThemedView>
     </>

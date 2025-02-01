@@ -1,5 +1,5 @@
 import { DEFAULT_ANIME_PROVIDER } from '@/constants/provider';
-import { Episode, IAnimeInfo, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
+import { Episode, IAnimeInfo, IMovieInfo, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { getFetchUrl } from '@/constants/utils';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -17,7 +17,7 @@ export function useInfo({
   id: string;
   provider: string;
 }) {
-  return useQuery<IAnimeInfo>({
+  return useQuery<IAnimeInfo | IMovieInfo>({
     queryKey: [mediaType, 'info', id, metaProvider, type, provider],
     queryFn: async () => {
       const url =

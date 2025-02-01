@@ -41,7 +41,7 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
           value={id}
           borderWidth={2}
           borderColor={currentTab === id ? '$color4' : '$color1'}
-          backgroundColor={currentTab === id ? '$color4' : '$background'}>
+          backgroundColor={currentTab === id ? '$color4' : 'transparent'}>
           <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
         </Tabs.Tab>
       ))}

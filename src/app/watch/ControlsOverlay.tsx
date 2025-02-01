@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner, Tabs } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
 import {
   Play,
   Pause,
@@ -20,7 +20,7 @@ import { useEpisodesIdStore, useEpisodesStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
 import { VideoTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
-
+import HorizontalTabs from '@/components/HorizontalTabs';
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -86,7 +86,54 @@ const ControlsOverlay = memo(
     const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
     const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].id : null;
     const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
-    // temp
+    const tabItems = [
+      {
+        key: 'tab1',
+        label: 'Quality',
+        content: (
+          <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+            {videoTracks?.map((track, index) => (
+              <RippleButton
+                key={index}
+                style={{
+                  backgroundColor: '#0e0f15',
+                }}
+                onPress={() => {
+                  console.log(index, selectedSubtitleIndex, track.index);
+                  setSelectedVideoTrackIndex(track.index);
+                }}>
+                <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>{track.height}p</Text>
+              </RippleButton>
+            ))}
+          </YStack>
+        ),
+      },
+      {
+        key: 'tab2',
+        label: 'Subtitle',
+        content: (
+          <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+            {subtitleTracks?.map((track, index) => (
+              <RippleButton
+                key={index}
+                style={{
+                  backgroundColor: '#0e0f15',
+                }}
+                onPress={() => {
+                  setSelectedSubtitleIndex(index);
+                }}>
+                <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
+              </RippleButton>
+            ))}
+          </YStack>
+        ),
+      },
+      {
+        key: 'tab3',
+        label: 'Audio',
+        content: <Text>Working</Text>,
+      },
+    ];
     useEffect(() => {
       if (prevId || nextId) {
         setEpisodeIds(currentEpisodeId!, prevId, nextId);
@@ -141,67 +188,7 @@ const ControlsOverlay = memo(
                 />
                 <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <Tabs
-                      defaultValue="tab1"
-                      orientation="horizontal"
-                      flexDirection="column"
-                      // width={'100%'}
-                      // height={150}
-                      borderRadius="$4"
-                      overflow="hidden"
-                      borderColor="$borderColor">
-                      <Tabs.List disablePassBorderRadius="bottom">
-                        <Tabs.Tab flex={1} value="tab1">
-                          <Text>Quality</Text>
-                        </Tabs.Tab>
-                        <Tabs.Tab flex={1} value="tab2">
-                          <Text>Subtitle</Text>
-                        </Tabs.Tab>
-                        <Tabs.Tab flex={1} value="tab3">
-                          <Text>Audio</Text>
-                        </Tabs.Tab>
-                      </Tabs.List>
-                      <Tabs.Content value="tab1">
-                        <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-                          {videoTracks?.map((track, index) => (
-                            <RippleButton
-                              key={index}
-                              style={{
-                                backgroundColor: '#0e0f15',
-                              }}
-                              onPress={() => {
-                                console.log(index, selectedSubtitleIndex, track.index);
-                                setSelectedVideoTrackIndex(track.index);
-                              }}>
-                              <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>
-                                {track.height}p
-                              </Text>
-                            </RippleButton>
-                          ))}
-                        </YStack>
-                      </Tabs.Content>
-
-                      <Tabs.Content value="tab2">
-                        <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-                          {subtitleTracks?.map((track, index) => (
-                            <RippleButton
-                              key={index}
-                              style={{
-                                backgroundColor: '#0e0f15',
-                              }}
-                              onPress={() => {
-                                setSelectedSubtitleIndex(index);
-                              }}>
-                              <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
-                            </RippleButton>
-                          ))}
-                        </YStack>
-                      </Tabs.Content>
-
-                      <Tabs.Content value="tab3">
-                        <Text>Working on it</Text>
-                      </Tabs.Content>
-                    </Tabs>
+                    <HorizontalTabs items={tabItems} initialTab="tab1" />
                   </Sheet.ScrollView>
                 </Sheet.Frame>
               </Sheet>
