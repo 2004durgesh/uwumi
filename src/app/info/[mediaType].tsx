@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from '@/components/HorizontalTabs';
-import { MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
+import { IMangaChapter, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { hexToRGB } from '@/constants/utils';
 import Episodes from './Episodes';
 import Chapters from './Chapters';
@@ -36,7 +36,7 @@ const Info = () => {
     {
       key: 'tab1',
       label: mediaType === MediaType.ANIME ? 'Episodes' : 'Chapters',
-      content: mediaType === MediaType.ANIME ? <Episodes /> : <Chapters />,
+      content: mediaType === MediaType.ANIME ? <Episodes /> : <Chapters data={data?.chapters as IMangaChapter[]} />,
     },
     {
       key: 'tab2',

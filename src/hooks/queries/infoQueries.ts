@@ -33,7 +33,7 @@ export function useInfo({
         },
         timeout: 5000,
       });
-      // console.log(data);
+      console.log(data);
       return data;
     },
   });

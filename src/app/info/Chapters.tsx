@@ -1,10 +1,11 @@
+import { IMangaChapter } from '@/constants/types';
 import React from 'react';
 import { Text, View } from 'tamagui';
 
-const Chapters = () => {
+const Chapters = ({ data }: { data?: IMangaChapter[] })=> {
   return (
     <View>
-      <Text>Chapters</Text>
+      <Text>{JSON.stringify(data)}</Text>
     </View>
   );
 };

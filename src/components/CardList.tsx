@@ -55,7 +55,7 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
             mediaType: mediaType,
             metaProvider: metaProvider,
             type: item?.type,
-            provider: 'zoro',
+            provider: mediaType === MediaType.ANIME ? 'zoro' : 'mangadex',
             id: item.id,
             image: item.image,
           },

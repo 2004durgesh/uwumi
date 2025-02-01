@@ -98,6 +98,7 @@ export interface IAnimeInfo extends IAnimeResult {
   malId?: number | string;
   genres?: string[];
   description?: string;
+  chapters?: IMangaChapter[];
   status?: MediaStatus;
   totalEpisodes?: number;
   subOrDub?: SubOrSub;
@@ -117,6 +118,15 @@ export interface IAnimeInfo extends IAnimeResult {
   endDate?: FuzzyDate;
   recommendations?: IAnimeResult[];
   relations?: IAnimeResult[];
+}
+
+export interface IMangaChapter {
+  id: string;
+  title: string;
+  volume?: number;
+  pages?: number;
+  releaseDate?: string;
+  [x: string]: unknown; // other fields
 }
 
 export interface Character {
