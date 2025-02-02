@@ -49,7 +49,7 @@ const Info = () => {
       content: <Similar data={data} />,
     },
   ];
-  console.log(data);
+  // console.log(data);
   return (
     <>
       <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>

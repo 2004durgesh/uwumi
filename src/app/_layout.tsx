@@ -61,6 +61,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="info/[mediaType]" />
                 <Stack.Screen name="watch/[mediaType]" />
+                <Stack.Screen name="read/[id]" />
                 <Stack.Screen name="(settings)" />
                 <Stack.Screen name="+not-found" />
               </Stack>

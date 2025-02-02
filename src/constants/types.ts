@@ -123,9 +123,16 @@ export interface IAnimeInfo extends IAnimeResult {
 export interface IMangaChapter {
   id: string;
   title: string;
-  volume?: number;
+  volumeNumber?: number | string;
+  chapterNumber?: number | string;
   pages?: number;
   releaseDate?: string;
+  [x: string]: unknown; // other fields
+}
+
+export interface IMangaChapterPage {
+  img: string;
+  page: number;
   [x: string]: unknown; // other fields
 }
 
