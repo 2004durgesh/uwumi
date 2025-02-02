@@ -48,7 +48,7 @@ const SearchBar: React.FC = () => {
           placeholderTextColor={currentTheme?.color1}
           placeholder="Search..."
           style={{
-            color: 'white',
+            color: currentTheme?.color1,
             padding: 10,
             flex: 1,
             fontWeight: 500,

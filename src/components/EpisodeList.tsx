@@ -184,9 +184,10 @@ const EpisodeList = ({
         <YStack
           gap={'$4'}
           padding={2}
+          marginVertical={1}
           borderWidth={1}
           borderRadius={10}
-          borderColor={currentEpisodeId === item.id ? '$color4' : ''}
+          borderColor={currentEpisodeId === item.id ? '$color4' : 'transparent'}
           backgroundColor={pureBlackBackground ? '#000' : '$background'}>
           <XStack gap={'$4'}>
             <View position="relative" overflow="hidden" borderRadius={8}>

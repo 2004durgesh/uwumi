@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
-import { Spinner, Text, View } from 'tamagui';
+import { Spinner, View } from 'tamagui';
 import { useLocalSearchParams } from 'expo-router';
 import { useMangaChapterRead } from '@/hooks';
 import { FlashList } from '@shopify/flash-list';
