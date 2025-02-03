@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Set environment variables
+export NODE_ENV=production
 
 # Bundle JavaScript code
 echo "Bundling JavaScript code........................................................................."

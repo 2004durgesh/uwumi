@@ -35,8 +35,8 @@ const Info = () => {
   const tabItems = [
     {
       key: 'tab1',
-      label: mediaType === MediaType.ANIME ? 'Episodes' : 'Chapters',
-      content: mediaType === MediaType.ANIME ? <Episodes /> : <Chapters data={data?.chapters as IMangaChapter[]} />,
+      label: mediaType === MediaType.MANGA ? 'Chapters' : 'Episodes',
+      content: mediaType === MediaType.MANGA ? <Chapters data={data?.chapters as IMangaChapter[]} /> : <Episodes />,
     },
     {
       key: 'tab2',
@@ -49,7 +49,7 @@ const Info = () => {
       content: <Similar data={data} />,
     },
   ];
-  // console.log(data);
+  console.log(data);
   return (
     <>
       <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>

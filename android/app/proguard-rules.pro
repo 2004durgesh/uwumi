@@ -10,7 +10,6 @@
 # react-native-reanimated
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.turbomodule.** { *; }
--keep class com.shopify.reactnative.skia.** { *; }
 
 # Add any project specific keep options here:
 -keep class com.facebook.react.** { *; }

@@ -36,7 +36,6 @@
         }
       ],
       "expo-font",
-      "react-native-bottom-tabs",
       [
         "expo-build-properties",
         {
@@ -49,13 +48,6 @@
             "useFrameworks": "static",
             "deploymentTarget": "15.2"
           }
-        }
-      ],
-      [
-        "expo-video",
-        {
-          "supportsBackgroundPlayback": true,
-          "supportsPictureInPicture": true
         }
       ],
       [

@@ -278,7 +278,12 @@ const EpisodeList = ({
               friction={2}
               enableTrackpadTwoFingerGesture
               rightThreshold={40}
-              onSwipeableOpen={(_: any, s: any) => s.close()}
+              onSwipeableOpen={(e) => {
+                console.log(e, 'eopened');
+                if (swipeRef.current) {
+                  swipeRef.current.close();
+                }
+              }}
               onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               onSwipeableWillClose={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               renderRightActions={rightActions}>

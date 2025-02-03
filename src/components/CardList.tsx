@@ -12,6 +12,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
 import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch, useSearchStore } from '@/hooks';
+import { DEFAULT_ANIME_PROVIDER, DEFAULT_MANGA_PROVIDER, DEFAULT_MOVIE_PROVIDER } from '@/constants/provider';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;
@@ -55,7 +56,18 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
             mediaType: mediaType,
             metaProvider: metaProvider,
             type: item?.type,
-            provider: mediaType === MediaType.ANIME ? 'zoro' : 'mangadex',
+            provider: (() => {
+              switch (mediaType) {
+                case MediaType.ANIME:
+                  return DEFAULT_ANIME_PROVIDER;
+                case MediaType.MANGA:
+                  return DEFAULT_MANGA_PROVIDER;
+                case MediaType.MOVIE:
+                  return DEFAULT_MOVIE_PROVIDER;
+                default:
+                  return DEFAULT_ANIME_PROVIDER;
+              }
+            })(),
             id: item.id,
             image: item.image,
           },
