@@ -3,7 +3,7 @@
 import { View, Text, YStack, XStack, Spinner, styled, Progress } from 'tamagui';
 import { Pressable, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useRouter } from 'expo-router';
 import ReanimatedSwipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -23,11 +23,13 @@ import {
   useAnimeEpisodes,
   useCurrentTheme,
   usePureBlackBackground,
+  useMovieEpisodeStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
-import { Episode } from '@/constants/types';
+import { Episode, IMovieEpisode, MediaType } from '@/constants/types';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
+import RippleButton from './RippleButton';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -56,12 +58,21 @@ const EpisodeList = ({
   const swipeRef = useRef<SwipeableMethods>(null);
   const router = useRouter();
   const currentTheme = useCurrentTheme();
-  const flashListRef = useRef<FlashList<Episode>>(null);
+  const flashListRef = useRef<FlashList<Episode | IMovieEpisode>>(null);
   const hasScrolledRef = useRef(false);
+  const [seasonNumber, setSeasonNumber] = useState(0);
 
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
   const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider });
-  const episodesList = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
+  const movieSeasons = useMovieEpisodeStore((state) => state.movieSeasons);
+  const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
+  const episodes = useMemo(() => {
+    if (mediaType === MediaType.MOVIE && movieSeasons?.[seasonNumber]?.episodes) {
+      return movieSeasons[seasonNumber].episodes;
+    }
+    return animeEpisodes || [];
+  }, [mediaType, movieSeasons, seasonNumber, animeEpisodes]);
+  console.log('episodes', episodes);
   const progresses = useWatchProgressStore((state) => state.progresses);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   // useEffect(() => {
@@ -70,13 +81,16 @@ const EpisodeList = ({
 
   const setEpisodes = useEpisodesStore((state) => state.setEpisodes);
   useEffect(() => {
-    if (episodesList) {
-      setEpisodes(episodesList);
+    if (animeEpisodes) {
+      setEpisodes(animeEpisodes);
     }
-  }, [episodesList, setEpisodes]);
+  }, [animeEpisodes, setEpisodes]);
 
-  const currentEpisode = episodesList.find((episode) => episode.id === currentEpisodeId);
-
+  const currentEpisode = animeEpisodes.find((episode) => episode.id === currentEpisodeId);
+  console.log(
+    movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
+    seasonNumber,
+  );
   useEffect(() => {
     return () => {
       hasScrolledRef.current = false;
@@ -138,7 +152,7 @@ const EpisodeList = ({
   };
 
   const renderEpisodeProgress = useMemo(
-    () => (item: Episode) => {
+    () => (item: Episode | IMovieEpisode) => {
       if (currentEpisodeId === item?.id) {
         return <WavyAnimation />;
       }
@@ -161,7 +175,7 @@ const EpisodeList = ({
     [currentEpisodeId, progresses],
   );
 
-  const renderPressableItem = ({ item }: { item: Episode }) => {
+  const renderPressableItem = ({ item }: { item: Episode | IMovieEpisode }) => {
     return (
       <Pressable
         onPress={() => {
@@ -172,12 +186,12 @@ const EpisodeList = ({
               provider,
               id,
               episodeId: item?.id,
-              episodeDubId: item?.dubId,
-              isDub: item?.isDub,
-              poster: item?.image,
+              ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
+              ...(item?.isDub ? { isDub: item.isDub as string } : null),
+              poster: item?.image ?? item?.img?.hd,
               title: item?.title,
               description: item?.description,
-              number: item?.number,
+              number: item?.number ?? item?.episode,
             },
           });
         }}>
@@ -185,14 +199,14 @@ const EpisodeList = ({
           gap={'$4'}
           padding={2}
           marginVertical={1}
-          borderWidth={1}
+          borderWidth={2}
           borderRadius={10}
           borderColor={currentEpisodeId === item.id ? '$color4' : 'transparent'}
           backgroundColor={pureBlackBackground ? '#000' : '$background'}>
           <XStack gap={'$4'}>
             <View position="relative" overflow="hidden" borderRadius={8}>
               {/* 10 - 2 (of gap) = 8 */}
-              <CustomImage source={item?.image} style={{ width: 160, height: 107 }} />
+              <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
               <View
                 position="absolute"
                 bottom="$2.5"
@@ -203,7 +217,7 @@ const EpisodeList = ({
                 paddingHorizontal="$2"
                 paddingVertical="$1">
                 <Text fontSize="$3" fontWeight="700" color="$color">
-                  EP {item.number}
+                  EP {item.number ?? item.episode}
                 </Text>
               </View>
               {progresses[item?.id] && swipeable && (
@@ -236,7 +250,7 @@ const EpisodeList = ({
 
               <XStack justifyContent="space-between" alignItems="center">
                 <View>{renderEpisodeProgress(item)}</View>
-                <StyledText>{new Date(item?.airDate).toDateString()}</StyledText>
+                <StyledText>{new Date(item?.airDate ?? item?.releaseDate ?? '').toDateString()}</StyledText>
               </XStack>
             </YStack>
           </XStack>
@@ -250,9 +264,26 @@ const EpisodeList = ({
   }
   return (
     <YStack flex={1} gap={2}>
+      <XStack gap="$5" justifyContent="center" alignItems="center" flexWrap="wrap">
+        {movieSeasons?.flatMap((_, index) => (
+          <RippleButton
+            key={index}
+            onPress={() => {
+              setSeasonNumber(index);
+            }}>
+            <Text
+              backgroundColor={seasonNumber === index ? '$color4' : 'transparent'}
+              textAlign="center"
+              fontWeight="bold">
+              {index}
+            </Text>
+          </RippleButton>
+        ))}
+      </XStack>
+
       <FlashList
         ref={flashListRef}
-        data={episodesList || []}
+        data={episodes}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingVertical: 8,
@@ -270,8 +301,8 @@ const EpisodeList = ({
             viewPosition: 0.5,
           });
         }}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }: { item: Episode }) =>
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }: { item: Episode | IMovieEpisode }) =>
           swipeable ? (
             <ReanimatedSwipeable
               ref={swipeRef}

@@ -2,17 +2,17 @@ import AnimatedCountdown from '@/components/AnimatedCountdown';
 import { AnimatedCustomImage } from '@/components/CustomImage';
 import IconTitle from '@/components/IconTitle';
 import { ThemedView } from '@/components/ThemedView';
-import { useCurrentTheme, useInfo, usePureBlackBackground } from '@/hooks';
+import { useCurrentTheme, useInfo, useMovieEpisodeStore, usePureBlackBackground } from '@/hooks';
 import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from '@/components/HorizontalTabs';
-import { IMangaChapter, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
+import { IMangaChapter, IMovieSeason, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { hexToRGB } from '@/constants/utils';
 import Episodes from './Episodes';
 import Chapters from './Chapters';
@@ -30,6 +30,10 @@ const Info = () => {
   }>();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
+  const setMovieSeasons = useMovieEpisodeStore((state) => state.setMovieSeasons);
+  useEffect(() => {
+    setMovieSeasons(data?.seasons as IMovieSeason[]);
+  }, [data, setMovieSeasons]);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
   const tabItems = [

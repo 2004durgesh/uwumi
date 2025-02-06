@@ -1,4 +1,4 @@
-import { Episode } from '@/constants/types';
+import { Episode, IMovieSeason } from '@/constants/types';
 import { create } from 'zustand';
 
 interface EpisodesIdState {
@@ -25,4 +25,14 @@ interface EpisodesState {
 export const useEpisodesStore = create<EpisodesState>((set) => ({
   episodes: [],
   setEpisodes: (episodes: Episode[]) => set({ episodes }),
+}));
+
+interface MovieSeasonState {
+  movieSeasons: IMovieSeason[] | null;
+  setMovieSeasons: (movieSeasons: IMovieSeason[]) => void;
+}
+
+export const useMovieEpisodeStore = create<MovieSeasonState>((set) => ({
+  movieSeasons: null,
+  setMovieSeasons: (movieSeasons: IMovieSeason[]) => set({ movieSeasons }),
 }));

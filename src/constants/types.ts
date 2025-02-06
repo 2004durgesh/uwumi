@@ -8,7 +8,8 @@ export interface Episode {
   image?: string;
   title: string;
   description?: string;
-  airDate: string;
+  airDate?: string;
+  [x: string]: any;
 }
 
 export interface ITitle {
@@ -215,8 +216,13 @@ export interface IMovieEpisode {
   url?: string;
   number?: number;
   season?: number;
+  episode?: number;
   description?: string;
   image?: string;
+  img?: {
+    mobile?: string;
+    hd?: string;
+  };
   releaseDate?: string;
   [x: string]: unknown; // other fields
 }
@@ -238,6 +244,15 @@ export interface IMovieResult {
   [x: string]: unknown;
 }
 
+export interface IMovieSeason {
+  season: number;
+  image?: {
+    mobile?: string;
+    hd?: string;
+  };
+  episodes: IMovieEpisode[];
+}
+
 export interface IMovieInfo extends IMovieResult {
   cover?: string;
   recommendations?: IMovieResult[];
@@ -251,6 +266,6 @@ export interface IMovieInfo extends IMovieResult {
   tags?: string[];
   totalEpisodes?: number;
   trailer?: Trailer;
-  seasons?: { season: number; image?: string; episodes: IMovieEpisode[] }[];
+  seasons?: IMovieSeason[];
   episodes?: IMovieEpisode[];
 }

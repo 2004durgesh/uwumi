@@ -31,7 +31,6 @@ export function useInfo({
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
-        timeout: 5000,
       });
       // console.log(data);
       return data;

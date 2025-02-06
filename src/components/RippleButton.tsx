@@ -1,3 +1,4 @@
+import { useThemeStore } from '@/hooks';
 import React, { FC } from 'react';
 import { TouchableWithoutFeedbackProps } from 'react-native';
 import Ripple from 'react-native-material-ripple';
@@ -9,6 +10,7 @@ interface RippleButtonProps extends TouchableWithoutFeedbackProps {
 }
 
 const RippleButton: FC<RippleButtonProps> = ({ onPress, children }) => {
+  const themeName = useThemeStore((state) => state.themeName);
   return (
     <Ripple
       onPress={(e) => {
@@ -16,7 +18,7 @@ const RippleButton: FC<RippleButtonProps> = ({ onPress, children }) => {
         // e.preventDefault();
         // e.stopPropagation();
       }}
-      rippleColor="white"
+      rippleColor={themeName === 'light' ? 'black' : 'white'}
       rippleDuration={700}
       rippleContainerBorderRadius={50}
       rippleOpacity={1}>
