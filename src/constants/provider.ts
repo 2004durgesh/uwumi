@@ -1,30 +1,17 @@
 const animeProviders = [
-  {
-    name: 'zoro',
-  },
-  {
-    name: 'gogoanime',
-  },
+  { name: 'Gogoanime', value: 'gogoanime' },
+  { name: 'Zoro', value: 'zoro' },
 ];
+
 const mangaProviders = [
-  {
-    name: 'mangadex',
-  },
-  {
-    name: 'mangakakalot',
-  },
+  { name: 'Mangadex', value: 'mangadex' },
+  { name: 'Mangakakalot', value: 'mangakakalot' },
 ];
 
 const movieProviders = [
-  {
-    name: 'sflix',
-  },
-  {
-    name: 'multimovies',
-  },
-  {
-    name: 'dramacool',
-  },
+  { name: 'SFlix', value: 'sflix' },
+  { name: 'MultiMovies', value: 'multimovies' },
+  { name: 'DramaCool', value: 'dramacool' },
 ];
 
 export { animeProviders, movieProviders, mangaProviders };

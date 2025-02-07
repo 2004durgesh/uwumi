@@ -42,6 +42,7 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_ANIME_PROVIDER }: { id
   return useQuery<Episode>({
     queryKey: ['anime', 'episodes', id, provider],
     queryFn: async () => {
+      console.log(`${getFetchUrl().episodeApiUrl}/${id}?provider=${provider}`);
       const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/${id}?provider=${provider}`);
       return data;
     },

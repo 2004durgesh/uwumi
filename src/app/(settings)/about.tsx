@@ -4,6 +4,7 @@ import { Text, View, Popover, Button, YStack, XStack, Input } from 'tamagui';
 import Ripple from 'react-native-material-ripple';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import { Alert } from 'react-native';
+import ProviderSelect from '@/components/CustomSelect';
 
 const About = () => {
   return (
@@ -78,6 +79,7 @@ const About = () => {
           </Popover.Content>
         </Popover>
       </View>
+      <ProviderSelect currentProvider="crunchyroll" onProviderChange={() => {}} />
     </ThemedView>
   );
 };

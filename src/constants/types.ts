@@ -269,3 +269,9 @@ export interface IMovieInfo extends IMovieResult {
   seasons?: IMovieSeason[];
   episodes?: IMovieEpisode[];
 }
+
+export enum EpisodeDisplayMode {
+  FullMetadata = 'full',
+  TitleOnly = 'title',
+  NumberOnly = 'number',
+}

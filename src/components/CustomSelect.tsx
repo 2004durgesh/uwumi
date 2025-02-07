@@ -1,0 +1,93 @@
+import React, { memo } from 'react';
+import { Check, ChevronDown, ChevronUp } from '@tamagui/lucide-icons';
+import { Adapt, Select, Sheet, YStack } from 'tamagui';
+import { LinearGradient } from 'tamagui/linear-gradient';
+
+type SelectOption = {
+  name: string;
+  value: string;
+};
+
+const CustomSelect = ({
+  SelectItem,
+  SelectLabel,
+  value,
+  onValueChange,
+}: {
+  SelectItem: SelectOption[];
+  SelectLabel: string;
+  value: string;
+  onValueChange: (value: string) => void;
+}) => {
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <Select.Trigger width={150} iconAfter={ChevronDown}>
+        <Select.Value>{SelectItem.find((opt) => opt.value === value)?.name || SelectLabel}</Select.Value>
+      </Select.Trigger>
+
+      <Adapt platform="touch">
+        <Sheet snapPoints={[25]} modal dismissOnSnapToBottom animation="quick">
+          <Sheet.Frame>
+            <Sheet.ScrollView>
+              <Adapt.Contents />
+            </Sheet.ScrollView>
+          </Sheet.Frame>
+        </Sheet>
+      </Adapt>
+
+      <Select.Content zIndex={200000}>
+        <Select.ScrollUpButton alignItems="center" justifyContent="center" position="relative" width="100%" height="$3">
+          <YStack zIndex={10}>
+            <ChevronUp size={20} />
+          </YStack>
+          <LinearGradient
+            start={[0, 0]}
+            end={[0, 1]}
+            fullscreen
+            colors={['$background', 'transparent']}
+            borderRadius="$4"
+          />
+        </Select.ScrollUpButton>
+
+        <Select.Viewport
+          animation="quick"
+          animateOnly={['transform', 'opacity']}
+          enterStyle={{ x: 0, y: -10 }}
+          exitStyle={{ x: 0, y: 10 }}
+          minWidth={200}>
+          <Select.Group>
+            <Select.Label>{SelectLabel}</Select.Label>
+            {SelectItem.map((item, index) => (
+              <Select.Item key={item.value} index={index} value={item.value}>
+                <Select.ItemText>{item.name}</Select.ItemText>
+                <Select.ItemIndicator marginLeft="auto">
+                  <Check size={16} />
+                </Select.ItemIndicator>
+              </Select.Item>
+            ))}
+          </Select.Group>
+        </Select.Viewport>
+
+        <Select.ScrollDownButton
+          alignItems="center"
+          justifyContent="center"
+          position="relative"
+          width="100%"
+          height="$3">
+          <YStack zIndex={10}>
+            <ChevronDown size={20} />
+          </YStack>
+          <LinearGradient
+            start={[0, 0]}
+            end={[0, 1]}
+            fullscreen
+            colors={['transparent', '$background']}
+            borderRadius="$4"
+          />
+        </Select.ScrollDownButton>
+      </Select.Content>
+    </Select>
+  );
+};
+
+export default memo(CustomSelect);

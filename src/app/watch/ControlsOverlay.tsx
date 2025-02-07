@@ -16,7 +16,7 @@ import {
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { ISubtitle } from '@/constants/types';
 import { useRouter } from 'expo-router';
-import { useEpisodesIdStore, useEpisodesStore } from '@/hooks';
+import { useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
 import { VideoTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
@@ -86,6 +86,8 @@ const ControlsOverlay = memo(
     const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
     const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].id : null;
     const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
+    const themeName = useThemeStore((state) => state.themeName);
+    const SHEET_THEME_COLOR = themeName === 'light' ? '#ebeaf1' : '#0e0f15';
     const tabItems = [
       {
         key: 'tab1',
@@ -96,7 +98,7 @@ const ControlsOverlay = memo(
               <RippleButton
                 key={index}
                 style={{
-                  backgroundColor: '#0e0f15',
+                  backgroundColor: SHEET_THEME_COLOR,
                 }}
                 onPress={() => {
                   console.log(index, selectedSubtitleIndex, track.index);
@@ -117,7 +119,7 @@ const ControlsOverlay = memo(
               <RippleButton
                 key={index}
                 style={{
-                  backgroundColor: '#0e0f15',
+                  backgroundColor: SHEET_THEME_COLOR,
                 }}
                 onPress={() => {
                   setSelectedSubtitleIndex(index);
@@ -186,7 +188,10 @@ const ControlsOverlay = memo(
                   enterStyle={{ opacity: 0 }}
                   exitStyle={{ opacity: 0 }}
                 />
-                <Sheet.Frame backgroundColor="#0e0f15" marginHorizontal="auto" width={isFullscreen ? '50%' : '90%'}>
+                <Sheet.Frame
+                  backgroundColor={SHEET_THEME_COLOR}
+                  marginHorizontal="auto"
+                  width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
                     <HorizontalTabs items={tabItems} initialTab="tab1" />
                   </Sheet.ScrollView>

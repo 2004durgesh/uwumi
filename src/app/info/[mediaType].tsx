@@ -2,7 +2,7 @@ import AnimatedCountdown from '@/components/AnimatedCountdown';
 import { AnimatedCustomImage } from '@/components/CustomImage';
 import IconTitle from '@/components/IconTitle';
 import { ThemedView } from '@/components/ThemedView';
-import { useCurrentTheme, useInfo, useMovieEpisodeStore, usePureBlackBackground } from '@/hooks';
+import { useCurrentTheme, useInfo, useMovieSeasonStore, usePureBlackBackground } from '@/hooks';
 import { ArrowLeft, Clock, Heart, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams } from 'expo-router';
@@ -30,7 +30,7 @@ const Info = () => {
   }>();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
-  const setMovieSeasons = useMovieEpisodeStore((state) => state.setMovieSeasons);
+  const setMovieSeasons = useMovieSeasonStore((state) => state.setMovieSeasons);
   useEffect(() => {
     setMovieSeasons(data?.seasons as IMovieSeason[]);
   }, [data, setMovieSeasons]);

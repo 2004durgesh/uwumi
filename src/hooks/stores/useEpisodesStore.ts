@@ -1,4 +1,4 @@
-import { Episode, IMovieSeason } from '@/constants/types';
+import { Episode, EpisodeDisplayMode, IMovieSeason } from '@/constants/types';
 import { create } from 'zustand';
 
 interface EpisodesIdState {
@@ -32,7 +32,17 @@ interface MovieSeasonState {
   setMovieSeasons: (movieSeasons: IMovieSeason[]) => void;
 }
 
-export const useMovieEpisodeStore = create<MovieSeasonState>((set) => ({
+export const useMovieSeasonStore = create<MovieSeasonState>((set) => ({
   movieSeasons: null,
   setMovieSeasons: (movieSeasons: IMovieSeason[]) => set({ movieSeasons }),
+}));
+
+interface EpisodeDisplayState {
+  displayMode: EpisodeDisplayMode;
+  setDisplayMode: (mode: EpisodeDisplayMode) => void;
+}
+
+export const useEpisodeDisplayStore = create<EpisodeDisplayState>((set) => ({
+  displayMode: EpisodeDisplayMode.FullMetadata,
+  setDisplayMode: (mode) => set({ displayMode: mode }),
 }));
