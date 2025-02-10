@@ -3,7 +3,7 @@
 import { View, Text, YStack, XStack, Spinner, styled, Progress } from 'tamagui';
 import { Pressable, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback, memo } from 'react';
 import CustomImage from '@/components/CustomImage';
 import { useRouter } from 'expo-router';
 import ReanimatedSwipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -15,7 +15,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Captions, Eye, EyeOff, Mic } from '@tamagui/lucide-icons';
+import { Captions, Eye, EyeOff, Mic, TableProperties, Images, ListOrdered } from '@tamagui/lucide-icons';
 import {
   useEpisodesIdStore,
   useEpisodesStore,
@@ -27,7 +27,7 @@ import {
   useEpisodeDisplayStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
-import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaType } from '@/constants/types';
+import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvType } from '@/constants/types';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';
@@ -50,11 +50,13 @@ const EpisodeList = ({
   mediaType,
   provider,
   id,
+  type,
   swipeable = false,
 }: {
   mediaType: MediaType;
   provider: string;
   id: string;
+  type?: MediaFormat | TvType;
   swipeable?: boolean;
 }) => {
   const swipeRef = useRef<SwipeableMethods>(null);
@@ -82,6 +84,11 @@ const EpisodeList = ({
   const displayMode = useEpisodeDisplayStore((state) => state.displayMode);
   const setDisplayMode = useEpisodeDisplayStore((state) => state.setDisplayMode);
 
+  const [listKey, setListKey] = useState(0);
+  useEffect(() => {
+    setListKey((prev) => prev + 1);
+  }, [displayMode]);
+
   const setEpisodes = useEpisodesStore((state) => state.setEpisodes);
   useEffect(() => {
     if (animeEpisodes) {
@@ -90,10 +97,10 @@ const EpisodeList = ({
   }, [animeEpisodes, setEpisodes]);
 
   const currentEpisode = animeEpisodes.find((episode) => episode.id === currentEpisodeId);
-  console.log(
-    movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
-    seasonNumber,
-  );
+  // console.log(
+  //   movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
+  //   seasonNumber,
+  // );
   useEffect(() => {
     return () => {
       hasScrolledRef.current = false;
@@ -164,7 +171,11 @@ const EpisodeList = ({
         return <WavyAnimation />;
       }
 
-      const progress = progresses[item?.id];
+      const progress =
+        progresses[
+          item?.id ?? `${id}-${item?.number ?? item?.episode}-${item?.season}-${type?.split(' ')[0].toLowerCase()}`
+        ];
+      // console.log('progress', progress);
       if (progress?.currentTime && progress?.progress < 90) {
         return (
           <StyledText>
@@ -182,101 +193,157 @@ const EpisodeList = ({
     [currentEpisodeId, progresses],
   );
 
-  const renderPressableItem = useCallback(
+  const ListPressable = memo(({ item, children }: { item: Episode | IMovieEpisode; children: React.ReactNode }) => {
+    return (
+      <Pressable
+        onPress={() => {
+          router.push({
+            pathname: '/watch/[mediaType]',
+            params: {
+              mediaType,
+              provider: currentProvider,
+              id,
+              episodeId:
+                item?.id ??
+                `${id}-${item?.number ?? item?.episode}-${item?.season}-${type?.split(' ')[0].toLowerCase()}`,
+              ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
+              ...(item?.isDub ? { isDub: item.isDub as string } : null),
+              poster: item?.image ?? item?.img?.hd ?? '',
+              title: item?.title,
+              description: item?.description,
+              episodeNumber: item?.number ?? item?.episode,
+              seasonNumber: item?.season,
+              type,
+            },
+          });
+        }}>
+        <YStack
+          gap={'$4'}
+          padding={4}
+          marginVertical={1}
+          borderWidth={2}
+          borderRadius={10}
+          borderColor={currentEpisodeId === item.id ? '$color4' : 'transparent'}
+          backgroundColor={pureBlackBackground ? '#000' : '$background'}>
+          <XStack gap={'$4'}>{children}</XStack>
+        </YStack>
+      </Pressable>
+    );
+  });
+
+  const ProgressAndAirDate = useCallback(
     ({ item }: { item: Episode | IMovieEpisode }) => {
       return (
-        <Pressable
-          onPress={() => {
-            router.push({
-              pathname: '/watch/[mediaType]',
-              params: {
-                mediaType,
-                provider: currentProvider,
-                id,
-                episodeId: item?.id,
-                ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
-                ...(item?.isDub ? { isDub: item.isDub as string } : null),
-                poster: item?.image ?? item?.img?.hd,
-                title: item?.title,
-                description: item?.description,
-                number: item?.number ?? item?.episode,
-              },
-            });
-          }}>
-          <YStack
-            gap={'$4'}
-            padding={2}
-            marginVertical={1}
-            borderWidth={2}
-            borderRadius={10}
-            borderColor={currentEpisodeId === item.id ? '$color4' : 'transparent'}
-            backgroundColor={pureBlackBackground ? '#000' : '$background'}>
-            <XStack gap={'$4'}>
-              <View position="relative" overflow="hidden" borderRadius={8}>
-                {/* 10 - 2 (of gap) = 8 */}
-                <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
-                <View
-                  position="absolute"
-                  bottom="$2.5"
-                  left="$2.5"
-                  backgroundColor="$background"
-                  opacity={0.8}
-                  borderRadius="$4"
-                  paddingHorizontal="$2"
-                  paddingVertical="$1">
-                  <Text fontSize="$3" fontWeight="700" color="$color">
-                    EP {item.number ?? item.episode}
-                  </Text>
-                </View>
-                {progresses[item?.id] && swipeable && (
-                  <View position="absolute" bottom="$0" left="50%" transform={[{ translateX: '-50%' }]}>
-                    <Progress
-                      size={'$2'}
-                      scaleX={1.15}
-                      borderRadius={0}
-                      backgroundColor="$color1"
-                      value={Math.round(progresses[item?.id]?.progress) || 0}
-                      max={100}>
-                      <Progress.Indicator animation="bouncy" backgroundColor="$color4" />
-                    </Progress>
-                  </View>
-                )}
-              </View>
-              <YStack padding={2} flex={1} justifyContent="space-between">
-                <YStack>
-                  <XStack alignItems="center" justifyContent="space-between" gap={2}>
-                    <Text fontSize="$3" fontWeight="700" numberOfLines={1} flex={1}>
-                      {item.title}
-                    </Text>
-                    <XStack gap={2}>
-                      <Captions size={20} color="$color1" opacity={0.7} />
-                      {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
-                    </XStack>
-                  </XStack>
-                  <StyledText numberOfLines={4}>{item?.description}</StyledText>
-                </YStack>
-
-                <XStack justifyContent="space-between" alignItems="center">
-                  <View>{renderEpisodeProgress(item)}</View>
-                  <StyledText>{new Date(item?.airDate ?? item?.releaseDate ?? '').toDateString()}</StyledText>
-                </XStack>
-              </YStack>
-            </XStack>
-          </YStack>
-        </Pressable>
+        <XStack justifyContent="space-between" alignItems="center">
+          <View>{renderEpisodeProgress(item)}</View>
+          <StyledText>{new Date(item?.airDate ?? item?.releaseDate ?? '').toDateString()}</StyledText>
+        </XStack>
       );
     },
-    [
-      currentEpisodeId,
-      currentProvider,
-      id,
-      mediaType,
-      progresses,
-      pureBlackBackground,
-      renderEpisodeProgress,
-      router,
-      swipeable,
-    ],
+    [renderEpisodeProgress],
+  );
+
+  const renderFullMetadataPressableItem = useCallback(
+    ({ item }: { item: Episode | IMovieEpisode }) => {
+      return (
+        <ListPressable item={item}>
+          <View position="relative" overflow="hidden" borderRadius={8}>
+            {/* 10 - 2 (of gap) = 8 */}
+            <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
+            <View
+              position="absolute"
+              bottom="$2.5"
+              left="$2.5"
+              backgroundColor="$background"
+              opacity={0.8}
+              borderRadius="$4"
+              paddingHorizontal="$2"
+              paddingVertical="$1">
+              <Text fontSize="$3" fontWeight="700" color="$color">
+                EP {item.number ?? item.episode}
+              </Text>
+            </View>
+            {progresses[item?.id] && swipeable && (
+              <View position="absolute" bottom="$0" left="50%" transform={[{ translateX: '-50%' }]}>
+                <Progress
+                  size={'$2'}
+                  scaleX={1.15}
+                  borderRadius={0}
+                  backgroundColor="$color1"
+                  value={Math.round(progresses[item?.id]?.progress) || 0}
+                  max={100}>
+                  <Progress.Indicator animation="bouncy" backgroundColor="$color4" />
+                </Progress>
+              </View>
+            )}
+          </View>
+          <YStack padding={2} flex={1} justifyContent="space-between">
+            <YStack>
+              <XStack alignItems="center" justifyContent="space-between" gap={2}>
+                <Text fontSize="$3" fontWeight="700" numberOfLines={1} flex={1}>
+                  {item.title}
+                </Text>
+                <XStack gap={2}>
+                  <Captions size={20} color="$color1" opacity={0.7} />
+                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                </XStack>
+              </XStack>
+              <StyledText numberOfLines={4}>{item?.description}</StyledText>
+            </YStack>
+            {ProgressAndAirDate({ item })}
+          </YStack>
+        </ListPressable>
+      );
+    },
+    [ListPressable, ProgressAndAirDate, progresses, swipeable],
+  );
+
+  const renderTitleOnlyPressableItem = useCallback(
+    ({ item }: { item: Episode | IMovieEpisode }) => {
+      return (
+        <ListPressable item={item}>
+          <YStack padding={2} flex={1} justifyContent="space-between">
+            <YStack>
+              <XStack alignItems="center" justifyContent="space-between" gap={2}>
+                <Text fontSize="$3" fontWeight="700" numberOfLines={1} flex={1}>
+                  {item.title}
+                </Text>
+                <XStack gap={2}>
+                  <Captions size={20} color="$color1" opacity={0.7} />
+                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                </XStack>
+              </XStack>
+            </YStack>
+            {ProgressAndAirDate({ item })}
+          </YStack>
+        </ListPressable>
+      );
+    },
+    [ListPressable, ProgressAndAirDate],
+  );
+
+  const renderNumberOnlyPressableItem = useCallback(
+    ({ item }: { item: Episode | IMovieEpisode }) => {
+      return (
+        <ListPressable item={item}>
+          <YStack padding={2} flex={1} justifyContent="space-between">
+            <YStack>
+              <XStack alignItems="center" justifyContent="space-between" gap={2}>
+                <Text fontSize="$3" fontWeight="700" numberOfLines={1} flex={1}>
+                  EP {item.number ?? item.episode}
+                </Text>
+                <XStack gap={2}>
+                  <Captions size={20} color="$color1" opacity={0.7} />
+                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                </XStack>
+              </XStack>
+            </YStack>
+            {ProgressAndAirDate({ item })}
+          </YStack>
+        </ListPressable>
+      );
+    },
+    [ListPressable, ProgressAndAirDate],
   );
 
   const renderItemContent = useCallback(
@@ -284,16 +351,16 @@ const EpisodeList = ({
       console.log('renderContent', displayMode);
       switch (displayMode) {
         case EpisodeDisplayMode.FullMetadata:
-          return renderPressableItem({ item });
+          return renderFullMetadataPressableItem({ item });
         case EpisodeDisplayMode.TitleOnly:
-          return <Text numberOfLines={1}>{item.title}</Text>;
+          return renderTitleOnlyPressableItem({ item });
         case EpisodeDisplayMode.NumberOnly:
-          return <Text>EP {item.number ?? item.episode}</Text>;
+          return renderNumberOnlyPressableItem({ item });
         default:
-          return renderPressableItem({ item });
+          return renderFullMetadataPressableItem({ item });
       }
     },
-    [renderPressableItem, displayMode],
+    [renderFullMetadataPressableItem, renderTitleOnlyPressableItem, renderNumberOnlyPressableItem, displayMode],
   );
 
   if (isLoading) {
@@ -307,7 +374,7 @@ const EpisodeList = ({
           <CustomSelect
             SelectItem={
               movieSeasons?.map((season, index) => ({
-                name: `Season ${index}`,
+                name: `Season ${index + 1}`,
                 value: String(index),
               })) || []
             }
@@ -330,22 +397,26 @@ const EpisodeList = ({
         />
         <Pressable
           onPress={() => {
-            setDisplayMode(EpisodeDisplayMode.FullMetadata), console.log(displayMode);
+            // Cycle through display modes: FullMetadata -> TitleOnly -> NumberOnly -> FullMetadata
+            setDisplayMode(
+              displayMode === EpisodeDisplayMode.FullMetadata
+                ? EpisodeDisplayMode.TitleOnly
+                : displayMode === EpisodeDisplayMode.TitleOnly
+                  ? EpisodeDisplayMode.NumberOnly
+                  : EpisodeDisplayMode.FullMetadata,
+            );
           }}>
-          <Text>full</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            setDisplayMode(EpisodeDisplayMode.TitleOnly), console.log(displayMode);
-          }}>
-          <Text>title</Text>
-        </Pressable>
-        <Pressable onPress={() => setDisplayMode(EpisodeDisplayMode.NumberOnly)}>
-          <Text>number</Text>
+          {displayMode === EpisodeDisplayMode.FullMetadata ? (
+            <TableProperties color="$color" />
+          ) : displayMode === EpisodeDisplayMode.TitleOnly ? (
+            <ListOrdered color="$color" />
+          ) : (
+            <Images color="$color" />
+          )}
         </Pressable>
       </XStack>
-
       <FlashList
+        key={listKey}
         ref={flashListRef}
         data={episodes}
         contentContainerStyle={{

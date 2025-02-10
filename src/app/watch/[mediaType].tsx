@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Dimensions, StyleProp, ViewStyle, Pressable } from 'react-native';
 import Video, {
@@ -12,7 +13,7 @@ import { YStack, Spinner, Text, View, styled } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
-import { ISubtitle, MediaType } from '@/constants/types';
+import { ISubtitle, MediaFormat, MediaType, TvType } from '@/constants/types';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
@@ -20,7 +21,13 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import * as Brightness from 'expo-brightness';
 import { VolumeManager } from 'react-native-volume-manager';
-import { useEpisodesIdStore, useWatchProgressStore, useDoubleTapGesture, useWatchAnimeEpisodes } from '@/hooks';
+import {
+  useEpisodesIdStore,
+  useWatchProgressStore,
+  useDoubleTapGesture,
+  useWatchAnimeEpisodes,
+  useWatchMoviesEpisodes,
+} from '@/hooks';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
 import axios from 'axios';
@@ -73,7 +80,20 @@ const OverlayedView = styled(Animated.View, {
 });
 
 const Watch = () => {
-  const { mediaType, provider, id, episodeId, episodeDubId, isDub, poster, title, description } = useLocalSearchParams<{
+  const {
+    mediaType,
+    provider,
+    id,
+    episodeId,
+    episodeDubId,
+    isDub,
+    poster,
+    title,
+    description,
+    episodeNumber,
+    seasonNumber,
+    type,
+  } = useLocalSearchParams<{
     mediaType: MediaType;
     provider: string;
     id: string;
@@ -83,11 +103,25 @@ const Watch = () => {
     poster: string;
     title: string;
     description: string;
+    episodeNumber: string;
+    seasonNumber: string;
+    type: MediaFormat | TvType;
   }>();
-  const { data, isLoading, error } = useWatchAnimeEpisodes({
-    episodeId,
-    provider,
-  });
+  // console.log(useLocalSearchParams());
+  const { data, isLoading, error } =
+    mediaType === MediaType.ANIME
+      ? useWatchAnimeEpisodes({
+          episodeId,
+          provider,
+        })
+      : useWatchMoviesEpisodes({
+          tmdbId: id,
+          episodeNumber,
+          seasonNumber,
+          type,
+          // server,
+          provider,
+        });
   const { top, right, bottom, left } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
@@ -350,7 +384,7 @@ const Watch = () => {
 
           // Extract resolutions using regex
           const regex =
-            /^#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+),FRAME-RATE=(\d+\.\d+),CODECS="([^,]+)/;
+            /^#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+)(?:,FRAME-RATE=(\d+\.\d+))?(?:,CODECS="([^"]+)")?/;
           const lines = data.split('\n');
           const tracks = [];
           for (const line of lines) {
@@ -470,7 +504,10 @@ const Watch = () => {
                     });
                   }}
                   onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
-                  onError={(error) => console.log('Video Error:', error)}
+                  onError={(error) => {
+                    toast.error('Video Error', { description: 'Try changing servers' });
+                    console.log('Video Error:', error);
+                  }}
                   onLoad={(value) => {
                     // console.log('Video loaded:', value);
                     setIsVideoReady(true);

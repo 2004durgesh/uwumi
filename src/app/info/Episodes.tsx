@@ -1,16 +1,18 @@
 import EpisodeList from '@/components/EpisodeList';
+import { MediaFormat, MediaType, TvType } from '@/constants/types';
 import { useLocalSearchParams } from 'expo-router';
 import { View } from 'tamagui';
 
 const Episodes = () => {
-  const { mediaType, provider, id } = useLocalSearchParams<{
-    mediaType: string;
+  const { mediaType, provider, id, type } = useLocalSearchParams<{
+    mediaType: MediaType;
     provider: string;
+    type?: MediaFormat | TvType;
     id: string;
   }>();
   return (
     <View height="100%">
-      <EpisodeList mediaType={mediaType} provider={provider} id={id} swipeable />
+      <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable />
     </View>
   );
 };

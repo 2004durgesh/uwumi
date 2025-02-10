@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
-import { Check, ChevronDown, ChevronUp } from '@tamagui/lucide-icons';
-import { Adapt, Select, Sheet, YStack } from 'tamagui';
-import { LinearGradient } from 'tamagui/linear-gradient';
+import { Check, ChevronDown } from '@tamagui/lucide-icons';
+import { Adapt, Select, Sheet } from 'tamagui';
 
 type SelectOption = {
   name: string;
@@ -26,9 +25,9 @@ const CustomSelect = ({
       </Select.Trigger>
 
       <Adapt platform="touch">
-        <Sheet snapPoints={[25]} modal dismissOnSnapToBottom animation="quick">
+        <Sheet snapPoints={[30]} modal dismissOnSnapToBottom animation="quick">
           <Sheet.Frame>
-            <Sheet.ScrollView>
+            <Sheet.ScrollView showsVerticalScrollIndicator>
               <Adapt.Contents />
             </Sheet.ScrollView>
           </Sheet.Frame>
@@ -36,19 +35,6 @@ const CustomSelect = ({
       </Adapt>
 
       <Select.Content zIndex={200000}>
-        <Select.ScrollUpButton alignItems="center" justifyContent="center" position="relative" width="100%" height="$3">
-          <YStack zIndex={10}>
-            <ChevronUp size={20} />
-          </YStack>
-          <LinearGradient
-            start={[0, 0]}
-            end={[0, 1]}
-            fullscreen
-            colors={['$background', 'transparent']}
-            borderRadius="$4"
-          />
-        </Select.ScrollUpButton>
-
         <Select.Viewport
           animation="quick"
           animateOnly={['transform', 'opacity']}
@@ -67,24 +53,6 @@ const CustomSelect = ({
             ))}
           </Select.Group>
         </Select.Viewport>
-
-        <Select.ScrollDownButton
-          alignItems="center"
-          justifyContent="center"
-          position="relative"
-          width="100%"
-          height="$3">
-          <YStack zIndex={10}>
-            <ChevronDown size={20} />
-          </YStack>
-          <LinearGradient
-            start={[0, 0]}
-            end={[0, 1]}
-            fullscreen
-            colors={['transparent', '$background']}
-            borderRadius="$4"
-          />
-        </Select.ScrollDownButton>
       </Select.Content>
     </Select>
   );
