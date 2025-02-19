@@ -23,15 +23,15 @@ import {
   useAnimeEpisodes,
   useCurrentTheme,
   usePureBlackBackground,
-  useMovieSeasonStore,
   useEpisodeDisplayStore,
+  useMoviesEpisodes,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvType } from '@/constants/types';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';
-import { animeProviders, mangaProviders, movieProviders } from '@/constants/provider';
+import { PROVIDERS, useProviderStore } from '@/constants/provider';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -59,17 +59,28 @@ const EpisodeList = ({
   type?: MediaFormat | TvType;
   swipeable?: boolean;
 }) => {
-  const swipeRef = useRef<SwipeableMethods>(null);
+  const swipeableRefs = useRef<Map<string, SwipeableMethods>>(new Map());
   const router = useRouter();
   const currentTheme = useCurrentTheme();
   const flashListRef = useRef<FlashList<Episode | IMovieEpisode>>(null);
   const hasScrolledRef = useRef(false);
   const [seasonNumber, setSeasonNumber] = useState(0);
-  const [currentProvider, setCurrentProvider] = useState<string>(provider);
-  const { data: episodeData, isLoading } = useAnimeEpisodes({ id, provider: currentProvider });
+  const { setProvider, getProvider } = useProviderStore();
+  useEffect(() => {
+    setProvider(mediaType, provider);
+  }, [mediaType, provider, setProvider]);
+  const { data: episodeData, isLoading } =
+    mediaType === MediaType.ANIME
+      ? useAnimeEpisodes({ id, provider: getProvider(mediaType) })
+      : useMoviesEpisodes({
+          id,
+          type: type!,
+          provider: getProvider(mediaType) === 'rive' ? '' : getProvider(mediaType),
+        });
 
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
-  const movieSeasons = useMovieSeasonStore((state) => state.movieSeasons);
+  const movieSeasons = episodeData?.seasons;
+  // console.log('movieSeasons', movieSeasons);
   const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
   const episodes = useMemo(() => {
     if (mediaType === MediaType.MOVIE && movieSeasons?.[seasonNumber]?.episodes) {
@@ -107,11 +118,14 @@ const EpisodeList = ({
     };
   }, [currentEpisodeId]);
 
-  const handleProviderChange = useCallback((value: string) => {
-    setCurrentProvider(value);
-  }, []);
+  const handleProviderChange = useCallback(
+    (value: string) => {
+      setProvider(mediaType, value);
+    },
+    [mediaType, setProvider],
+  );
 
-  const rightActions = (prog: SharedValue<number>, drag: SharedValue<number>) => {
+  const rightActions = (_prog: SharedValue<number>, drag: SharedValue<number>) => {
     const THRESHOLD = 100;
 
     const animatedStyle = useAnimatedStyle(() => {
@@ -171,10 +185,7 @@ const EpisodeList = ({
         return <WavyAnimation />;
       }
 
-      const progress =
-        progresses[
-          item?.id ?? `${id}-${item?.number ?? item?.episode}-${item?.season}-${type?.split(' ')[0].toLowerCase()}`
-        ];
+      const progress = progresses[item?.id];
       // console.log('progress', progress);
       if (progress?.currentTime && progress?.progress < 90) {
         return (
@@ -201,7 +212,7 @@ const EpisodeList = ({
             pathname: '/watch/[mediaType]',
             params: {
               mediaType,
-              provider: currentProvider,
+              provider: getProvider(mediaType),
               id,
               episodeId:
                 item?.id ??
@@ -247,8 +258,8 @@ const EpisodeList = ({
     ({ item }: { item: Episode | IMovieEpisode }) => {
       return (
         <ListPressable item={item}>
-          <View position="relative" overflow="hidden" borderRadius={8}>
-            {/* 10 - 2 (of gap) = 8 */}
+          <View position="relative" overflow="hidden" borderRadius={4}>
+            {/* 10 - 4 (of gap) = 6 */}
             <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
             <View
               position="absolute"
@@ -373,47 +384,43 @@ const EpisodeList = ({
         {movieSeasons && (
           <CustomSelect
             SelectItem={
-              movieSeasons?.map((season, index) => ({
+              movieSeasons?.map((_: any, index: number): { name: string; value: string } => ({
                 name: `Season ${index + 1}`,
                 value: String(index),
               })) || []
             }
             SelectLabel="Season"
             value={String(seasonNumber)}
-            onValueChange={(value) => setSeasonNumber(Number(value))}
+            onValueChange={(value: string) => setSeasonNumber(Number(value))}
           />
         )}
         <CustomSelect
-          SelectItem={
-            mediaType === MediaType.ANIME
-              ? animeProviders
-              : mediaType === MediaType.MANGA
-                ? mangaProviders
-                : movieProviders
-          }
+          SelectItem={mediaType === MediaType.ANIME ? PROVIDERS.anime : PROVIDERS.manga}
           SelectLabel="Provider"
-          value={currentProvider}
+          value={getProvider(mediaType)}
           onValueChange={handleProviderChange}
         />
-        <Pressable
-          onPress={() => {
-            // Cycle through display modes: FullMetadata -> TitleOnly -> NumberOnly -> FullMetadata
-            setDisplayMode(
-              displayMode === EpisodeDisplayMode.FullMetadata
-                ? EpisodeDisplayMode.TitleOnly
-                : displayMode === EpisodeDisplayMode.TitleOnly
-                  ? EpisodeDisplayMode.NumberOnly
-                  : EpisodeDisplayMode.FullMetadata,
-            );
-          }}>
-          {displayMode === EpisodeDisplayMode.FullMetadata ? (
-            <TableProperties color="$color" />
-          ) : displayMode === EpisodeDisplayMode.TitleOnly ? (
-            <ListOrdered color="$color" />
-          ) : (
-            <Images color="$color" />
-          )}
-        </Pressable>
+        {swipeable && (
+          <Pressable
+            onPress={() => {
+              // Cycle through display modes: FullMetadata -> TitleOnly -> NumberOnly -> FullMetadata
+              setDisplayMode(
+                displayMode === EpisodeDisplayMode.FullMetadata
+                  ? EpisodeDisplayMode.TitleOnly
+                  : displayMode === EpisodeDisplayMode.TitleOnly
+                    ? EpisodeDisplayMode.NumberOnly
+                    : EpisodeDisplayMode.FullMetadata,
+              );
+            }}>
+            {displayMode === EpisodeDisplayMode.FullMetadata ? (
+              <TableProperties color="$color" />
+            ) : displayMode === EpisodeDisplayMode.TitleOnly ? (
+              <ListOrdered color="$color" />
+            ) : (
+              <Images color="$color" />
+            )}
+          </Pressable>
+        )}
       </XStack>
       <FlashList
         key={listKey}
@@ -438,15 +445,23 @@ const EpisodeList = ({
         }}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }: { item: Episode | IMovieEpisode }) => {
+          const itemKey = item?.id ?? `${id}-${item?.number ?? item?.episode}-${item?.season}`;
           return swipeable ? (
             <ReanimatedSwipeable
-              ref={swipeRef}
+              ref={(ref) => {
+                if (ref) {
+                  swipeableRefs.current.set(itemKey, ref);
+                } else {
+                  swipeableRefs.current.delete(itemKey);
+                }
+              }}
               friction={2}
               enableTrackpadTwoFingerGesture
               rightThreshold={40}
               onSwipeableOpen={(e) => {
-                if (swipeRef.current) {
-                  swipeRef.current.close();
+                const currentRef = swipeableRefs.current.get(itemKey);
+                if (currentRef) {
+                  currentRef.close();
                 }
               }}
               onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}

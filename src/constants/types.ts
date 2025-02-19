@@ -246,7 +246,7 @@ export interface IMovieResult {
 
 export interface IMovieSeason {
   season: number;
-  image?: {
+  img?: {
     mobile?: string;
     hd?: string;
   };

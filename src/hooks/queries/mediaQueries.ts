@@ -6,17 +6,17 @@ import axios from 'axios';
 export function useMediaFeed<T>(
   mediaType: MediaType,
   metaProvider: MetaProvider,
-  type: MediaFeedType,
+  mediaFeedType: MediaFeedType,
   options?: {
     params?: Record<string, unknown>;
     enabled?: boolean;
   },
 ) {
   return useInfiniteQuery({
-    queryKey: [mediaType, type, metaProvider],
+    queryKey: [mediaType, mediaFeedType, metaProvider],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${type}?page=${pageParam}`);
-      const { data } = await axios.get<ISearch<T>>(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${type}`, {
+      console.log(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${mediaFeedType}?page=${pageParam}`);
+      const { data } = await axios.get<ISearch<T>>(`${getFetchUrl().apiUrl}/meta/${metaProvider}/${mediaFeedType}`, {
         params: {
           page: pageParam,
           ...options?.params,

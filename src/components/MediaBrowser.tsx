@@ -22,9 +22,9 @@ const TabIconStyle = {
 };
 
 const TABS = [
-  { id: 'tab1', icon: ChartNoAxesCombined, text: 'Trending', type: 'trending' },
-  { id: 'tab2', icon: Heart, text: 'Popular', type: 'popular' },
-  { id: 'tab3', icon: Search, text: 'Search', type: 'search' },
+  { id: 'tab1', icon: ChartNoAxesCombined, text: 'Trending', mediaFeedType: 'trending' },
+  { id: 'tab2', icon: Heart, text: 'Popular', mediaFeedType: 'popular' },
+  { id: 'tab3', icon: Search, text: 'Search', mediaFeedType: 'search' },
 ] as const;
 
 const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
@@ -61,10 +61,10 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
         value={currentTab}
         onValueChange={(value) => setCurrentTab(value)}>
         <TabList />
-        {TABS.map(({ id, type }) => (
+        {TABS.map(({ id, mediaFeedType }) => (
           <Tabs.Content value={id} key={id}>
             <View height="100%">
-              <CardList type={type} mediaType={mediaType} metaProvider={metaProvider} />
+              <CardList mediaFeedType={mediaFeedType} mediaType={mediaType} metaProvider={metaProvider} />
             </View>
           </Tabs.Content>
         ))}

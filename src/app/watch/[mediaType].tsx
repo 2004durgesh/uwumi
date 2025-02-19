@@ -9,7 +9,7 @@ import Video, {
   type VideoRef,
 } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { YStack, Spinner, Text, View, styled } from 'tamagui';
+import { YStack, Spinner, Text, View, styled, XStack, Button } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
@@ -31,6 +31,7 @@ import {
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
 import axios from 'axios';
+import { PROVIDERS } from '@/constants/provider';
 
 export interface SubtitleTrack {
   index: number;
@@ -108,20 +109,7 @@ const Watch = () => {
     type: MediaFormat | TvType;
   }>();
   // console.log(useLocalSearchParams());
-  const { data, isLoading, error } =
-    mediaType === MediaType.ANIME
-      ? useWatchAnimeEpisodes({
-          episodeId,
-          provider,
-        })
-      : useWatchMoviesEpisodes({
-          tmdbId: id,
-          episodeNumber,
-          seasonNumber,
-          type,
-          // server,
-          provider,
-        });
+
   const { top, right, bottom, left } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
@@ -133,15 +121,7 @@ const Watch = () => {
       setEpisodeIds('');
     };
   }, [episodeId]);
-  // useEffect(() => {
-  //   if (episodeId && videoRef.current) {
-  //     const savedProgress = getProgress(episodeId);
-  //     // console.log('Loading saved progress:', savedProgress);
-  //     if (savedProgress && savedProgress.currentTime > 0) {
-  //       videoRef.current.seek(savedProgress.currentTime);
-  //     }
-  //   }
-  // }, [episodeId, getProgress]);
+
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -150,6 +130,7 @@ const Watch = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [seekableDuration, setSeekableDuration] = useState(0);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [dub, setDub] = useState(false);
   const [playbackState, setPlaybackState] = useState<PlaybackState>({
     isPlaying: false,
     isSeeking: false,
@@ -166,6 +147,21 @@ const Watch = () => {
     width: 0,
     height: 0,
   });
+  const { data, isLoading, error } =
+    mediaType === MediaType.ANIME
+      ? useWatchAnimeEpisodes({
+          episodeId,
+          provider,
+          dub,
+        })
+      : useWatchMoviesEpisodes({
+          tmdbId: id,
+          episodeNumber,
+          seasonNumber,
+          type,
+          // server,
+          provider,
+        });
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
@@ -367,6 +363,8 @@ const Watch = () => {
     }),
     [isFullscreen, dimensions, right],
   );
+  // const source ="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8";
+
   const source = useMemo(
     () =>
       data?.sources?.find((s) => s.quality === 'default')?.url ||
@@ -567,15 +565,45 @@ const Watch = () => {
           </View>
         </GestureDetector>
         <YStack flex={1} gap="$2">
-          {description && (
+          {/* {description && (
             <>
               <Text textAlign="justify" padding="$2">
                 {description}
               </Text>
             </>
-          )}
+          )} */}
+          <YStack backgroundColor="black" padding="$4" borderRadius="$4">
+            {[
+              { label: 'Sub', key: 'sub' },
+              { label: 'Dub', key: 'dub' },
+            ].map(({ label, key }) => (
+              <XStack key={key} justifyContent="space-between" marginBottom="$2">
+                <Text color="white" fontWeight="bold">
+                  {label}
+                </Text>
+                <XStack>
+                  {PROVIDERS.anime.map(({ name, value, sub, dub }) => {
+                    const isAvailable = key === 'sub' ? sub : key === 'dub' ? dub : false;
+                    if (!isAvailable) return null;
+                    return (
+                      <Button
+                        key={value}
+                        onPress={() => {
+                          setDub(key === 'dub');
+                        }}
+                        // backgroundColor={selected === value ? '$blue10' : '$gray8'}
+                        marginHorizontal="$1"
+                        borderRadius="$2">
+                        <Text color="white">{name.toLowerCase()}</Text>
+                      </Button>
+                    );
+                  })}
+                </XStack>
+              </XStack>
+            ))}
+          </YStack>
           <View flex={1}>
-            <EpisodeList mediaType={mediaType} provider={provider} id={id} swipeable={false} />
+            <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable={false} />
           </View>
         </YStack>
       </View>

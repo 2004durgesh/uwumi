@@ -1,4 +1,4 @@
-import { DEFAULT_ANIME_PROVIDER, DEFAULT_MOVIE_PROVIDER } from '@/constants/provider';
+import { DEFAULT_PROVIDERS } from '@/constants/provider';
 import { ISource } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
 import { getFetchUrl } from '@/constants/utils';
@@ -6,16 +6,19 @@ import axios from 'axios';
 
 export function useWatchAnimeEpisodes({
   episodeId,
-  provider = DEFAULT_ANIME_PROVIDER,
+  provider = DEFAULT_PROVIDERS.anime,
+  dub = false,
 }: {
   episodeId: string;
   provider: string;
+  dub: boolean;
 }) {
   return useQuery<ISource>({
-    queryKey: ['watch', episodeId, provider],
+    queryKey: ['watch', episodeId, provider, dub],
     queryFn: async () => {
-      console.log(`${getFetchUrl().apiUrl}/meta/anilist/watch/${episodeId}?provider=${provider}`);
-      const { data } = await axios.get(`${getFetchUrl().apiUrl}/meta/anilist/watch/${episodeId}?provider=${provider}`);
+      let url = `${getFetchUrl().apiUrl}/anime/${provider}/watch/${episodeId}?dub=${dub}`;
+      console.log(url);
+      const { data } = await axios.get(url);
       return data;
     },
   });
@@ -27,7 +30,7 @@ export function useWatchMoviesEpisodes({
   seasonNumber,
   type,
   server,
-  provider = DEFAULT_MOVIE_PROVIDER,
+  provider = DEFAULT_PROVIDERS.movie,
 }: {
   tmdbId: string;
   episodeNumber: string;

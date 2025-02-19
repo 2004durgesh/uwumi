@@ -27,15 +27,6 @@ export const useEpisodesStore = create<EpisodesState>((set) => ({
   setEpisodes: (episodes: Episode[]) => set({ episodes }),
 }));
 
-interface MovieSeasonState {
-  movieSeasons: IMovieSeason[] | null;
-  setMovieSeasons: (movieSeasons: IMovieSeason[]) => void;
-}
-
-export const useMovieSeasonStore = create<MovieSeasonState>((set) => ({
-  movieSeasons: null,
-  setMovieSeasons: (movieSeasons: IMovieSeason[]) => set({ movieSeasons }),
-}));
 
 interface EpisodeDisplayState {
   displayMode: EpisodeDisplayMode;

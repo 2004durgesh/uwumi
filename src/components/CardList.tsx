@@ -12,11 +12,11 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
 import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch, useSearchStore } from '@/hooks';
-import { DEFAULT_ANIME_PROVIDER, DEFAULT_MANGA_PROVIDER, DEFAULT_MOVIE_PROVIDER } from '@/constants/provider';
+import { DEFAULT_PROVIDERS } from '@/constants/provider';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;
-  type: MediaFeedType;
+  mediaFeedType: MediaFeedType;
   mediaType: MediaType;
   metaProvider: MetaProvider;
 }
@@ -59,13 +59,13 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
             provider: (() => {
               switch (mediaType) {
                 case MediaType.ANIME:
-                  return DEFAULT_ANIME_PROVIDER;
+                  return DEFAULT_PROVIDERS.anime;
                 case MediaType.MANGA:
-                  return DEFAULT_MANGA_PROVIDER;
+                  return DEFAULT_PROVIDERS.manga;
                 case MediaType.MOVIE:
-                  return DEFAULT_MOVIE_PROVIDER;
+                  return DEFAULT_PROVIDERS.movie;
                 default:
-                  return DEFAULT_ANIME_PROVIDER;
+                  return DEFAULT_PROVIDERS.anime;
               }
             })(),
             id: item.id,
@@ -114,7 +114,7 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
   );
 });
 
-const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaProvider }) => {
+const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaType, metaProvider }) => {
   const debouncedQuery = useSearchStore((state) => state.debouncedQuery);
 
   const {
@@ -126,11 +126,11 @@ const CardList: React.FC<CardListProps> = ({ staticData, type, mediaType, metaPr
     hasNextPage,
   } = staticData
     ? { data: undefined, isLoading: false, error: null, refetch: () => {}, fetchNextPage: () => {}, hasNextPage: false }
-    : type === 'search' && mediaType === MediaType.MOVIE
+    : mediaFeedType === 'search' && mediaType === MediaType.MOVIE
       ? useMovieSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
-      : type === 'search'
+      : mediaFeedType === 'search'
         ? useAnimeAndMangaSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
-        : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, type);
+        : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, mediaFeedType);
 
   const data = staticData || dynamicData;
   // console.log(data, 'data cardlist');
