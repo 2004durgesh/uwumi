@@ -191,6 +191,11 @@ export interface ISource {
   download?: string;
   embedURL?: string;
 }
+export interface IEpisodeServer {
+  name: string;
+  url: string;
+}
+
 export interface Intro {
   start: number;
   end: number;

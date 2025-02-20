@@ -5,8 +5,8 @@ import { MediaType } from '@/constants/types';
 interface Provider {
   name: string;
   value: string;
-  sub?: boolean;
-  dub?: boolean;
+  subbed?: boolean;
+  dubbed?: boolean;
 }
 
 interface ProviderGroups {
@@ -18,9 +18,10 @@ interface ProviderGroups {
 // Define all providers in one place
 const PROVIDERS: ProviderGroups = {
   [MediaType.ANIME]: [
-    { name: 'Gogoanime', value: 'gogo', sub: true, dub: true },
-    { name: 'Zoro', value: 'zoro', sub: true, dub: true },
-    { name: 'AnimeKai', value: 'animekai', sub: true, dub: true },
+    // { name: 'Gogoanime', value: 'gogo', sub: true, dub: true },
+    { name: 'Zoro', value: 'zoro', subbed: true, dubbed: true },
+    { name: 'AnimeKai', value: 'animekai', subbed: true, dubbed: true },
+    // { name: 'AnimePahe', value: 'animepahe', sub: true, dub: true },
   ],
   [MediaType.MANGA]: [
     { name: 'Mangadex', value: 'mangadex' },

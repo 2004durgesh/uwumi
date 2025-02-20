@@ -48,7 +48,7 @@ export const useWatchProgressStore = create<WatchProgressState>()(
       },
     }),
     {
-      name: 'watch-progress',
+      name: 'watchProgress',
       storage: createJSONStorage(() => ({
         setItem: (name, value) => storage.set(name, value),
         getItem: (name) => storage.getString(name) ?? null,

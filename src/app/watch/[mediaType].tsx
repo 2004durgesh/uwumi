@@ -27,11 +27,14 @@ import {
   useDoubleTapGesture,
   useWatchAnimeEpisodes,
   useWatchMoviesEpisodes,
+  useMoviesEpisodesServers,
+  useServerStore,
 } from '@/hooks';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
 import axios from 'axios';
-import { PROVIDERS } from '@/constants/provider';
+import { PROVIDERS, useProviderStore } from '@/constants/provider';
+import { Check } from '@tamagui/lucide-icons';
 
 export interface SubtitleTrack {
   index: number;
@@ -112,6 +115,9 @@ const Watch = () => {
 
   const { top, right, bottom, left } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
+  const { setProvider, getProvider } = useProviderStore();
+  const { setServers, getCurrentServer, currentServer } = useServerStore();
+
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   useEffect(() => {
     if (episodeId) {
@@ -159,9 +165,26 @@ const Watch = () => {
           episodeNumber,
           seasonNumber,
           type,
-          // server,
+          server: currentServer?.name,
           provider,
         });
+  const {
+    data: serverData,
+    isLoading: isServerLoading,
+    error: serverError,
+  } = useMoviesEpisodesServers({
+    tmdbId: id,
+    episodeNumber,
+    seasonNumber,
+    type,
+    provider,
+  });
+  useEffect(() => {
+    if (serverData) {
+      setServers(serverData);
+    }
+  }, [serverData, setServers]);
+
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
@@ -364,16 +387,16 @@ const Watch = () => {
     [isFullscreen, dimensions, right],
   );
   // const source ="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8";
-
   const source = useMemo(
     () =>
       data?.sources?.find((s) => s.quality === 'default')?.url ||
       data?.sources?.find((s) => s.quality === 'backup')?.url ||
       data?.sources?.[0]?.url ||
+      currentServer?.url ||
       '',
-    [data?.sources],
+    [data?.sources, currentServer],
   );
-
+  console.log(source);
   useEffect(() => {
     if (source) {
       const fetchQuality = async () => {
@@ -382,7 +405,7 @@ const Watch = () => {
 
           // Extract resolutions using regex
           const regex =
-            /^#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+)(?:,FRAME-RATE=(\d+\.\d+))?(?:,CODECS="([^"]+)")?/;
+            /^#EXT-X-STREAM-INF:BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+)(?:,FRAME-RATE=(\d+\.\d+))?(?:,CODECS="([^"]+)")?/m;
           const lines = data.split('\n');
           const tracks = [];
           for (const line of lines) {
@@ -425,15 +448,15 @@ const Watch = () => {
   }, [data?.subtitles]);
 
   useEffect(() => {
-    if (!isLoading && source === '') {
+    if (!isLoading && !isServerLoading && source === '') {
       toast.error('No video source found', { description: 'Try changing servers' });
     }
-    if (!isLoading && error) {
-      toast.error('Error', { description: error?.message });
+    if (!isLoading && error && serverError) {
+      toast.error('Error', { description: error?.message ?? serverError?.message });
     }
-  }, [source, isLoading, error]);
+  }, [source, isLoading, error, isServerLoading, serverError]);
 
-  if (isLoading) {
+  if (isLoading || isServerLoading) {
     return (
       <ThemedView useSafeArea={false}>
         <YStack flex={1} justifyContent="center" alignItems="center">
@@ -572,36 +595,46 @@ const Watch = () => {
               </Text>
             </>
           )} */}
-          <YStack backgroundColor="black" padding="$4" borderRadius="$4">
-            {[
-              { label: 'Sub', key: 'sub' },
-              { label: 'Dub', key: 'dub' },
-            ].map(({ label, key }) => (
-              <XStack key={key} justifyContent="space-between" marginBottom="$2">
-                <Text color="white" fontWeight="bold">
-                  {label}
-                </Text>
-                <XStack>
-                  {PROVIDERS.anime.map(({ name, value, sub, dub }) => {
-                    const isAvailable = key === 'sub' ? sub : key === 'dub' ? dub : false;
-                    if (!isAvailable) return null;
-                    return (
-                      <Button
-                        key={value}
-                        onPress={() => {
-                          setDub(key === 'dub');
-                        }}
-                        // backgroundColor={selected === value ? '$blue10' : '$gray8'}
-                        marginHorizontal="$1"
-                        borderRadius="$2">
-                        <Text color="white">{name.toLowerCase()}</Text>
-                      </Button>
-                    );
-                  })}
-                </XStack>
-              </XStack>
-            ))}
-          </YStack>
+          {mediaType === MediaType.ANIME && (
+            <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
+              {[{ label: 'Sub', key: 'sub' }, isDub === 'true' && { label: 'Dub', key: 'dub' }]
+                // @ts-ignore
+                .map(({ label, key }) => (
+                  <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
+                    {key && (
+                      <Text color="$color1" fontWeight="bold" width={50}>
+                        {label}:
+                      </Text>
+                    )}
+                    <XStack flexWrap="wrap" flex={1} gap={4}>
+                      {PROVIDERS.anime.map(({ name, value, subbed, dubbed }) => {
+                        const isAvailable = key === 'sub' ? subbed : key === 'dub' ? dubbed : false;
+                        const isSelected = getProvider(mediaType) === value && dub === (key === 'dub');
+                        if (!isAvailable) return null;
+                        return (
+                          <Button
+                            key={value}
+                            onPress={() => {
+                              setDub(key === 'dub');
+                              setProvider(mediaType, value);
+                            }}
+                            backgroundColor={isSelected ? '$color' : '$color3'}
+                            flex={1}
+                            justifyContent="center">
+                            <XStack alignItems="center">
+                              {isSelected && <Check color="$color4" />}
+                              <Text fontWeight={900} color={isSelected ? '$color4' : '$color'}>
+                                {name}
+                              </Text>
+                            </XStack>
+                          </Button>
+                        );
+                      })}
+                    </XStack>
+                  </XStack>
+                ))}
+            </YStack>
+          )}
           <View flex={1}>
             <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable={false} />
           </View>

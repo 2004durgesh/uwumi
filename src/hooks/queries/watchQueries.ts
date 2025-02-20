@@ -1,5 +1,5 @@
 import { DEFAULT_PROVIDERS } from '@/constants/provider';
-import { ISource } from '@/constants/types';
+import { IEpisodeServer, ISource } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
 import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
@@ -51,6 +51,38 @@ export function useWatchMoviesEpisodes({
           seasonNumber,
           type: type.split(' ')[0].toLowerCase(),
           ...(server && { server }),
+          provider,
+        },
+      });
+      console.log(data);
+      return data;
+    },
+  });
+}
+export function useMoviesEpisodesServers({
+  tmdbId,
+  episodeNumber,
+  seasonNumber,
+  type,
+  provider = DEFAULT_PROVIDERS.movie,
+}: {
+  tmdbId: string;
+  episodeNumber: string;
+  seasonNumber: string;
+  type: string;
+  provider: string;
+}) {
+  return useQuery<IEpisodeServer[]>({
+    queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider],
+    queryFn: async () => {
+      console.log(
+        `${getFetchUrl().episodeApiUrl}/movies/server/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}`,
+      );
+      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/server/${tmdbId}`, {
+        params: {
+          episodeNumber,
+          seasonNumber,
+          type: type.split(' ')[0].toLowerCase(),
           provider,
         },
       });

@@ -27,7 +27,6 @@ export const useEpisodesStore = create<EpisodesState>((set) => ({
   setEpisodes: (episodes: Episode[]) => set({ episodes }),
 }));
 
-
 interface EpisodeDisplayState {
   displayMode: EpisodeDisplayMode;
   setDisplayMode: (mode: EpisodeDisplayMode) => void;

@@ -25,6 +25,7 @@ import {
   usePureBlackBackground,
   useEpisodeDisplayStore,
   useMoviesEpisodes,
+  useServerStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvType } from '@/constants/types';
@@ -67,8 +68,8 @@ const EpisodeList = ({
   const [seasonNumber, setSeasonNumber] = useState(0);
   const { setProvider, getProvider } = useProviderStore();
   useEffect(() => {
-    setProvider(mediaType, provider);
-  }, [mediaType, provider, setProvider]);
+    setProvider(mediaType, getProvider(mediaType) ?? provider);
+  }, [mediaType, provider, setProvider, getProvider]);
   const { data: episodeData, isLoading } =
     mediaType === MediaType.ANIME
       ? useAnimeEpisodes({ id, provider: getProvider(mediaType) })
@@ -94,6 +95,7 @@ const EpisodeList = ({
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const displayMode = useEpisodeDisplayStore((state) => state.displayMode);
   const setDisplayMode = useEpisodeDisplayStore((state) => state.setDisplayMode);
+  const { setCurrentServer, getCurrentServer, getServers, servers } = useServerStore();
 
   const [listKey, setListKey] = useState(0);
   useEffect(() => {
@@ -394,12 +396,27 @@ const EpisodeList = ({
             onValueChange={(value: string) => setSeasonNumber(Number(value))}
           />
         )}
-        <CustomSelect
-          SelectItem={mediaType === MediaType.ANIME ? PROVIDERS.anime : PROVIDERS.manga}
-          SelectLabel="Provider"
-          value={getProvider(mediaType)}
-          onValueChange={handleProviderChange}
-        />
+        {getServers() && !swipeable && (
+          <CustomSelect
+            SelectItem={
+              getServers().map((server) => ({
+                name: server.name,
+                value: server.name,
+              })) || []
+            }
+            SelectLabel="Servers"
+            value={getCurrentServer()?.name!}
+            onValueChange={(value: string) => setCurrentServer(value)}
+          />
+        )}
+        {mediaType === MediaType.ANIME && swipeable && (
+          <CustomSelect
+            SelectItem={mediaType === MediaType.ANIME ? PROVIDERS.anime : PROVIDERS.movie}
+            SelectLabel="Provider"
+            value={getProvider(mediaType)}
+            onValueChange={handleProviderChange}
+          />
+        )}
         {swipeable && (
           <Pressable
             onPress={() => {

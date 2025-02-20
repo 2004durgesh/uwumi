@@ -21,7 +21,7 @@ const CustomSelect = ({
   return (
     <Select value={value} onValueChange={onValueChange}>
       <Select.Trigger width={150} iconAfter={ChevronDown}>
-        <Select.Value>{SelectItem.find((opt) => opt.value === value)?.name || SelectLabel}</Select.Value>
+        <Select.Value width={90}>{SelectItem.find((opt) => opt.value === value)?.name || SelectLabel}</Select.Value>
       </Select.Trigger>
 
       <Adapt platform="touch">

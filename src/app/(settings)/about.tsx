@@ -25,13 +25,24 @@ const About = () => {
       </Ripple>
 
       {/* press the button to see all the mmkv storage */}
-      <Button
-        onPress={() => {
-          // console.log(storage.getAllKeys().forEach((key) => console.log(key)));
-          console.log(JSON.parse(storage.getString('watch-progress')!))
-        }}>
-        <Text>Press to see all the mmkv storage</Text>
-      </Button>
+      <YStack gap={10} margin={10}>
+        <Button
+          onPress={() => {
+            console.log(JSON.parse(storage.getString('mediaProviders') || '{}'));
+            // console.log(JSON.parse(storage.getString('theme') || '{}'));
+            // console.log(JSON.parse(storage.getString('accent') || '{}'));
+            console.log(JSON.parse(storage.getString('pureBlack') || '{}'));
+            console.log(JSON.parse(storage.getString('watchProgress') || '{}'));
+          }}>
+          <Text>Press to see all the mmkv storage</Text>
+        </Button>
+        <Button
+          onPress={() => {
+            storage.delete('watchProgress');
+          }}>
+          <Text>delete progress</Text>
+        </Button>
+      </YStack>
     </ThemedView>
   );
 };
