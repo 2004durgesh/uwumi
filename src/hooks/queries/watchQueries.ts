@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
 
-
 export function useWatchAnimeEpisodes({
   episodeId,
   provider = DEFAULT_PROVIDERS.anime,
@@ -15,6 +14,7 @@ export function useWatchAnimeEpisodes({
   provider: string;
   dub: boolean;
 }) {
+  // console.log(episodeId, provider, dub);
   return useQuery<ISource>({
     queryKey: ['watch', episodeId, provider, dub],
     queryFn: async () => {
@@ -41,7 +41,7 @@ export function useWatchMoviesEpisodes({
   server?: string;
   provider: string;
 }) {
-  console.log(tmdbId, episodeNumber, seasonNumber, type, server, provider);
+  // console.log(tmdbId, episodeNumber, seasonNumber, type, server, provider);
   // useEffect(() => {
   //   const { setCurrentServer } = useServerStore();
   //   setCurrentServer(server);
@@ -80,7 +80,7 @@ export function useMoviesEpisodesServers({
   type: string;
   provider: string;
 }) {
-  console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
+  // console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
 
   return useQuery<IEpisodeServer[]>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider],

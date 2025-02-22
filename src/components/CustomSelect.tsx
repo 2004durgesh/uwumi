@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Check, ChevronDown } from '@tamagui/lucide-icons';
 import { Adapt, Select, Sheet } from 'tamagui';
+import { usePureBlackBackground } from '@/hooks';
 
 type SelectOption = {
   name: string;
@@ -18,15 +19,17 @@ const CustomSelect = ({
   value: string;
   onValueChange: (value: string) => void;
 }) => {
+  const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
+  const bgColor = pureBlackBackground ? '$color3' : 'black';
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <Select.Trigger width={150} iconAfter={ChevronDown}>
+      <Select.Trigger backgroundColor={bgColor} width={150} iconAfter={ChevronDown}>
         <Select.Value width={90}>{SelectItem.find((opt) => opt.value === value)?.name || SelectLabel}</Select.Value>
       </Select.Trigger>
 
       <Adapt platform="touch">
         <Sheet snapPoints={[30]} modal dismissOnSnapToBottom animation="quick">
-          <Sheet.Frame>
+          <Sheet.Frame backgroundColor={bgColor}>
             <Sheet.ScrollView showsVerticalScrollIndicator>
               <Adapt.Contents />
             </Sheet.ScrollView>
@@ -42,9 +45,9 @@ const CustomSelect = ({
           exitStyle={{ x: 0, y: 10 }}
           minWidth={200}>
           <Select.Group>
-            <Select.Label>{SelectLabel}</Select.Label>
+            <Select.Label backgroundColor={bgColor}>{SelectLabel}</Select.Label>
             {SelectItem.map((item, index) => (
-              <Select.Item key={item.value} index={index} value={item.value}>
+              <Select.Item backgroundColor={bgColor} key={item.value} index={index} value={item.value}>
                 <Select.ItemText>{item.name}</Select.ItemText>
                 <Select.ItemIndicator marginLeft="auto">
                   <Check size={16} />

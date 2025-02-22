@@ -28,7 +28,7 @@ export const useWatchProgressStore = create<WatchProgressState>()(
             [episodeId]: progress,
           },
         }));
-        console.log('New state:', get().progresses);
+        // console.log('New state:', get().progresses);
       },
       getProgress: (episodeId) => {
         const progress = get().progresses[episodeId] || null;

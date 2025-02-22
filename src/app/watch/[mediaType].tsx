@@ -84,13 +84,14 @@ const OverlayedView = styled(Animated.View, {
 });
 
 const Watch = () => {
-  const { mediaType, provider, id, episodeId, isDub, poster, title, episodeNumber, seasonNumber, type } =
+  const { mediaType, provider, id, episodeId, uniqueId, isDub, poster, title, episodeNumber, seasonNumber, type } =
     useLocalSearchParams<{
       mediaType: MediaType;
       provider: string;
       id: string;
       episodeId: string;
       episodeDubId: string;
+      uniqueId: string;
       isDub: string;
       poster: string;
       title: string;
@@ -107,14 +108,15 @@ const Watch = () => {
   const { setServers, setCurrentServer, currentServer } = useServerStore();
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
+  const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
   useEffect(() => {
-    if (episodeId) {
-      setEpisodeIds(episodeId);
+    if (episodeId && uniqueId) {
+      setEpisodeIds(episodeId, uniqueId);
     }
     return () => {
-      setEpisodeIds('');
+      setEpisodeIds('', '');
     };
-  }, [episodeId, setEpisodeIds]);
+  }, [uniqueId, setEpisodeIds, episodeId]);
 
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -134,8 +136,8 @@ const Watch = () => {
     height: 0,
   });
   const [dimensions, setDimensions] = useState({
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    width: Dimensions.get('screen').width,
+    height: Dimensions.get('screen').height,
   });
   const [wrapperDimensions, setWrapperDimensions] = useState({
     width: 0,
@@ -144,8 +146,8 @@ const Watch = () => {
   const { data, isLoading, error } =
     mediaType === MediaType.ANIME
       ? useWatchAnimeEpisodes({
-          episodeId,
-          provider,
+          episodeId: currentEpisodeId ?? episodeId,
+          provider: getProvider(mediaType),
           dub,
         })
       : useWatchMoviesEpisodes({
@@ -160,13 +162,15 @@ const Watch = () => {
     data: serverData,
     isLoading: isServerLoading,
     error: serverError,
-  } = useMoviesEpisodesServers({
-    tmdbId: id,
-    episodeNumber,
-    seasonNumber,
-    type,
-    provider,
-  });
+  } = mediaType === MediaType.MOVIE
+    ? useMoviesEpisodesServers({
+        tmdbId: id,
+        episodeNumber,
+        seasonNumber,
+        type,
+        provider,
+      })
+    : { data: undefined, isLoading: false, error: null };
   useEffect(() => {
     if (serverData) {
       setServers(serverData);
@@ -187,10 +191,10 @@ const Watch = () => {
   const [systemVolume, setSystemVolume] = useState(1);
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener('change', ({ screen }) => {
       setDimensions({
-        width: window.width,
-        height: window.height,
+        width: screen.width,
+        height: screen.height,
       });
     });
 
@@ -207,6 +211,7 @@ const Watch = () => {
   const enterFullscreen = async () => {
     try {
       SystemNavigationBar.stickyImmersive();
+
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
       setIsFullscreen(true);
     } catch (error) {
@@ -227,14 +232,14 @@ const Watch = () => {
   const handleProgress = ({ currentTime, seekableDuration }: { currentTime: number; seekableDuration: number }) => {
     setCurrentTime(currentTime);
     setSeekableDuration(seekableDuration);
-    if (episodeId && seekableDuration > 0 && Math.floor(currentTime) % 5 === 0) {
+    if (uniqueId && seekableDuration > 0 && Math.floor(currentTime) % 5 === 0) {
       const progress = {
         currentTime: currentTime,
         duration: seekableDuration,
         progress: (currentTime / seekableDuration) * 100,
       };
       // console.log('Saving progress:', progress);
-      setProgress(episodeId, progress);
+      setProgress(uniqueId, progress);
     }
   };
 
@@ -371,11 +376,12 @@ const Watch = () => {
       backgroundColor: 'black',
       position: 'absolute' as const,
       top: 0,
-      left: isFullscreen ? right : 0,
+      left: 0,
       right: 0,
     }),
-    [isFullscreen, dimensions, right],
+    [isFullscreen, dimensions],
   );
+  console.log(videoStyle);
   // const source ="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8";
   const source = useMemo(
     () =>
@@ -386,7 +392,7 @@ const Watch = () => {
       '',
     [data],
   );
-  console.log(source);
+  // console.log(source);
   useEffect(() => {
     if (source) {
       const fetchQuality = async () => {
@@ -527,7 +533,7 @@ const Watch = () => {
                       value.textTracks?.filter((track) => !track.language && !track.title).length || 0;
                     setNullSubtitleIndex(nullTrackCount);
                     console.log('nullIndex:', nullTrackCount);
-                    videoRef?.current?.seek(getProgress(episodeId)?.currentTime || 0);
+                    videoRef?.current?.seek(getProgress(uniqueId)?.currentTime || 0);
                   }}
                   selectedVideoTrack={{
                     type: SelectedVideoTrackType.INDEX,
@@ -548,7 +554,7 @@ const Watch = () => {
                 {isVideoReady && (
                   <ControlsOverlay
                     showControls={showControls}
-                    routeInfo={{ mediaType, provider, id }}
+                    routeInfo={{ mediaType, provider, id, type }}
                     isPlaying={playbackState.isPlaying}
                     isMuted={isMuted}
                     isFullscreen={isFullscreen}

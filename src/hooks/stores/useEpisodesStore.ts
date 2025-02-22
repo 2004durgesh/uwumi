@@ -1,30 +1,37 @@
-import { Episode, EpisodeDisplayMode } from '@/constants/types';
+import { Episode, EpisodeDisplayMode, IMovieEpisode } from '@/constants/types';
 import { create } from 'zustand';
 
 interface EpisodesIdState {
+  currentUniqueId: string | null;
   currentEpisodeId: string | null;
-  prevEpisodeId: string | null;
-  nextEpisodeId: string | null;
-  setEpisodeIds: (current: string | null, prev?: string | null, next?: string | null) => void;
+  prevUniqueId: string | null;
+  nextUniqueId: string | null;
+  setEpisodeIds: (
+    currenteid: string | null,
+    currentuid: string | null,
+    prevuid?: string | null,
+    nextuid?: string | null,
+  ) => void;
 }
 
 export const useEpisodesIdStore = create<EpisodesIdState>((set) => ({
+  currentUniqueId: null,
   currentEpisodeId: null,
-  prevEpisodeId: null,
-  nextEpisodeId: null,
-  setEpisodeIds: (current, prev, next) => {
-    set({ currentEpisodeId: current, prevEpisodeId: prev, nextEpisodeId: next });
+  prevUniqueId: null,
+  nextUniqueId: null,
+  setEpisodeIds: (currenteid, currentuid, prevuid, nextuid) => {
+    set({ currentEpisodeId: currenteid, currentUniqueId: currentuid, prevUniqueId: prevuid, nextUniqueId: nextuid });
   },
 }));
 
 interface EpisodesState {
-  episodes: Episode[];
-  setEpisodes: (episodes: Episode[]) => void;
+  episodes: Episode[] | IMovieEpisode[];
+  setEpisodes: (episodes: Episode[] | IMovieEpisode[]) => void;
 }
 
 export const useEpisodesStore = create<EpisodesState>((set) => ({
   episodes: [],
-  setEpisodes: (episodes: Episode[]) => set({ episodes }),
+  setEpisodes: (episodes: Episode[] | IMovieEpisode[]) => set({ episodes }),
 }));
 
 interface EpisodeDisplayState {

@@ -79,7 +79,7 @@ const EpisodeList = ({
           provider: getProvider(mediaType) === 'rive' ? '' : getProvider(mediaType),
         });
 
-  const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
+  const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
   const movieSeasons = episodeData?.seasons;
   // console.log('movieSeasons', movieSeasons);
   const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
@@ -109,7 +109,7 @@ const EpisodeList = ({
     }
   }, [episodes, setEpisodes]);
 
-  const currentEpisode = animeEpisodes.find((episode) => episode.id === currentEpisodeId);
+  const currentEpisode = animeEpisodes.find((episode) => episode.id === currentUniqueId);
   // console.log(
   //   movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
   //   seasonNumber,
@@ -118,7 +118,7 @@ const EpisodeList = ({
     return () => {
       hasScrolledRef.current = false;
     };
-  }, [currentEpisodeId]);
+  }, [currentUniqueId]);
 
   const handleProviderChange = useCallback(
     (value: string) => {
@@ -183,11 +183,11 @@ const EpisodeList = ({
 
   const renderEpisodeProgress = useMemo(
     () => (item: Episode | IMovieEpisode) => {
-      if (currentEpisodeId === item?.id) {
+      if (currentUniqueId === item?.uniqueId) {
         return <WavyAnimation />;
       }
 
-      const progress = progresses[item?.id];
+      const progress = progresses[item?.uniqueId];
       // console.log('progress', progress);
       if (progress?.currentTime && progress?.progress < 90) {
         return (
@@ -203,7 +203,7 @@ const EpisodeList = ({
         <Eye opacity={0.7} color="white" size={15} />
       );
     },
-    [currentEpisodeId, progresses],
+    [currentUniqueId, progresses],
   );
 
   const ListPressable = memo(({ item, children }: { item: Episode | IMovieEpisode; children: React.ReactNode }) => {
@@ -216,11 +216,10 @@ const EpisodeList = ({
               mediaType,
               provider: getProvider(mediaType),
               id,
-              episodeId:
-                item?.id ??
-                `${id}-${item?.number ?? item?.episode}-${item?.season}-${type?.split(' ')[0].toLowerCase()}`,
+              episodeId: item?.id,
               ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
               ...(item?.isDub ? { isDub: item.isDub as string } : null),
+              uniqueId: item?.uniqueId,
               poster: item?.image ?? item?.img?.hd ?? '',
               title: item?.title,
               description: item?.description,
@@ -236,7 +235,7 @@ const EpisodeList = ({
           marginVertical={1}
           borderWidth={2}
           borderRadius={10}
-          borderColor={currentEpisodeId === item.id ? '$color4' : 'transparent'}
+          borderColor={currentUniqueId === item?.uniqueId ? '$color4' : 'transparent'}
           backgroundColor={pureBlackBackground ? '#000' : '$background'}>
           <XStack gap={'$4'}>{children}</XStack>
         </YStack>
@@ -276,14 +275,14 @@ const EpisodeList = ({
                 EP {item.number ?? item.episode}
               </Text>
             </View>
-            {progresses[item?.id] && swipeable && (
+            {progresses[item?.uniqueId] && swipeable && (
               <View position="absolute" bottom="$0" left="50%" transform={[{ translateX: '-50%' }]}>
                 <Progress
                   size={'$2'}
                   scaleX={1.15}
                   borderRadius={0}
                   backgroundColor="$color1"
-                  value={Math.round(progresses[item?.id]?.progress) || 0}
+                  value={Math.round(progresses[item?.uniqueId]?.progress) || 0}
                   max={100}>
                   <Progress.Indicator animation="bouncy" backgroundColor="$color4" />
                 </Progress>
@@ -462,7 +461,7 @@ const EpisodeList = ({
         }}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }: { item: Episode | IMovieEpisode }) => {
-          const itemKey = item?.id ?? `${id}-${item?.number ?? item?.episode}-${item?.season}`;
+          const itemKey = item?.id ?? item?.uniqueId;
           return swipeable ? (
             <ReanimatedSwipeable
               ref={(ref) => {

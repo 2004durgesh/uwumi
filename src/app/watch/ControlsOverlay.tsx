@@ -14,7 +14,7 @@ import {
   SkipBack,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
-import { ISubtitle } from '@/constants/types';
+import { ISubtitle, MediaFormat, TvType } from '@/constants/types';
 import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
@@ -28,6 +28,7 @@ interface ControlsOverlayProps {
     mediaType: string;
     provider: string;
     id: string;
+    type: MediaFormat | TvType;
   };
   isPlaying: boolean;
   isMuted: boolean;
@@ -76,20 +77,30 @@ const ControlsOverlay = memo(
     // console.log("settings are being shown", openSettings);
     const router = useRouter();
     const { mediaType, provider, id } = routeInfo;
-    const prevEpisodeId = useEpisodesIdStore((state) => state.prevEpisodeId);
-    const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
-    const nextEpisodeId = useEpisodesIdStore((state) => state.nextEpisodeId);
+    const prevUniqueId = useEpisodesIdStore((state) => state.prevUniqueId);
+    const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
+    const nextUniqueId = useEpisodesIdStore((state) => state.nextUniqueId);
     const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
     const episodes = useEpisodesStore((state) => state.episodes);
-    // console.log('episodes', episodes,currentEpisodeId,nextEpisodeId,prevEpisodeId);
-    const currentEpisodeIndex = episodes.findIndex((ep) => ep.id === currentEpisodeId);
-    const prevEpisodeIndex = episodes.findIndex((ep) => ep.id === prevEpisodeId);
-    const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
-    const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].id : null;
-    const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
+    const currentEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === currentUniqueId);
+    const prevEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === prevUniqueId);
+    const nextEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === nextUniqueId);
+    const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].uniqueId : null;
+    const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].uniqueId : null;
     const themeName = useThemeStore((state) => state.themeName);
+    // console.log({
+    //   prevUniqueId,
+    //   currentUniqueId,
+    //   nextUniqueId,
+    //   episodes,
+    //   currentEpisodeIndex,
+    //   prevEpisodeIndex,
+    //   nextEpisodeIndex,
+    //   prevId,
+    //   nextId,
+    // });
     const SHEET_THEME_COLOR = themeName === 'light' ? '#ebeaf1' : '#0e0f15';
-    console.log('selectedSubtitleIndex', selectedSubtitleIndex, subtitleTracks![selectedSubtitleIndex!]);
+    // console.log('selectedSubtitleIndex', selectedSubtitleIndex, subtitleTracks![selectedSubtitleIndex!]);
     const tabItems = [
       {
         key: 'tab1',
@@ -140,9 +151,9 @@ const ControlsOverlay = memo(
     ];
     useEffect(() => {
       if (prevId || nextId) {
-        setEpisodeIds(currentEpisodeId!, prevId, nextId);
+        setEpisodeIds(episodes[currentEpisodeIndex].id, currentUniqueId!, prevId, nextId);
       }
-    }, [currentEpisodeId, prevId, nextId, setEpisodeIds]);
+    }, [currentUniqueId, prevId, nextId, setEpisodeIds, episodes, currentEpisodeIndex]);
 
     return showControls ? (
       <>
@@ -183,7 +194,6 @@ const ControlsOverlay = memo(
                 dismissOnSnapToBottom
                 zIndex={100_000}
                 animation="quick">
-                <Sheet.Handle backgroundColor="$color4" />
                 <Sheet.Overlay
                   backgroundColor="transparent"
                   animation="lazy"
@@ -220,12 +230,19 @@ const ControlsOverlay = memo(
                       provider,
                       id,
                       episodeId: episodes[prevEpisodeIndex].id,
-                      episodeDubId: episodes[prevEpisodeIndex].dubId,
-                      isDub: episodes[prevEpisodeIndex].isDub,
-                      poster: episodes[prevEpisodeIndex].image,
+                      uniqueId: episodes[prevEpisodeIndex].uniqueId,
+                      ...(episodes[prevEpisodeIndex].dubId
+                        ? { episodeDubId: episodes[prevEpisodeIndex].dubId as string }
+                        : null),
+                      ...(episodes[prevEpisodeIndex].isDub
+                        ? { isDub: episodes[prevEpisodeIndex].isDub as string }
+                        : null),
+                      poster: episodes[prevEpisodeIndex].image ?? episodes[prevEpisodeIndex].img?.hd,
                       title: episodes[prevEpisodeIndex].title,
                       description: episodes[prevEpisodeIndex].description,
-                      number: episodes[prevEpisodeIndex].number,
+                      episodeNumber: episodes[prevEpisodeIndex].number ?? episodes[prevEpisodeIndex].episode,
+                      seasonNumber: episodes[prevEpisodeIndex].season,
+                      type: routeInfo.type,
                     },
                   });
                 }
@@ -252,12 +269,19 @@ const ControlsOverlay = memo(
                       provider,
                       id,
                       episodeId: episodes[nextEpisodeIndex].id,
-                      episodeDubId: episodes[nextEpisodeIndex].dubId,
-                      isDub: episodes[nextEpisodeIndex].isDub,
-                      poster: episodes[nextEpisodeIndex].image,
+                      uniqueId: episodes[nextEpisodeIndex].uniqueId,
+                      ...(episodes[nextEpisodeIndex].dubId
+                        ? { episodeDubId: episodes[nextEpisodeIndex].dubId as string }
+                        : null),
+                      ...(episodes[nextEpisodeIndex].isDub
+                        ? { isDub: episodes[nextEpisodeIndex].isDub as string }
+                        : null),
+                      poster: episodes[nextEpisodeIndex].image ?? episodes[nextEpisodeIndex].img?.hd,
                       title: episodes[nextEpisodeIndex].title,
                       description: episodes[nextEpisodeIndex].description,
-                      number: episodes[nextEpisodeIndex].number,
+                      episodeNumber: episodes[nextEpisodeIndex].number ?? episodes[nextEpisodeIndex].episode,
+                      seasonNumber: episodes[nextEpisodeIndex].season,
+                      type: routeInfo.type,
                     },
                   });
                 }
@@ -301,10 +325,10 @@ const ControlsOverlay = memo(
                     onSeek(Math.round(value));
                   }}
                   step={1}>
-                  <Slider.Track>
+                  <Slider.Track height={5}>
                     <Slider.TrackActive backgroundColor="$color" />
                   </Slider.Track>
-                  <Slider.Thumb backgroundColor="$color" index={0} size={20} circular borderColor="$color" />
+                  <Slider.Thumb backgroundColor="$color" index={0} size={13} circular borderColor="$color" />
                 </Slider>
               </View>
               <Text color="white" fontSize={13} fontWeight={700}>

@@ -1,7 +1,7 @@
 export interface Episode {
   id: string;
   dubId?: string;
-  uniqueId?: string;
+  uniqueId: string;
   isDub?: string;
   number: number;
   url: string;
@@ -191,7 +191,7 @@ export interface ISource {
   sources: IVideo[];
   download?: string;
   embedURL?: string;
-  server?:string
+  server?: string;
 }
 export interface IEpisodeServer {
   name: string;
@@ -219,6 +219,7 @@ export interface IVideo {
 
 export interface IMovieEpisode {
   id: string;
+  uniqueId: string;
   title: string;
   url?: string;
   number?: number;
