@@ -27,10 +27,6 @@ export function useInfo({
       console.log(url);
       const { data } = await axios.get(url, {
         params: { provider },
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
       });
       // console.log(data);
       return data;
@@ -61,7 +57,7 @@ export function useMoviesEpisodes({
   return useQuery<IMovieInfo>({
     queryKey: ['movies', 'episodes', id, type, provider],
     queryFn: async () => {
-      let url = `${getFetchUrl().episodeApiUrl}/movies/episodes/${id}?type=${type}&provider=${provider}`;
+      let url = `${getFetchUrl().episodeApiUrl}/movies/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
       console.log(url);
       const { data } = await axios.get(url);
       console.log(data);

@@ -81,6 +81,7 @@ const ControlsOverlay = memo(
     const nextEpisodeId = useEpisodesIdStore((state) => state.nextEpisodeId);
     const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
     const episodes = useEpisodesStore((state) => state.episodes);
+    // console.log('episodes', episodes,currentEpisodeId,nextEpisodeId,prevEpisodeId);
     const currentEpisodeIndex = episodes.findIndex((ep) => ep.id === currentEpisodeId);
     const prevEpisodeIndex = episodes.findIndex((ep) => ep.id === prevEpisodeId);
     const nextEpisodeIndex = episodes.findIndex((ep) => ep.id === nextEpisodeId);
@@ -88,6 +89,7 @@ const ControlsOverlay = memo(
     const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].id : null;
     const themeName = useThemeStore((state) => state.themeName);
     const SHEET_THEME_COLOR = themeName === 'light' ? '#ebeaf1' : '#0e0f15';
+    console.log('selectedSubtitleIndex', selectedSubtitleIndex, subtitleTracks![selectedSubtitleIndex!]);
     const tabItems = [
       {
         key: 'tab1',

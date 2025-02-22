@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { DEFAULT_PROVIDERS } from '@/constants/provider';
 import { IEpisodeServer, ISource } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
 import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
+
 
 export function useWatchAnimeEpisodes({
   episodeId,
@@ -29,7 +31,7 @@ export function useWatchMoviesEpisodes({
   episodeNumber,
   seasonNumber,
   type,
-  server,
+  server = 'Ghost-HLS',
   provider = DEFAULT_PROVIDERS.movie,
 }: {
   tmdbId: string;
@@ -39,6 +41,12 @@ export function useWatchMoviesEpisodes({
   server?: string;
   provider: string;
 }) {
+  console.log(tmdbId, episodeNumber, seasonNumber, type, server, provider);
+  // useEffect(() => {
+  //   const { setCurrentServer } = useServerStore();
+  //   setCurrentServer(server);
+  // }, [server]);
+
   return useQuery<ISource>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, server, provider],
     queryFn: async () => {
@@ -72,6 +80,8 @@ export function useMoviesEpisodesServers({
   type: string;
   provider: string;
 }) {
+  console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
+
   return useQuery<IEpisodeServer[]>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider],
     queryFn: async () => {

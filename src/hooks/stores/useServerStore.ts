@@ -19,7 +19,7 @@ export const useServerStore = create<ServerState>((set, get) => ({
   setServers: (servers) => {
     set({ servers });
   },
-  
+
   getServers: () => get().servers,
 
   setCurrentServer: (serverName) => {

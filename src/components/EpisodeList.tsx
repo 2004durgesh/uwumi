@@ -95,7 +95,7 @@ const EpisodeList = ({
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const displayMode = useEpisodeDisplayStore((state) => state.displayMode);
   const setDisplayMode = useEpisodeDisplayStore((state) => state.setDisplayMode);
-  const { setCurrentServer, getCurrentServer, getServers, servers } = useServerStore();
+  const { setCurrentServer, getCurrentServer, servers } = useServerStore();
 
   const [listKey, setListKey] = useState(0);
   useEffect(() => {
@@ -104,10 +104,10 @@ const EpisodeList = ({
 
   const setEpisodes = useEpisodesStore((state) => state.setEpisodes);
   useEffect(() => {
-    if (animeEpisodes) {
-      setEpisodes(animeEpisodes);
+    if (episodes) {
+      setEpisodes(episodes);
     }
-  }, [animeEpisodes, setEpisodes]);
+  }, [episodes, setEpisodes]);
 
   const currentEpisode = animeEpisodes.find((episode) => episode.id === currentEpisodeId);
   // console.log(
@@ -361,7 +361,7 @@ const EpisodeList = ({
 
   const renderItemContent = useCallback(
     (item: Episode | IMovieEpisode) => {
-      console.log('renderContent', displayMode);
+      // console.log('renderContent', displayMode);
       switch (displayMode) {
         case EpisodeDisplayMode.FullMetadata:
           return renderFullMetadataPressableItem({ item });
@@ -396,16 +396,16 @@ const EpisodeList = ({
             onValueChange={(value: string) => setSeasonNumber(Number(value))}
           />
         )}
-        {getServers() && !swipeable && (
+        {mediaType === MediaType.MOVIE && servers && servers.length > 0 && !swipeable && (
           <CustomSelect
             SelectItem={
-              getServers().map((server) => ({
+              servers.map((server) => ({
                 name: server.name,
                 value: server.name,
               })) || []
             }
             SelectLabel="Servers"
-            value={getCurrentServer()?.name!}
+            value={getCurrentServer()?.name! ?? servers[0].name}
             onValueChange={(value: string) => setCurrentServer(value)}
           />
         )}

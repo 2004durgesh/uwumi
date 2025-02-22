@@ -1,4 +1,4 @@
-import { Episode, EpisodeDisplayMode, IMovieSeason } from '@/constants/types';
+import { Episode, EpisodeDisplayMode } from '@/constants/types';
 import { create } from 'zustand';
 
 interface EpisodesIdState {

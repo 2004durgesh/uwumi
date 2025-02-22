@@ -84,39 +84,27 @@ const OverlayedView = styled(Animated.View, {
 });
 
 const Watch = () => {
-  const {
-    mediaType,
-    provider,
-    id,
-    episodeId,
-    episodeDubId,
-    isDub,
-    poster,
-    title,
-    description,
-    episodeNumber,
-    seasonNumber,
-    type,
-  } = useLocalSearchParams<{
-    mediaType: MediaType;
-    provider: string;
-    id: string;
-    episodeId: string;
-    episodeDubId: string;
-    isDub: string;
-    poster: string;
-    title: string;
-    description: string;
-    episodeNumber: string;
-    seasonNumber: string;
-    type: MediaFormat | TvType;
-  }>();
+  const { mediaType, provider, id, episodeId, isDub, poster, title, episodeNumber, seasonNumber, type } =
+    useLocalSearchParams<{
+      mediaType: MediaType;
+      provider: string;
+      id: string;
+      episodeId: string;
+      episodeDubId: string;
+      isDub: string;
+      poster: string;
+      title: string;
+      description: string;
+      episodeNumber: string;
+      seasonNumber: string;
+      type: MediaFormat | TvType;
+    }>();
   // console.log(useLocalSearchParams());
 
-  const { top, right, bottom, left } = useSafeAreaInsets();
+  const { top, right } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const { setProvider, getProvider } = useProviderStore();
-  const { setServers, getCurrentServer, currentServer } = useServerStore();
+  const { setServers, setCurrentServer, currentServer } = useServerStore();
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   useEffect(() => {
@@ -126,7 +114,7 @@ const Watch = () => {
     return () => {
       setEpisodeIds('');
     };
-  }, [episodeId]);
+  }, [episodeId, setEpisodeIds]);
 
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -183,9 +171,13 @@ const Watch = () => {
     if (serverData) {
       setServers(serverData);
     }
-  }, [serverData, setServers]);
+    if (data && data?.server) {
+      setCurrentServer(data?.server || 'Ghost-HLS');
+    }
+  }, [data, serverData, setCurrentServer, setServers]);
 
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
+  const [NullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
   const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
@@ -275,8 +267,6 @@ const Watch = () => {
     doubleTapGesture,
     isDoubleTap,
     doubleTapValue,
-    forwardAnimatedStyle,
-    backwardAnimatedStyle,
     backwardRippleRef,
     forwardRippleRef,
     backwardAnimatedRipple,
@@ -392,9 +382,9 @@ const Watch = () => {
       data?.sources?.find((s) => s.quality === 'default')?.url ||
       data?.sources?.find((s) => s.quality === 'backup')?.url ||
       data?.sources?.[0]?.url ||
-      currentServer?.url ||
+      (Array.isArray(data) ? data[0]?.sources?.[0]?.url : '') ||
       '',
-    [data?.sources, currentServer],
+    [data],
   );
   console.log(source);
   useEffect(() => {
@@ -405,7 +395,7 @@ const Watch = () => {
 
           // Extract resolutions using regex
           const regex =
-            /^#EXT-X-STREAM-INF:BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+)(?:,FRAME-RATE=(\d+\.\d+))?(?:,CODECS="([^"]+)")?/m;
+            /^#EXT-X-STREAM-INF:.*?BANDWIDTH=(\d+),RESOLUTION=(\d+)x(\d+)(?:,FRAME-RATE=([\d.]+))?(?:,CODECS="([^"]+)")?/gm;
           const lines = data.split('\n');
           const tracks = [];
           for (const line of lines) {
@@ -530,8 +520,13 @@ const Watch = () => {
                     console.log('Video Error:', error);
                   }}
                   onLoad={(value) => {
-                    // console.log('Video loaded:', value);
+                    console.log('Video loaded:', value);
                     setIsVideoReady(true);
+                    // to find how much of the textTracks have null language and title
+                    const nullTrackCount =
+                      value.textTracks?.filter((track) => !track.language && !track.title).length || 0;
+                    setNullSubtitleIndex(nullTrackCount);
+                    console.log('nullIndex:', nullTrackCount);
                     videoRef?.current?.seek(getProgress(episodeId)?.currentTime || 0);
                   }}
                   selectedVideoTrack={{
@@ -540,7 +535,7 @@ const Watch = () => {
                   }}
                   selectedTextTrack={{
                     type: SelectedTrackType.INDEX,
-                    value: (selectedSubtitleIndex ?? 0) + 1,
+                    value: (selectedSubtitleIndex ?? 0) + NullSubtitleIndex!,
                   }}
                   // onVideoTracks={(tracks) => {
                   //   console.log('Video Tracks:', tracks);

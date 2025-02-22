@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
-import { Text, View, Popover, Button, YStack, XStack, Input } from 'tamagui';
+import { Text, Button, YStack } from 'tamagui';
 import Ripple from 'react-native-material-ripple';
 import { storage } from '@/hooks/stores/MMKV';
 
