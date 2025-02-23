@@ -18,6 +18,7 @@ import Episodes from './Episodes';
 import Chapters from './Chapters';
 import Details from './Details';
 import Similar from './Similar';
+import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -47,7 +48,7 @@ const Info = () => {
     {
       key: 'tab3',
       label: 'Similar',
-      content: <Similar data={data} />,
+      content: <Similar data={data} mediaType={mediaType} metaProvider={metaProvider} />,
     },
   ];
   // console.log(data);
@@ -82,9 +83,17 @@ const Info = () => {
             />
           </View>
           <View padding={10} marginTop={insets.top + 10}>
-            <XStack justifyContent="space-between" marginBlockEnd={20}>
+            <XStack alignItems="center" justifyContent="space-between" marginBlockEnd={20}>
               <ArrowLeft />
-              <Heart />
+              <AnimatedFavoriteButton
+                id={id}
+                title={data?.title!}
+                image={image || data?.image!}
+                type={type}
+                mediaType={mediaType}
+                provider={provider}
+                metaProvider={metaProvider}
+              />
             </XStack>
 
             <XStack gap={10} alignItems="center">
@@ -110,7 +119,9 @@ const Info = () => {
               </YStack>
             </XStack>
             <View marginTop={20}>
-              <Text>Webview</Text>
+              <XStack>
+                <Text>Webview</Text>
+              </XStack>
             </View>
           </View>
         </ZStack>

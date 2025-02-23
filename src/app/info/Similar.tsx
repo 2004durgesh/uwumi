@@ -1,13 +1,21 @@
 import { View } from 'tamagui';
 import React from 'react';
-import { IAnimeInfo, IMovieInfo } from '@/constants/types';
+import { IAnimeInfo, IMovieInfo, MediaType, MetaProvider } from '@/constants/types';
 import CardList from '@/components/CardList';
 
-const Similar = ({ data }: { data?: IAnimeInfo | IMovieInfo }) => {
+const Similar = ({
+  data,
+  mediaType,
+  metaProvider,
+}: {
+  data?: IAnimeInfo | IMovieInfo;
+  mediaType: MediaType;
+  metaProvider: MetaProvider;
+}) => {
   return (
     <View height="100%">
       {/* @ts-ignore */}
-      <CardList staticData={data?.recommendations} />
+      <CardList staticData={data?.recommendations} mediaType={mediaType} metaProvider={metaProvider} />
     </View>
   );
 };

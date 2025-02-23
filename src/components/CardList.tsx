@@ -16,7 +16,7 @@ import { DEFAULT_PROVIDERS } from '@/constants/provider';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;
-  mediaFeedType: MediaFeedType;
+  mediaFeedType?: MediaFeedType;
   mediaType: MediaType;
   metaProvider: MetaProvider;
 }
@@ -130,7 +130,7 @@ const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaTyp
       ? useMovieSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
       : mediaFeedType === 'search'
         ? useAnimeAndMangaSearch<IAnimeResult | IMovieResult>(mediaType, debouncedQuery)
-        : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, mediaFeedType);
+        : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, mediaFeedType!);
 
   const data = staticData || dynamicData;
   // console.log(data, 'data cardlist');

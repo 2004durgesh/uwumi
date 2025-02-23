@@ -3,6 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Text, Button, YStack } from 'tamagui';
 import Ripple from 'react-native-material-ripple';
 import { storage } from '@/hooks/stores/MMKV';
+import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
 
 const About = () => {
   return (
@@ -25,12 +26,12 @@ const About = () => {
       </Ripple>
 
       {/* press the button to see all the mmkv storage */}
-      <YStack gap={10} margin={10}>
+      <YStack alignItems="center" gap={10} margin={10}>
         <Button
           onPress={() => {
             console.log(JSON.parse(storage.getString('mediaProviders') || '{}'));
             // console.log(JSON.parse(storage.getString('theme') || '{}'));
-            // console.log(JSON.parse(storage.getString('accent') || '{}'));
+            console.log(JSON.parse(storage.getString('favorites') || '{}'));
             console.log(JSON.parse(storage.getString('pureBlack') || '{}'));
             console.log(JSON.parse(storage.getString('watchProgress') || '{}'));
           }}>
@@ -39,6 +40,7 @@ const About = () => {
         <Button
           onPress={() => {
             storage.delete('watchProgress');
+            storage.delete('favorites');
           }}>
           <Text>delete progress</Text>
         </Button>
