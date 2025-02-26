@@ -4,7 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { MediaType } from '@/constants/types';
 import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
 import React from 'react';
-import { Text, View } from 'tamagui';
+import { View } from 'tamagui';
 
 const Favorites = () => {
   const { favorites } = useFavoriteStore();
