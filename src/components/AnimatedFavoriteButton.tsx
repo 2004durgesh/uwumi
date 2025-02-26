@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import Lottie from 'lottie-react-native';
 import { Heart } from '@tamagui/lucide-icons';
 import favoriteAnimation from '../../assets/animations/like.json';
-import { Stack, View } from 'tamagui';
+import { View } from 'tamagui';
 import { ITitle, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
 import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
 import RippleButton from './RippleButton';

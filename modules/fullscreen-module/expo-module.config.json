@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    "apple",
+    "android",
+    "web"
+  ],
+  "apple": {
+    "modules": [
+      "FullscreenModule"
+    ]
+  },
+  "android": {
+    "modules": [
+      "com.x2004durgesh.uwumi.FullscreenModule"
+    ]
+  }
+}

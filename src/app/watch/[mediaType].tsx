@@ -35,6 +35,7 @@ import { toast } from 'sonner-native';
 import axios from 'axios';
 import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import { Check } from '@tamagui/lucide-icons';
+import FullscreenModule from '../../../modules/fullscreen-module';
 
 export interface SubtitleTrack {
   index: number;
@@ -210,8 +211,8 @@ const Watch = () => {
 
   const enterFullscreen = async () => {
     try {
-      SystemNavigationBar.stickyImmersive();
-
+      // SystemNavigationBar.stickyImmersive();
+      await FullscreenModule.enterFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
       setIsFullscreen(true);
     } catch (error) {
@@ -221,7 +222,8 @@ const Watch = () => {
 
   const exitFullscreen = async () => {
     try {
-      SystemNavigationBar.navigationShow();
+      // SystemNavigationBar.navigationShow();
+      await FullscreenModule.exitFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
       setIsFullscreen(false);
     } catch (error) {
