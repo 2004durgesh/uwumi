@@ -3,30 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Text, Button, YStack } from 'tamagui';
 import Ripple from 'react-native-material-ripple';
 import { storage } from '@/hooks/stores/MMKV';
-import FullscreenModule from '../../../modules/fullscreen-module';
 const About = () => {
-  console.log(FullscreenModule);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const handleFullscreen = async () => {
-    // Check if the module has these methods
-    console.log('FullscreenModule methods:', Object.keys(FullscreenModule));
-
-    if (FullscreenModule.enterFullscreen && FullscreenModule.exitFullscreen) {
-      try {
-        if (isFullscreen) {
-          await FullscreenModule.exitFullscreen();
-        } else {
-          await FullscreenModule.enterFullscreen();
-        }
-        setIsFullscreen(!isFullscreen);
-      } catch (error) {
-        console.error('Fullscreen error:', error);
-      }
-    } else {
-      console.error('Fullscreen methods not available');
-    }
-  };
   return (
     <ThemedView>
       <Text>About ji</Text>
@@ -64,9 +41,6 @@ const About = () => {
             storage.delete('favorites');
           }}>
           <Text>delete progress</Text>
-        </Button>
-        <Button onPress={handleFullscreen}>
-          <Text>{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}</Text>
         </Button>
       </YStack>
     </ThemedView>

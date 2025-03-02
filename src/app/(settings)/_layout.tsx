@@ -21,7 +21,7 @@ export default function SettingsLayout() {
         },
       }}>
       <Stack.Screen name="index" options={{ title: 'Settings' }} />
-      {process.env.NODE_ENV === 'development' && <Stack.Screen name="about" options={{ title: 'About' }} />}
+      <Stack.Screen name="about" options={{ title: 'About' }} />
       <Stack.Screen name="appearance" options={{ title: 'Appearance' }} />
       <Stack.Screen name="favorites" options={{ title: 'Favorites' }} />
     </Stack>

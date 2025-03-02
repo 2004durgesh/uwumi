@@ -8,6 +8,7 @@ buildscript {
         targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
         kotlinVersion = findProperty('android.kotlinVersion') ?: '2.0.21'
         kspVersion = "2.0.21-1.0.28"
+        multiDexEnabled = true
 
         ndkVersion = "27.1.12297006"
         useExoplayerIMA = true

@@ -104,7 +104,7 @@ const Info = () => {
               />
               <YStack gap={8} flex={1}>
                 <Text numberOfLines={3} color="$color1" fontSize="$5" fontWeight="700">
-                  {typeof data?.title === 'object' ? data?.title?.english : data?.title}
+                  {typeof data?.title === 'object' ? data?.title?.english || data?.title?.romaji : data?.title}
                 </Text>
 
                 <IconTitle icon={Clock} text={data?.status} />

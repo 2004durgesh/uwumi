@@ -39,6 +39,7 @@ const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
   const [contentHeight, setContentHeight] = useState(0);
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
+  console.log(contentHeight);
   return (
     <YStack gap={2}>
       <ScrollView
@@ -49,11 +50,41 @@ const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
         showsVerticalScrollIndicator={false}>
         <View>
           <View>
-            <View marginTop="$2">
-              <View onLayout={(event) => setContentHeight(event.nativeEvent.layout.height)}>
-                <Text color="$color1" paddingHorizontal="$2" lineHeight="$3.5" textAlign="justify">
+            <View position="relative" marginTop="$2">
+              <View position="absolute" onLayout={(event) => setContentHeight(event.nativeEvent.layout.height)}>
+                <Text color="transparent" paddingHorizontal="$2" lineHeight="$3.5" textAlign="justify">
                   {data?.description}
                 </Text>
+              </View>
+              <View
+                height={isExpanded ? contentHeight + contentHeight * 0.5 : contentHeight}
+                style={{ overflow: 'hidden' }}>
+                <WebView
+                  bounces={false}
+                  scrollEnabled={false}
+                  originWhitelist={['*']}
+                  source={{
+                    html: `
+                                    <html>
+                                      <head>
+                                        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+                                        <style>
+                                          * { margin: 0; padding: 0; overflow: hidden; }
+                                          body { width: 100vw; height: 100vh;color: ${currentTheme?.color1};text-align: justify;font-weight: 500; }
+                                        </style>
+                                      </head>
+                                      <body>
+                                        ${data?.description || 'No Description'}
+                                      </body>
+                                    </html>
+                                  `,
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'transparent',
+                  }}
+                />
               </View>
             </View>
             <View height="100%">

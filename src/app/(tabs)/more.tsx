@@ -30,8 +30,12 @@ const More = () => {
           <MenuItem href="/(settings)" icon={Settings} label="Settings" />
           <Separator />
           <MenuItem href="/(settings)/favorites" icon={Heart} label="Favorites" />
-          <Separator />
-          <MenuItem href="/(settings)/about" icon={Info} label="About" />
+          {process.env.NODE_ENV === 'development' && (
+            <>
+              <Separator />
+              <MenuItem href="/(settings)/about" icon={Info} label="About" />
+            </>
+          )}
         </YStack>
       </YStack>
     </ThemedView>

@@ -4,6 +4,6 @@
     "modules": ["FullscreenModule"]
   },
   "android": {
-    "modules": ["com.x2004durgesh.uwumi.FullscreenModule"]
+    "modules": ["com.x2004durgesh.uwumi.fullscreen.FullscreenModule"]
   }
 }
