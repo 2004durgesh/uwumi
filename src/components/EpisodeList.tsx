@@ -381,7 +381,7 @@ const EpisodeList = ({
 
   return (
     <YStack flex={1} gap={2}>
-      <XStack paddingVertical={1} gap="$5" alignItems="center">
+      <XStack paddingHorizontal={16} paddingTop={8} gap="$5" alignItems="center">
         {movieSeasons && (
           <CustomSelect
             SelectItem={

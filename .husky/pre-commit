@@ -1,4 +1,48 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/husky.sh"
+# . "$(dirname -- "$0")/_/husky.sh"
 
+# First run lint-staged
 npx lint-staged
+
+# Then check versions
+echo "⚡ Checking version consistency..."
+
+# Check if package.json is staged for commit
+if git diff --cached --name-only | grep -q "package.json"; then
+    echo "✅ package.json has been modified"
+    PACKAGE_CHANGED=true
+else
+    PACKAGE_CHANGED=false
+fi
+
+# Check if build.gradle is staged for commit
+if git diff --cached --name-only | grep -q "android/app/build.gradle"; then
+    echo "✅ build.gradle has been modified"
+    GRADLE_CHANGED=true
+else
+    GRADLE_CHANGED=false
+fi
+
+# Only enforce version checks if either file was changed
+if [ "$PACKAGE_CHANGED" = true ] || [ "$GRADLE_CHANGED" = true ]; then
+    # Extract versions using more Windows-compatible commands
+    PACKAGE_VERSION=$(node -e "console.log(require('./package.json').version)")
+    GRADLE_VERSION=$(grep -o 'versionName "[^"]*"' android/app/build.gradle | grep -o '"[^"]*"' | tr -d '"')
+
+    echo "📦 Package version: $PACKAGE_VERSION"
+    echo "📱 Android version: $GRADLE_VERSION"
+
+    # Check if versions match
+    if [ "$PACKAGE_VERSION" != "$GRADLE_VERSION" ]; then
+        echo "❌ ERROR: Version mismatch detected!"
+        echo "👉 package.json: $PACKAGE_VERSION"
+        echo "👉 build.gradle: $GRADLE_VERSION"
+        echo "Please update both files to use the same version before committing."
+        exit 1  # Prevent commit
+    else
+        echo "✅ Versions match! Proceeding with commit..."
+    fi
+fi
+echo "✅ Version consistency checks passed!"
+# Exit successfully
+exit 0

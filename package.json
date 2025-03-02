@@ -1,7 +1,7 @@
 {
   "name": "uwumi",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.0.0-rc",
   "scripts": {
     "start": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo start --localhost",
     "android": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo run:android",
