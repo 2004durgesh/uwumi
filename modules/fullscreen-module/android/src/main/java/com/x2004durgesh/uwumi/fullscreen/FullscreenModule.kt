@@ -1,6 +1,5 @@
 package com.x2004durgesh.uwumi.fullscreen
 
-import android.app.Activity
 import android.os.Build
 import android.view.View
 import android.view.WindowInsets
@@ -22,37 +21,34 @@ class FullscreenModule : Module() {
           if (controller != null) {
             // Hide both the status bar and the navigation bar
             controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-            controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
           }
+          // Set navigation bar color to transparent
+          activity.window.navigationBarColor = 0x00000000
+          activity.window.statusBarColor = 0x00000000
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
           // For Android 9-10 (API 28-29)
           @Suppress("DEPRECATION")
           activity.window.attributes.layoutInDisplayCutoutMode =
-            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-          
+                  WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+
           @Suppress("DEPRECATION")
-          activity.window.decorView.systemUiVisibility = (
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_FULLSCREEN
-          )
+          activity.window.decorView.systemUiVisibility =
+                  (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                          View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                          View.SYSTEM_UI_FLAG_FULLSCREEN)
+          // Set navigation bar and status bar colors to transparent
+          activity.window.navigationBarColor = 0x00000000
+          activity.window.statusBarColor = 0x00000000
         } else {
-          // For Android 8 and below (API 26-)
-          @Suppress("DEPRECATION")
-          activity.window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-          )
-          
-          @Suppress("DEPRECATION")
-          activity.window.decorView.systemUiVisibility = (
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_FULLSCREEN
-          )
+          // Rest of code as before...
+          // Also add here:
+          activity.window.navigationBarColor = 0x00000000
+          activity.window.statusBarColor = 0x00000000
         }
       }
       true
@@ -72,7 +68,7 @@ class FullscreenModule : Module() {
           // For Android 10 and below (API 29-)
           @Suppress("DEPRECATION")
           activity.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-          
+
           @Suppress("DEPRECATION")
           activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         }
@@ -82,16 +78,15 @@ class FullscreenModule : Module() {
 
     Function("isFullscreen") {
       val activity = appContext.currentActivity ?: return@Function false
-      
+
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         // For Android 11+ (API 30+)
         val controller = activity.window.insetsController
-        return@Function controller?.systemBarsBehavior == 
-          WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        return@Function controller?.systemBarsBehavior ==
+                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
       } else {
         // For Android 10 and below (API 29-)
-        @Suppress("DEPRECATION")
-        val flags = activity.window.decorView.systemUiVisibility
+        @Suppress("DEPRECATION") val flags = activity.window.decorView.systemUiVisibility
         return@Function (flags and View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
       }
     }

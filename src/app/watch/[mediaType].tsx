@@ -211,7 +211,7 @@ const Watch = () => {
 
   const enterFullscreen = async () => {
     try {
-      // SystemNavigationBar.stickyImmersive();
+      SystemNavigationBar.stickyImmersive();
       await FullscreenModule.enterFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
       setIsFullscreen(true);
@@ -222,7 +222,7 @@ const Watch = () => {
 
   const exitFullscreen = async () => {
     try {
-      // SystemNavigationBar.navigationShow();
+      SystemNavigationBar.navigationShow();
       await FullscreenModule.exitFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
       setIsFullscreen(false);
