@@ -38,8 +38,10 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_PROVIDERS.anime }: { i
   return useQuery<Episode>({
     queryKey: ['anime', 'episodes', id, provider],
     queryFn: async () => {
-      console.log(`${getFetchUrl().episodeApiUrl}/anime/episodes/${id}?provider=${provider}`);
-      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/anime/episodes/${id}?provider=${provider}`);
+      console.log(`${getFetchUrl().episodeApiUrl}/anime/episodes/anilist/${id}?provider=${provider}`);
+      const { data } = await axios.get(
+        `${getFetchUrl().episodeApiUrl}/anime/episodes/anilist/${id}?provider=${provider}`,
+      );
       return data;
     },
   });
@@ -57,7 +59,7 @@ export function useMoviesEpisodes({
   return useQuery<IMovieInfo>({
     queryKey: ['movies', 'episodes', id, type, provider],
     queryFn: async () => {
-      let url = `${getFetchUrl().episodeApiUrl}/movies/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
+      let url = `${getFetchUrl().episodeApiUrl}/movies/tmdb/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
       console.log(url);
       const { data } = await axios.get(url);
       console.log(data);

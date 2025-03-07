@@ -7,6 +7,8 @@ interface Provider {
   value: string;
   subbed?: boolean;
   dubbed?: boolean;
+  embed?: boolean;
+  nonEmbed?: boolean;
 }
 
 interface ProviderGroups {
@@ -28,11 +30,9 @@ const PROVIDERS: ProviderGroups = {
     { name: 'Mangakakalot', value: 'mangakakalot' },
   ],
   [MediaType.MOVIE]: [
-    { name: 'Rive', value: 'rive' },
-    { name: 'MultiMovies', value: 'multimovies' },
-    { name: 'FlixHQ', value: 'flixhq' },
-    { name: 'SFlix', value: 'sflix' },
-    { name: 'DramaCool', value: 'dramacool' },
+    { name: 'Rive', value: 'rive', embed: true, nonEmbed: true },
+    { name: 'MultiMovies', value: 'multimovies', embed: true, nonEmbed: false },
+    // { name: 'DramaCool', value: 'dramacool' },
   ],
 };
 

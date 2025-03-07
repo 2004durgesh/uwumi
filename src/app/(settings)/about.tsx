@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { Text, Button, YStack } from 'tamagui';
 import Ripple from 'react-native-material-ripple';

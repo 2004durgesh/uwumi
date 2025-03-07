@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Image } from 'react-native';
 import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { View } from 'tamagui';
 import { useThemeStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import AnimeIcon from '@/components/SVG/AnimeIcon';
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -56,16 +56,9 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Anime',
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({ focused, color }) => (
             <TabBarCapsule focused={focused}>
-              <Image
-                source={
-                  focused
-                    ? require('../../../assets/images/anime.png')
-                    : require('../../../assets/images/anime-outlined.png')
-                }
-                style={{ width: 30, height: 30 }}
-              />
+              <AnimeIcon color={color} />
             </TabBarCapsule>
           ),
         }}
@@ -76,7 +69,12 @@ export default function TabLayout() {
           title: 'Manga',
           tabBarIcon: ({ focused, color }) => (
             <TabBarCapsule focused={focused}>
-              <BookImage color={color} />
+              <BookImage
+                color={color}
+                onPress={() => {
+                  console.log(color);
+                }}
+              />
             </TabBarCapsule>
           ),
         }}

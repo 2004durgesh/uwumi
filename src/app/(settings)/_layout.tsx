@@ -1,12 +1,13 @@
 import { useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 
 export default function SettingsLayout() {
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const insets = useSafeAreaInsets();
-  console.log(insets);
+  const calculatedHeaderHeight = Platform.OS === 'ios' ? 44 + insets.top : 56;
   return (
     <Stack
       screenOptions={{
@@ -16,7 +17,7 @@ export default function SettingsLayout() {
         headerTintColor: currentTheme?.color1,
         headerTransparent: true,
         contentStyle: {
-          marginTop: insets.top + insets.top / 2,
+          marginTop: calculatedHeaderHeight,
           backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background,
         },
       }}>

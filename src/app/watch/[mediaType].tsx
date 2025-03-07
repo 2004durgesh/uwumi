@@ -103,10 +103,11 @@ const Watch = () => {
     }>();
   // console.log(useLocalSearchParams());
 
-  const { top, right } = useSafeAreaInsets();
+  const { top } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const { setProvider, getProvider } = useProviderStore();
   const { setServers, setCurrentServer, currentServer } = useServerStore();
+  const [isEmbed, setIsEmbed] = useState<boolean>(true);
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
@@ -158,6 +159,7 @@ const Watch = () => {
           type,
           server: currentServer?.name,
           provider,
+          embed: isEmbed,
         });
   const {
     data: serverData,
@@ -170,6 +172,7 @@ const Watch = () => {
         seasonNumber,
         type,
         provider,
+        embed: isEmbed,
       })
     : { data: undefined, isLoading: false, error: null };
   useEffect(() => {
@@ -389,6 +392,7 @@ const Watch = () => {
     () =>
       data?.sources?.find((s) => s.quality === 'default')?.url ||
       data?.sources?.find((s) => s.quality === 'backup')?.url ||
+      data?.sources?.find((s) => s.quality === 'auto')?.url ||
       data?.sources?.[0]?.url ||
       (Array.isArray(data) ? data[0]?.sources?.[0]?.url : '') ||
       '',
@@ -553,29 +557,27 @@ const Watch = () => {
                   // }}
                   subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0.8 }}
                 />
-                {isVideoReady && (
-                  <ControlsOverlay
-                    showControls={showControls}
-                    routeInfo={{ mediaType, provider, id, type }}
-                    isPlaying={playbackState.isPlaying}
-                    isMuted={isMuted}
-                    isFullscreen={isFullscreen}
-                    currentTime={currentTime}
-                    seekableDuration={seekableDuration}
-                    title={title}
-                    isBuffering={isBuffering}
-                    subtitleTracks={subtitleTracks}
-                    selectedSubtitleIndex={selectedSubtitleIndex}
-                    setSelectedSubtitleIndex={setSelectedSubtitleIndex}
-                    videoTracks={videoTracks}
-                    selectedVideoTrackIndex={selectedVideoTrackIndex}
-                    setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}
-                    onPlayPress={handlePlayPress}
-                    onMutePress={handleMutePress}
-                    onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
-                    onSeek={handleSeek}
-                  />
-                )}
+                <ControlsOverlay
+                  showControls={showControls}
+                  routeInfo={{ mediaType, provider, id, type }}
+                  isPlaying={playbackState.isPlaying}
+                  isMuted={isMuted}
+                  isFullscreen={isFullscreen}
+                  currentTime={currentTime}
+                  seekableDuration={seekableDuration}
+                  title={title}
+                  isBuffering={isBuffering}
+                  subtitleTracks={subtitleTracks}
+                  selectedSubtitleIndex={selectedSubtitleIndex}
+                  setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                  videoTracks={videoTracks}
+                  selectedVideoTrackIndex={selectedVideoTrackIndex}
+                  setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}
+                  onPlayPress={handlePlayPress}
+                  onMutePress={handleMutePress}
+                  onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}
+                  onSeek={handleSeek}
+                />
               </View>
             </Pressable>
             <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
@@ -602,15 +604,15 @@ const Watch = () => {
             <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
               {[{ label: 'Sub', key: 'sub' }, isDub === 'true' && { label: 'Dub', key: 'dub' }]
                 // @ts-ignore
-                .map(({ label, key }) => (
-                  <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
+                .map(({ label, key }, index) => (
+                  <XStack key={`${key}-${index}`} alignItems="center" justifyContent="space-between" marginBottom="$2">
                     {key && (
                       <Text color="$color1" fontWeight="bold" width={50}>
                         {label}:
                       </Text>
                     )}
                     <XStack flexWrap="wrap" flex={1} gap={4}>
-                      {PROVIDERS.anime.map(({ name, value, subbed, dubbed }) => {
+                      {PROVIDERS[mediaType].map(({ name, value, subbed, dubbed }) => {
                         const isAvailable = key === 'sub' ? subbed : key === 'dub' ? dubbed : false;
                         const isSelected = getProvider(mediaType) === value && dub === (key === 'dub');
                         if (!isAvailable) return null;
@@ -636,6 +638,51 @@ const Watch = () => {
                     </XStack>
                   </XStack>
                 ))}
+            </YStack>
+          )}
+
+          {mediaType === MediaType.MOVIE && (
+            <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
+              {[
+                { label: 'Embed', key: 'embed' },
+                { label: 'Direct', key: 'nonEmbed' },
+              ].map(({ label, key }) => (
+                <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
+                  <Text color="$color1" fontWeight="bold" width={70}>
+                    {label}:
+                  </Text>
+                  <XStack flexWrap="wrap" flex={1} gap={4}>
+                    {PROVIDERS[mediaType].map(({ name, value, embed, nonEmbed }) => {
+                      const isAvailable = key === 'embed' ? embed : key === 'nonEmbed' ? nonEmbed : false;
+                      const isSelected =
+                        getProvider(mediaType) === value &&
+                        ((key === 'embed' && isEmbed) || (key === 'nonEmbed' && !isEmbed));
+                      console.log('isEmbed:', isEmbed, isSelected);
+
+                      if (!isAvailable) return null;
+
+                      return (
+                        <Button
+                          key={`${value}-${key}`}
+                          onPress={() => {
+                            setProvider(mediaType, value);
+                            setIsEmbed(key === 'embed');
+                          }}
+                          backgroundColor={isSelected ? '$color' : '$color3'}
+                          flex={1}
+                          justifyContent="center">
+                          <XStack alignItems="center">
+                            {isSelected && <Check color="$color4" />}
+                            <Text fontWeight={900} color={isSelected ? '$color4' : '$color'}>
+                              {name}
+                            </Text>
+                          </XStack>
+                        </Button>
+                      );
+                    })}
+                  </XStack>
+                </XStack>
+              ))}
             </YStack>
           )}
           <View flex={1}>

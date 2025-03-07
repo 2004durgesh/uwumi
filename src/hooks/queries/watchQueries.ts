@@ -14,7 +14,7 @@ export function useWatchAnimeEpisodes({
   provider: string;
   dub: boolean;
 }) {
-  // console.log(episodeId, provider, dub);
+  console.log(episodeId, provider, dub);
   return useQuery<ISource>({
     queryKey: ['watch', episodeId, provider, dub],
     queryFn: async () => {
@@ -31,8 +31,9 @@ export function useWatchMoviesEpisodes({
   episodeNumber,
   seasonNumber,
   type,
-  server = 'Ghost-HLS',
+  server,
   provider = DEFAULT_PROVIDERS.movie,
+  embed,
 }: {
   tmdbId: string;
   episodeNumber: string;
@@ -40,26 +41,22 @@ export function useWatchMoviesEpisodes({
   type: string;
   server?: string;
   provider: string;
+  embed: string;
 }) {
-  // console.log(tmdbId, episodeNumber, seasonNumber, type, server, provider);
-  // useEffect(() => {
-  //   const { setCurrentServer } = useServerStore();
-  //   setCurrentServer(server);
-  // }, [server]);
-
   return useQuery<ISource>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, server, provider],
     queryFn: async () => {
       console.log(
-        `${getFetchUrl().episodeApiUrl}/movies/watch/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&server=${server}`,
+        `${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&server=${server}&embed=${embed}`,
       );
-      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/watch/${tmdbId}`, {
+      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}`, {
         params: {
           episodeNumber,
           seasonNumber,
           type: type.split(' ')[0].toLowerCase(),
           ...(server && { server }),
           provider,
+          embed,
         },
       });
       console.log(data);
@@ -73,27 +70,30 @@ export function useMoviesEpisodesServers({
   seasonNumber,
   type,
   provider = DEFAULT_PROVIDERS.movie,
+  embed,
 }: {
   tmdbId: string;
   episodeNumber: string;
   seasonNumber: string;
   type: string;
   provider: string;
+  embed: string;
 }) {
   // console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
 
   return useQuery<IEpisodeServer[]>({
-    queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider],
+    queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider, embed],
     queryFn: async () => {
       console.log(
-        `${getFetchUrl().episodeApiUrl}/movies/server/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}`,
+        `${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&embed=${embed}`,
       );
-      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/server/${tmdbId}`, {
+      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}`, {
         params: {
           episodeNumber,
           seasonNumber,
           type: type.split(' ')[0].toLowerCase(),
           provider,
+          embed,
         },
       });
       console.log(data);
