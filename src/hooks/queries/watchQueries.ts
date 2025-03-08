@@ -41,7 +41,7 @@ export function useWatchMoviesEpisodes({
   type: string;
   server?: string;
   provider: string;
-  embed: string;
+  embed: boolean;
 }) {
   return useQuery<ISource>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, server, provider],
@@ -77,7 +77,7 @@ export function useMoviesEpisodesServers({
   seasonNumber: string;
   type: string;
   provider: string;
-  embed: string;
+  embed: boolean;
 }) {
   // console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
 

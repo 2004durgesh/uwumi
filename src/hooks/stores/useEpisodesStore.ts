@@ -43,3 +43,15 @@ export const useEpisodeDisplayStore = create<EpisodeDisplayState>((set) => ({
   displayMode: EpisodeDisplayMode.FullMetadata,
   setDisplayMode: (mode) => set({ displayMode: mode }),
 }));
+
+interface SeasonState {
+  seasonNumber: number;
+  setSeasonNumber: (seasonNumber: number) => void;
+  resetSeasonNumber: () => void;
+}
+
+export const useSeasonStore = create<SeasonState>((set) => ({
+  seasonNumber: 0,
+  setSeasonNumber: (seasonNumber) => set({ seasonNumber }),
+  resetSeasonNumber: () => set({ seasonNumber: 0 }),
+}));

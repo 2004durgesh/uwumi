@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Dimensions, StyleProp, ViewStyle, Pressable } from 'react-native';
+import { Dimensions, StyleProp, ViewStyle, Pressable, StatusBar } from 'react-native';
 import Video, {
   ISO639_1,
   SelectedTrackType,
@@ -205,8 +205,10 @@ const Watch = () => {
     return () => {
       subscription?.remove();
       const cleanup = async () => {
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        StatusBar.setHidden(false);
         SystemNavigationBar.navigationShow();
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        await FullscreenModule.exitFullscreen();
       };
       cleanup();
     };
@@ -214,9 +216,10 @@ const Watch = () => {
 
   const enterFullscreen = async () => {
     try {
+      StatusBar.setHidden(true);
       SystemNavigationBar.stickyImmersive();
-      await FullscreenModule.enterFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      await FullscreenModule.enterFullscreen();
       setIsFullscreen(true);
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
@@ -225,9 +228,10 @@ const Watch = () => {
 
   const exitFullscreen = async () => {
     try {
+      StatusBar.setHidden(false);
       SystemNavigationBar.navigationShow();
-      await FullscreenModule.exitFullscreen();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+      await FullscreenModule.exitFullscreen();
       setIsFullscreen(false);
     } catch (error) {
       console.error('Failed to exit fullscreen:', error);

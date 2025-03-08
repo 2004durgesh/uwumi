@@ -26,6 +26,7 @@ import {
   useEpisodeDisplayStore,
   useMoviesEpisodes,
   useServerStore,
+  useSeasonStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvType } from '@/constants/types';
@@ -65,7 +66,7 @@ const EpisodeList = ({
   const currentTheme = useCurrentTheme();
   const flashListRef = useRef<FlashList<Episode | IMovieEpisode>>(null);
   const hasScrolledRef = useRef(false);
-  const [seasonNumber, setSeasonNumber] = useState(0);
+  // const [seasonNumber, setSeasonNumber] = useState(0);
   const { setProvider, getProvider } = useProviderStore();
   useEffect(() => {
     setProvider(mediaType, getProvider(mediaType) ?? provider);
@@ -80,6 +81,7 @@ const EpisodeList = ({
         });
 
   const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
+  const { seasonNumber, setSeasonNumber, resetSeasonNumber } = useSeasonStore();
   const movieSeasons = episodeData?.seasons;
   // console.log('movieSeasons', movieSeasons);
   const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
@@ -106,10 +108,21 @@ const EpisodeList = ({
   useEffect(() => {
     if (episodes) {
       setEpisodes(episodes);
+      // console.log('episodes', episodes);
     }
   }, [episodes, setEpisodes]);
 
-  const currentEpisode = animeEpisodes.find((episode) => episode.id === currentUniqueId);
+  useEffect(() => {
+    resetSeasonNumber();
+  }, [id, resetSeasonNumber]);
+
+  useEffect(() => {
+    if (movieSeasons && seasonNumber >= movieSeasons.length) {
+      resetSeasonNumber();
+    }
+  }, [episodeData, movieSeasons, seasonNumber, resetSeasonNumber]);
+
+  const currentEpisode = episodes.find((episode: Episode | IMovieEpisode) => episode.id === currentUniqueId);
   // console.log(
   //   movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
   //   seasonNumber,
@@ -392,7 +405,10 @@ const EpisodeList = ({
             }
             SelectLabel="Season"
             value={String(seasonNumber)}
-            onValueChange={(value: string) => setSeasonNumber(Number(value))}
+            onValueChange={(value: string) => {
+              setSeasonNumber(Number(value));
+              setEpisodes(movieSeasons[value].episodes);
+            }}
           />
         )}
         {mediaType === MediaType.MOVIE && servers && servers.length > 0 && !swipeable && (
@@ -405,7 +421,7 @@ const EpisodeList = ({
             }
             SelectLabel="Servers"
             value={getCurrentServer()?.name! ?? servers[0].name}
-            onValueChange={(value: string) => setCurrentServer(value)}
+            onValueChange={(value: string) => setCurrentServer(value || servers[0].name)}
           />
         )}
         {mediaType === MediaType.ANIME && swipeable && (
