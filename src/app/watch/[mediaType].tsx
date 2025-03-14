@@ -29,6 +29,8 @@ import {
   useWatchMoviesEpisodes,
   useMoviesEpisodesServers,
   useServerStore,
+  useCurrentTheme,
+  usePureBlackBackground,
 } from '@/hooks';
 import EpisodeList from '@/components/EpisodeList';
 import { toast } from 'sonner-native';
@@ -108,9 +110,13 @@ const Watch = () => {
   const { setProvider, getProvider } = useProviderStore();
   const { setServers, setCurrentServer, currentServer } = useServerStore();
   const [isEmbed, setIsEmbed] = useState<boolean>(true);
+  const [serverInitialized, setServerInitialized] = useState(false);
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
   const currentEpisodeId = useEpisodesIdStore((state) => state.currentEpisodeId);
+  const currentTheme = useCurrentTheme();
+  const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
+
   useEffect(() => {
     if (episodeId && uniqueId) {
       setEpisodeIds(episodeId, uniqueId);
@@ -129,29 +135,16 @@ const Watch = () => {
   const [seekableDuration, setSeekableDuration] = useState(0);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [dub, setDub] = useState(false);
-  const [playbackState, setPlaybackState] = useState<PlaybackState>({
-    isPlaying: false,
-    isSeeking: false,
-  });
-  const [playerDimensions, setPlayerDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+  const [playbackState, setPlaybackState] = useState<PlaybackState>({ isPlaying: false, isSeeking: false });
+  const [playerDimensions, setPlayerDimensions] = useState({ width: 0, height: 0 });
   const [dimensions, setDimensions] = useState({
     width: Dimensions.get('screen').width,
     height: Dimensions.get('screen').height,
   });
-  const [wrapperDimensions, setWrapperDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+  const [wrapperDimensions, setWrapperDimensions] = useState({ width: 0, height: 0 });
   const { data, isLoading, error } =
     mediaType === MediaType.ANIME
-      ? useWatchAnimeEpisodes({
-          episodeId: currentEpisodeId ?? episodeId,
-          provider: getProvider(mediaType),
-          dub,
-        })
+      ? useWatchAnimeEpisodes({ episodeId: currentEpisodeId ?? episodeId, provider: getProvider(mediaType), dub })
       : useWatchMoviesEpisodes({
           tmdbId: id,
           episodeNumber,
@@ -166,23 +159,22 @@ const Watch = () => {
     isLoading: isServerLoading,
     error: serverError,
   } = mediaType === MediaType.MOVIE
-    ? useMoviesEpisodesServers({
-        tmdbId: id,
-        episodeNumber,
-        seasonNumber,
-        type,
-        provider,
-        embed: isEmbed,
-      })
+    ? useMoviesEpisodesServers({ tmdbId: id, episodeNumber, seasonNumber, type, provider, embed: isEmbed })
     : { data: undefined, isLoading: false, error: null };
   useEffect(() => {
-    if (serverData) {
+    if (serverData && !serverInitialized) {
       setServers(serverData);
+      console.log('Current Server:', serverData);
+      if (serverData.length > 0) {
+        setCurrentServer(serverData[0].name);
+      }
+      setServerInitialized(true);
     }
-    if (data && data?.server) {
-      setCurrentServer(data?.server || 'Ghost-HLS');
-    }
-  }, [data, serverData, setCurrentServer, setServers]);
+  }, [serverData, setCurrentServer, setServers, serverInitialized]);
+  useEffect(() => {
+    // Reset initialization when embed mode changes
+    setServerInitialized(false);
+  }, [isEmbed, provider]);
 
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
   const [NullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
@@ -196,16 +188,16 @@ const Watch = () => {
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ screen }) => {
-      setDimensions({
-        width: screen.width,
-        height: screen.height,
-      });
+      setDimensions({ width: screen.width, height: screen.height });
     });
 
     return () => {
       subscription?.remove();
       const cleanup = async () => {
         StatusBar.setHidden(false);
+        SystemNavigationBar.setNavigationColor(
+          pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
+        );
         SystemNavigationBar.navigationShow();
         await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
         await FullscreenModule.exitFullscreen();
@@ -229,6 +221,9 @@ const Watch = () => {
   const exitFullscreen = async () => {
     try {
       StatusBar.setHidden(false);
+      SystemNavigationBar.setNavigationColor(
+        pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
+      );
       SystemNavigationBar.navigationShow();
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
       await FullscreenModule.exitFullscreen();
@@ -391,7 +386,7 @@ const Watch = () => {
     [isFullscreen, dimensions],
   );
   // console.log(videoStyle);
-  // const source ="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8";
+  // const source ="https://cdn-xqrgj99p8krmzj4e.orbitcache.com/engine/hls2/01/09140/gc5lpxuqgrak_,n,.urlset/master.m3u8?t=F3z4Vr5gayxRKGOuvX39UtLtNdP04WDOIWHHfr0P6MQ&s=1741878671&e=14400&f=45704535&node=5LpKIhsv95HV1Q3x7jrfRXldwp3y8CT5PdX8aM588gQ=&i=103.123&sp=2500&asn=138296&q=n";
   const source = useMemo(
     () =>
       data?.sources?.find((s) => s.quality === 'default')?.url ||
@@ -407,7 +402,7 @@ const Watch = () => {
     if (source) {
       const fetchQuality = async () => {
         try {
-          const { data } = await axios.get(`${source}?quality`);
+          const { data } = await axios.get(`${source}`);
 
           // Extract resolutions using regex
           const regex =
@@ -498,10 +493,7 @@ const Watch = () => {
                 style={{ height: playerDimensions.height, position: 'relative' }}
                 // style={{height:"100%", position: 'relative' }} //keep for future ref
                 onLayout={(e) => {
-                  setWrapperDimensions({
-                    width: e.nativeEvent.layout.width,
-                    height: e.nativeEvent.layout.height,
-                  });
+                  setWrapperDimensions({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height });
                 }}>
                 <Video
                   ref={videoRef}
@@ -518,17 +510,11 @@ const Watch = () => {
                   }}
                   style={videoStyle}
                   resizeMode={'contain'}
-                  poster={{
-                    source: { uri: poster },
-                    resizeMode: 'contain',
-                  }}
+                  poster={{ source: { uri: poster }, resizeMode: 'contain' }}
                   onProgress={handleProgress}
                   onPlaybackStateChanged={handlePlaybackStateChange}
                   onLayout={(e) => {
-                    setPlayerDimensions({
-                      width: e.nativeEvent.layout.width,
-                      height: e.nativeEvent.layout.height,
-                    });
+                    setPlayerDimensions({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height });
                   }}
                   onBuffer={({ isBuffering }) => setIsBuffering(isBuffering)}
                   onError={(error) => {
@@ -545,10 +531,7 @@ const Watch = () => {
                     console.log('nullIndex:', nullTrackCount);
                     videoRef?.current?.seek(getProgress(uniqueId)?.currentTime || 0);
                   }}
-                  selectedVideoTrack={{
-                    type: SelectedVideoTrackType.INDEX,
-                    value: selectedVideoTrackIndex ?? 0,
-                  }}
+                  selectedVideoTrack={{ type: SelectedVideoTrackType.INDEX, value: selectedVideoTrackIndex ?? 0 }}
                   selectedTextTrack={{
                     type: SelectedTrackType.INDEX,
                     value: (selectedSubtitleIndex ?? 0) + NullSubtitleIndex!,

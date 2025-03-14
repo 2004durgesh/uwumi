@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { YStack, Tabs, View } from 'tamagui';
 import CardList from '@/components/CardList';
 import { ChartNoAxesCombined, Heart, Search } from '@tamagui/lucide-icons';
-import { useTabsStore } from '@/hooks';
+import { useCurrentTheme, useTabsStore } from '@/hooks';
 import IconTitle from '@/components/IconTitle';
 import SearchBar from '@/components/SearchBar';
 import { MediaType } from '@/constants/types';
@@ -30,6 +30,7 @@ const TABS = [
 const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
   const currentTab = useTabsStore((state) => state.currentTab);
   const setCurrentTab = useTabsStore((state) => state.setCurrentTab);
+  const currentTheme = useCurrentTheme();
   const TabList = memo(() => (
     <Tabs.List disablePassBorderRadius width="65%" marginVertical="$2" marginHorizontal="$4" gap="$2">
       {TABS.map(({ id, icon, text }) => (
@@ -39,9 +40,10 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
           padding={0}
           height={35}
           value={id}
+          // overflow="hidden"
           borderWidth={2}
           borderColor={currentTab === id ? '$color4' : '$color1'}
-          backgroundColor={currentTab === id ? '$color4' : 'transparent'}>
+          style={{ backgroundColor: currentTab === id ? currentTheme?.color4 : 'transparent' }}>
           <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
         </Tabs.Tab>
       ))}

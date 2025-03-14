@@ -69,12 +69,7 @@ export default function TabLayout() {
           title: 'Manga',
           tabBarIcon: ({ focused, color }) => (
             <TabBarCapsule focused={focused}>
-              <BookImage
-                color={color}
-                onPress={() => {
-                  console.log(color);
-                }}
-              />
+              <BookImage color={color} />
             </TabBarCapsule>
           ),
         }}

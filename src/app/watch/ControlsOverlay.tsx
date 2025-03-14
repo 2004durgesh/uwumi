@@ -13,7 +13,15 @@ import {
   SkipForward,
   SkipBack,
 } from '@tamagui/lucide-icons';
-import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  Easing,
+  FadeInDown,
+  FadeOutDown,
+  FadeInUp,
+  FadeOutUp,
+} from 'react-native-reanimated';
 import { ISubtitle, MediaFormat, TvType } from '@/constants/types';
 import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
@@ -50,6 +58,7 @@ interface ControlsOverlayProps {
 }
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
+const AnimatedXStack = Animated.createAnimatedComponent(XStack);
 
 const ControlsOverlay = memo(
   ({
@@ -160,11 +169,18 @@ const ControlsOverlay = memo(
         <AnimatedYStack
           flex={1}
           justifyContent="space-between"
-          paddingVertical={isFullscreen ? '$5' : '$2'}
+          paddingHorizontal={isFullscreen ? '$4' : '$2'}
           backgroundColor="rgba(0, 0, 0, 0.5)"
-          entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-          exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}>
-          <XStack width="100%" justifyContent="space-between" alignItems="center">
+          // entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+          // exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
+        >
+          <AnimatedXStack
+            entering={FadeInUp.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+            exiting={FadeOutUp.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+            paddingVertical={isFullscreen ? '$5' : '$2'}
+            width="100%"
+            justifyContent="space-between"
+            alignItems="center">
             <Text color="white" fontWeight={700} fontSize="$3.5">
               {title}
             </Text>
@@ -210,9 +226,11 @@ const ControlsOverlay = memo(
                 </Sheet.Frame>
               </Sheet>
             </XStack>
-          </XStack>
+          </AnimatedXStack>
           {/* Center play/pause button */}
-          <XStack
+          <AnimatedXStack
+            entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+            exiting={FadeOut.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
             alignItems="center"
             gap="$8"
             // backgroundColor= 'red'
@@ -288,9 +306,13 @@ const ControlsOverlay = memo(
               }}>
               <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
             </RippleButton>
-          </XStack>
+          </AnimatedXStack>
           {/* Bottom Controls */}
-          <YStack gap="$2">
+          <AnimatedYStack
+            entering={FadeInDown.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+            exiting={FadeOutDown.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+            paddingVertical={isFullscreen ? '$5' : '$2'}
+            gap="$2">
             <XStack gap="$2" alignItems="center" justifyContent="space-between" width="100%">
               <RippleButton onPress={onMutePress}>
                 {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
@@ -335,7 +357,7 @@ const ControlsOverlay = memo(
                 {formatTime(seekableDuration)}
               </Text>
             </XStack>
-          </YStack>
+          </AnimatedYStack>
         </AnimatedYStack>
       </>
     ) : null;

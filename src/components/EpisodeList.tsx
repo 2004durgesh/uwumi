@@ -41,12 +41,7 @@ const LoadingState = () => (
   </YStack>
 );
 
-const StyledText = styled(Text, {
-  fontWeight: '500',
-  color: '$color1',
-  fontSize: '$2.5',
-  opacity: 0.7,
-});
+const StyledText = styled(Text, { fontWeight: '500', color: '$color1', fontSize: '$2.5', opacity: 0.7 });
 
 const EpisodeList = ({
   mediaType,
@@ -99,6 +94,8 @@ const EpisodeList = ({
   const setDisplayMode = useEpisodeDisplayStore((state) => state.setDisplayMode);
   const { setCurrentServer, getCurrentServer, servers } = useServerStore();
 
+  // console.log('servers', servers[0], getCurrentServer());
+
   const [listKey, setListKey] = useState(0);
   useEffect(() => {
     setListKey((prev) => prev + 1);
@@ -146,15 +143,7 @@ const EpisodeList = ({
     const animatedStyle = useAnimatedStyle(() => {
       const progress = Math.min(Math.abs(drag.value) / THRESHOLD, 1);
       return {
-        transform: [
-          {
-            scale: withSpring(0.9 + progress * 0.1, {
-              mass: 0.5,
-              damping: 20,
-              stiffness: 200,
-            }),
-          },
-        ],
+        transform: [{ scale: withSpring(0.9 + progress * 0.1, { mass: 0.5, damping: 20, stiffness: 200 }) }],
         opacity: withSpring(progress > 0 ? 1 : 0.7),
       };
     });
@@ -413,14 +402,9 @@ const EpisodeList = ({
         )}
         {mediaType === MediaType.MOVIE && servers && servers.length > 0 && !swipeable && (
           <CustomSelect
-            SelectItem={
-              servers.map((server) => ({
-                name: server.name,
-                value: server.name,
-              })) || []
-            }
+            SelectItem={servers.map((server) => ({ name: server.name, value: server.name })) || []}
             SelectLabel="Servers"
-            value={getCurrentServer()?.name! ?? servers[0].name}
+            value={getCurrentServer()?.name!}
             onValueChange={(value: string) => setCurrentServer(value || servers[0].name)}
           />
         )}
@@ -458,10 +442,7 @@ const EpisodeList = ({
         key={listKey}
         ref={flashListRef}
         data={episodes}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
         ListEmptyComponent={<NoResults />}
         ListFooterComponent={<View height={100} />}
         estimatedItemSize={150}
@@ -469,11 +450,7 @@ const EpisodeList = ({
         estimatedFirstItemOffset={900}
         drawDistance={500}
         onLoad={(e) => {
-          flashListRef?.current?.scrollToItem({
-            item: currentEpisode,
-            animated: true,
-            viewPosition: 0.5,
-          });
+          flashListRef?.current?.scrollToItem({ item: currentEpisode, animated: true, viewPosition: 0.5 });
         }}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }: { item: Episode | IMovieEpisode }) => {

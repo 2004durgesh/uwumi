@@ -118,7 +118,7 @@ const HorizontalTabs: React.FC<HorizontalTabsProps> = ({ items, initialTab }) =>
               key={item.key}
               flex={1}
               value={item.key}
-              backgroundColor="transparent"
+              style={{ backgroundColor: 'transparent' }}
               onInteraction={handleOnInteraction}>
               <Text
                 fontWeight={currentTab === item.key ? '800' : '400'}

@@ -31,14 +31,7 @@ interface CardProps {
 const StyledCard = styled(Card, {
   width: '100%',
   height: 190,
-  variants: {
-    isHovered: {
-      true: {
-        scale: 0.95,
-        borderColor: '$color',
-      },
-    },
-  },
+  variants: { isHovered: { true: { scale: 0.95, borderColor: '$color' } } },
 });
 
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
@@ -82,15 +75,13 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
               margin={0}
               width={100}
               color="#ffffff">
-              {typeof item.title === 'string' ? item.title : item.title.romaji}
+              {typeof item.title === 'string' ? item.title : item.title?.romaji || item.title?.english}
             </Text>
           </Card.Footer>
           <Card.Background>
             <ZStack width="100%" height="100%" alignItems="center">
               <AnimatedCustomImage
-                source={{
-                  uri: item.image,
-                }}
+                source={{ uri: item.image }}
                 style={{ borderRadius: 10 }}
                 width={'100%'}
                 height={190}
@@ -183,10 +174,7 @@ const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaTyp
         drawDistance={500}
         numColumns={3}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 4 }}
         refreshControl={<RefreshControl refreshing={!!isLoading} onRefresh={refetch} />}
         onEndReached={() => {
           if (hasNextPage) {

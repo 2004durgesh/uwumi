@@ -1,3 +1,4 @@
+// @ts-nocheck
 type Theme = {
   accentBackground: string;
   accentColor: string;
@@ -13,11 +14,11 @@ type Theme = {
 function t(a: [number, number][]) {
   let res: Record<string, string> = {};
   for (const [ki, vi] of a) {
-    res[ks[ki] as string] = vs[vi] as string;
+    res[ks[ki] as string] = colors[vi] as string;
   }
   return res as Theme;
 }
-const vs = [
+export const colors = [
   '#fefbff',
   '#0058ca',
   '#1b1b1f',
@@ -72,9 +73,6 @@ const n1 = t([
   [7, 0],
   [8, 3],
 ]);
-
-export const light = n1;
-export const light_default = n1;
 const n2 = t([
   [0, 2],
   [1, 2],
@@ -87,9 +85,6 @@ const n2 = t([
   [7, 2],
   [8, 6],
 ]);
-
-export const dark = n2;
-export const dark_default = n2;
 const n3 = t([
   [0, 9],
   [1, 9],
@@ -101,8 +96,6 @@ const n3 = t([
   [7, 9],
   [8, 12],
 ]);
-
-export const light_cloudflare = n3;
 const n4 = t([
   [0, 14],
   [1, 14],
@@ -114,8 +107,6 @@ const n4 = t([
   [7, 14],
   [8, 17],
 ]);
-
-export const light_cottonCandy = n4;
 const n5 = t([
   [0, 11],
   [1, 11],
@@ -128,8 +119,6 @@ const n5 = t([
   [7, 11],
   [8, 20],
 ]);
-
-export const dark_cloudflare = n5;
 const n6 = t([
   [0, 16],
   [1, 16],
@@ -143,4 +132,15 @@ const n6 = t([
   [8, 25],
 ]);
 
-export const dark_cottonCandy = n6;
+type ThemeNames = 'light' | 'light_default' | 'dark' | 'dark_default' | 'light_cloudflare' | 'dark_cloudflare';
+
+export const themes: Record<ThemeNames, Theme> = {
+  light: n1,
+  light_default: n1,
+  dark: n2,
+  dark_default: n2,
+  light_cloudflare: n3,
+  light_cottonCandy: n4,
+  dark_cloudflare: n5,
+  dark_cottonCandy: n6,
+};

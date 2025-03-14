@@ -43,6 +43,7 @@ export function useWatchMoviesEpisodes({
   provider: string;
   embed: boolean;
 }) {
+  // console.log('from query', server);
   return useQuery<ISource>({
     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, server, provider],
     queryFn: async () => {
@@ -88,13 +89,7 @@ export function useMoviesEpisodesServers({
         `${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&embed=${embed}`,
       );
       const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}`, {
-        params: {
-          episodeNumber,
-          seasonNumber,
-          type: type.split(' ')[0].toLowerCase(),
-          provider,
-          embed,
-        },
+        params: { episodeNumber, seasonNumber, type: type.split(' ')[0].toLowerCase(), provider, embed },
       });
       console.log(data);
       return data;

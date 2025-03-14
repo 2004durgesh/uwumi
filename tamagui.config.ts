@@ -1,6 +1,6 @@
 import { createTamagui, createFont } from 'tamagui';
 import { createAnimations } from '@tamagui/animations-react-native';
-import * as themes from './src/constants/theme-out';
+import { themes } from './src/constants/theme-out';
 import { tokens } from '@tamagui/config/v3';
 
 const animations = createAnimations({
