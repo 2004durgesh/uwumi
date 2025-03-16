@@ -1,27 +1,12 @@
 import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { Text, Button, YStack } from 'tamagui';
-import Ripple from 'react-native-material-ripple';
 import { storage } from '@/hooks/stores/MMKV';
+import CustomSlider from '../watch/CustomSlider';
 const About = () => {
   return (
     <ThemedView>
       <Text>About ji</Text>
-      <Ripple
-        rippleColor="red"
-        rippleOpacity={0.5}
-        style={{
-          padding: 16,
-          borderRadius: 8,
-          backgroundColor: 'white',
-          borderWidth: 1,
-          borderColor: '$borderColor',
-          marginTop: 16,
-        }}>
-        <Text fontSize={16} fontWeight="600" color="$color">
-          touch me
-        </Text>
-      </Ripple>
 
       {/* press the button to see all the mmkv storage */}
       <YStack alignItems="center" gap={10} margin={10}>
@@ -43,6 +28,7 @@ const About = () => {
           <Text>delete progress</Text>
         </Button>
       </YStack>
+      <CustomSlider />
     </ThemedView>
   );
 };

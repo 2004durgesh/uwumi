@@ -14,7 +14,7 @@ export function useWatchAnimeEpisodes({
   provider: string;
   dub: boolean;
 }) {
-  console.log(episodeId, provider, dub);
+  // console.log(episodeId, provider, dub);
   return useQuery<ISource>({
     queryKey: ['watch', episodeId, provider, dub],
     queryFn: async () => {

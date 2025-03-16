@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { YStack, XStack, Button, Text, View, Slider, Sheet, Spinner } from 'tamagui';
+import { YStack, XStack, Button, Text, View, Sheet, Spinner } from 'tamagui';
 import {
   Play,
   Pause,
@@ -29,6 +29,7 @@ import { formatTime } from '@/constants/utils';
 import { VideoTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs from '@/components/HorizontalTabs';
+import CustomSlider from './CustomSlider';
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -339,19 +340,26 @@ const ControlsOverlay = memo(
                 {formatTime(currentTime)}
               </Text>
               <View flex={1}>
-                <Slider
+                {/* <Slider
                   value={[Math.round(currentTime)]}
                   min={0}
                   max={Math.round(seekableDuration)}
                   onValueChange={([value]) => {
                     onSeek(Math.round(value));
-                  }}
-                  step={1}>
+                  }}>
                   <Slider.Track height={5}>
                     <Slider.TrackActive backgroundColor="$color" />
                   </Slider.Track>
                   <Slider.Thumb backgroundColor="$color" index={0} size={13} circular borderColor="$color" />
-                </Slider>
+                </Slider> */}
+                <CustomSlider
+                  value={Math.round(currentTime)}
+                  min={0}
+                  max={Math.round(seekableDuration)}
+                  onValueChange={(value) => {
+                    onSeek(value);
+                  }}
+                />
               </View>
               <Text color="white" fontSize={13} fontWeight={700}>
                 {formatTime(seekableDuration)}

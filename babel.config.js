@@ -15,7 +15,7 @@ module.exports = function (api) {
       [
         'module-resolver',
         {
-          root: ['./src'],
+          root: ['./src/app'],
           extensions: [
             '.ios.ts',
             '.android.ts',
@@ -30,7 +30,7 @@ module.exports = function (api) {
           alias: {
             '@/constants': './src/constants',
             '@/components': './src/components',
-            '@/hooks': './src/hooks',
+            '@hooks': './src/hooks',
           },
         },
       ],

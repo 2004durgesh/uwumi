@@ -88,6 +88,11 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.x2004durgesh.uwumi'
+    externalNativeBuild {
+        cmake {
+            version "3.22.1"
+        }
+    }
     defaultConfig {
         applicationId 'com.x2004durgesh.uwumi'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -131,7 +136,23 @@ android {
             enable true
             reset()
             include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
-            universalApk false //set true to make a universal apk also
+            universalApk true
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            // Get the version name from defaultConfig
+            def versionName = variant.versionName
+            
+            // Get ABI name if it exists (like arm64-v8a)
+            def abiName = output.getFilter(com.android.build.OutputFile.ABI)
+            
+            // Set the filename to uwumi-versionname-archname.apk format
+            if (abiName != null) {
+                outputFileName = "uwumi-${versionName}-${abiName}.apk"
+            } else {
+                outputFileName = "uwumi-${versionName}.apk"
+            }
         }
     }
 }
