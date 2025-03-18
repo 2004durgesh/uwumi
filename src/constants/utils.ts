@@ -51,3 +51,34 @@ export const hexToRGB = (hex: string, alpha?: number): string => {
   // Return RGB or RGBA
   return alpha !== undefined ? `rgba(${r}, ${g}, ${b}, ${alpha})` : `rgb(${r}, ${g}, ${b})`;
 };
+
+export const compareVersions = (localVersion: string, remoteVersion: string) => {
+  // Split version strings into arrays and parse as numbers
+  const local = localVersion.split('-')[0].split('.').map(Number);
+  const remote = remoteVersion.split('-')[0].split('.').map(Number);
+  // console.log({ local, remote, localVersion, remoteVersion });
+  // Compare major version
+  if (local[0] !== remote[0]) {
+    return local[0] < remote[0] ? 'Major update available' : 'No update';
+  }
+
+  // Compare minor version
+  if (local[1] !== remote[1]) {
+    return local[1] < remote[1] ? 'Minor update available' : 'No update';
+  }
+
+  // Compare patch version
+  if (local[2] !== remote[2]) {
+    return local[2] < remote[2] ? 'Patch update available' : 'No update';
+  }
+
+  // Handle release candidate versions
+  const isLocalRC = localVersion.includes('-rc');
+  const isRemoteRC = remoteVersion.includes('-rc');
+
+  if (isLocalRC && !isRemoteRC) {
+    return 'Stable version available';
+  }
+
+  return 'No update available';
+};
