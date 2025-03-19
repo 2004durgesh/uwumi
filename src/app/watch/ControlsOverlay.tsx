@@ -1,5 +1,6 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { YStack, XStack, Button, Text, View, Sheet, Spinner } from 'tamagui';
+import { GestureResponderEvent } from 'react-native';
 import {
   Play,
   Pause,
@@ -84,7 +85,59 @@ const ControlsOverlay = memo(
     onSeek,
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
-    // console.log("settings are being shown", openSettings);
+    const [isUserActive, setIsUserActive] = useState(true);
+    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const lastActivityTimeRef = useRef(Date.now());
+    const controlsTimeoutDuration = 5000;
+
+    // Function to reset inactivity timer with debounce protection
+    const resetInactivityTimer = useCallback(() => {
+      const now = Date.now();
+      if (now - lastActivityTimeRef.current < 150) return;
+      lastActivityTimeRef.current = now;
+
+      setIsUserActive(true);
+
+      // Clear any existing timer
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+        inactivityTimerRef.current = null;
+      }
+
+      // Set a new timer only if controls should auto-hide
+      if (isPlaying && !openSettings && !isBuffering) {
+        inactivityTimerRef.current = setTimeout(() => {
+          setIsUserActive(false);
+        }, controlsTimeoutDuration);
+      }
+    }, [isPlaying, openSettings, isBuffering]);
+
+    // Setup the inactivity timer
+    useEffect(() => {
+      resetInactivityTimer();
+
+      return () => {
+        // Clean up timer when component unmounts
+        if (inactivityTimerRef.current) {
+          clearTimeout(inactivityTimerRef.current);
+        }
+      };
+    }, [resetInactivityTimer, isPlaying, openSettings]);
+
+    useEffect(() => {
+      resetInactivityTimer();
+    }, [isPlaying, openSettings, resetInactivityTimer]);
+
+    const handleUserActivity = useCallback(
+      (e: GestureResponderEvent | React.SyntheticEvent) => {
+        // Stop event from bubbling to prevent multiple calls
+        e.stopPropagation();
+        resetInactivityTimer();
+      },
+      [resetInactivityTimer],
+    );
+    const controlsVisible = openSettings || isBuffering || (showControls && isUserActive);
+
     const router = useRouter();
     const { mediaType, provider, id } = routeInfo;
     const prevUniqueId = useEpisodesIdStore((state) => state.prevUniqueId);
@@ -165,210 +218,208 @@ const ControlsOverlay = memo(
       }
     }, [currentUniqueId, prevId, nextId, setEpisodeIds, episodes, currentEpisodeIndex]);
 
-    return showControls ? (
+    return (
       <>
         <AnimatedYStack
           flex={1}
           justifyContent="space-between"
-          paddingHorizontal={isFullscreen ? '$4' : '$2'}
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          // entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-          // exiting={FadeOut.duration(100).easing(Easing.out(Easing.ease))}
-        >
-          <AnimatedXStack
-            entering={FadeInUp.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            exiting={FadeOutUp.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            paddingVertical={isFullscreen ? '$5' : '$2'}
-            width="100%"
-            justifyContent="space-between"
-            alignItems="center">
-            <Text color="white" fontWeight={700} fontSize="$3.5">
-              {title}
-            </Text>
-            <XStack gap="$4">
-              {(selectedSubtitleIndex ?? -1) > -1 ? (
-                <RippleButton onPress={() => setSelectedSubtitleIndex(-1)}>
-                  <Captions color="white" size={20} />
+          backgroundColor={controlsVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
+          entering={FadeIn.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+          exiting={FadeOut.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+          onTouchStart={handleUserActivity}
+          onMouseEnter={handleUserActivity}
+          onMouseLeave={handleUserActivity}>
+          {controlsVisible ? (
+            <AnimatedXStack
+              entering={FadeInUp.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              exiting={FadeOutUp.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              paddingVertical={isFullscreen ? '$5' : '$2'}
+              paddingHorizontal={isFullscreen ? '$4' : '$2'}
+              width="100%"
+              justifyContent="space-between"
+              alignItems="center">
+              <Text color="white" fontWeight={700} fontSize="$3.5">
+                {title}
+              </Text>
+              <XStack gap="$4">
+                {(selectedSubtitleIndex ?? -1) > -1 ? (
+                  <RippleButton onPress={() => setSelectedSubtitleIndex(-1)}>
+                    <Captions color="white" size={20} />
+                  </RippleButton>
+                ) : (
+                  <RippleButton onPress={() => setSelectedSubtitleIndex(0)}>
+                    <CaptionsOff color="white" size={20} />
+                  </RippleButton>
+                )}
+                <RippleButton
+                  onPress={() => {
+                    setOpenSettings(!openSettings);
+                  }}>
+                  <Settings color="white" size={20} />
                 </RippleButton>
+                <Sheet
+                  forceRemoveScrollEnabled={false}
+                  modal={true}
+                  open={openSettings}
+                  onOpenChange={(value: boolean) => setOpenSettings(value)}
+                  snapPoints={isFullscreen ? [80, 25] : [50, 25]}
+                  snapPointsMode={'percent'}
+                  dismissOnSnapToBottom
+                  zIndex={100_000}
+                  animation="quick">
+                  <Sheet.Overlay
+                    backgroundColor="transparent"
+                    animation="lazy"
+                    enterStyle={{ opacity: 0 }}
+                    exitStyle={{ opacity: 0 }}
+                  />
+                  <Sheet.Frame
+                    backgroundColor={SHEET_THEME_COLOR}
+                    marginHorizontal="auto"
+                    width={isFullscreen ? '50%' : '90%'}>
+                    <Sheet.ScrollView>
+                      <HorizontalTabs items={tabItems} initialTab="tab1" />
+                    </Sheet.ScrollView>
+                  </Sheet.Frame>
+                </Sheet>
+              </XStack>
+            </AnimatedXStack>
+          ) : null}
+
+          {/* Center play/pause button */}
+          {controlsVisible ? (
+            <AnimatedXStack
+              entering={FadeIn.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              exiting={FadeOut.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              alignItems="center"
+              gap="$8"
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)">
+              <RippleButton
+                onPress={() => {
+                  if (prevEpisodeIndex >= 0) {
+                    router.push({
+                      pathname: '/watch/[mediaType]',
+                      params: {
+                        mediaType,
+                        provider,
+                        id,
+                        episodeId: episodes[prevEpisodeIndex].id,
+                        uniqueId: episodes[prevEpisodeIndex].uniqueId,
+                        ...(episodes[prevEpisodeIndex].dubId
+                          ? { episodeDubId: episodes[prevEpisodeIndex].dubId as string }
+                          : null),
+                        ...(episodes[prevEpisodeIndex].isDub
+                          ? { isDub: episodes[prevEpisodeIndex].isDub as string }
+                          : null),
+                        poster: episodes[prevEpisodeIndex].image ?? episodes[prevEpisodeIndex].img?.hd,
+                        title: episodes[prevEpisodeIndex].title,
+                        description: episodes[prevEpisodeIndex].description,
+                        episodeNumber: episodes[prevEpisodeIndex].number ?? episodes[prevEpisodeIndex].episode,
+                        seasonNumber: episodes[prevEpisodeIndex].season,
+                        type: routeInfo.type,
+                      },
+                    });
+                  }
+                }}>
+                <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
+              </RippleButton>
+              {isBuffering ? (
+                <Spinner size="large" color="white" />
               ) : (
-                <RippleButton onPress={() => setSelectedSubtitleIndex(0)}>
-                  <CaptionsOff color="white" size={20} />
+                <RippleButton
+                  onPress={() => {
+                    onPlayPress();
+                  }}>
+                  {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
                 </RippleButton>
               )}
               <RippleButton
                 onPress={() => {
-                  setOpenSettings(!openSettings);
+                  if (nextEpisodeIndex >= 0) {
+                    router.push({
+                      pathname: '/watch/[mediaType]',
+                      params: {
+                        mediaType,
+                        provider,
+                        id,
+                        episodeId: episodes[nextEpisodeIndex].id,
+                        uniqueId: episodes[nextEpisodeIndex].uniqueId,
+                        ...(episodes[nextEpisodeIndex].dubId
+                          ? { episodeDubId: episodes[nextEpisodeIndex].dubId as string }
+                          : null),
+                        ...(episodes[nextEpisodeIndex].isDub
+                          ? { isDub: episodes[nextEpisodeIndex].isDub as string }
+                          : null),
+                        poster: episodes[nextEpisodeIndex].image ?? episodes[nextEpisodeIndex].img?.hd,
+                        title: episodes[nextEpisodeIndex].title,
+                        description: episodes[nextEpisodeIndex].description,
+                        episodeNumber: episodes[nextEpisodeIndex].number ?? episodes[nextEpisodeIndex].episode,
+                        seasonNumber: episodes[nextEpisodeIndex].season,
+                        type: routeInfo.type,
+                      },
+                    });
+                  }
                 }}>
-                <Settings color="white" size={20} />
+                <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
               </RippleButton>
-              <Sheet
-                forceRemoveScrollEnabled={false}
-                modal={true}
-                open={openSettings}
-                onOpenChange={(value: boolean) => setOpenSettings(value)}
-                snapPoints={isFullscreen ? [80, 25] : [50, 25]}
-                snapPointsMode={'percent'}
-                dismissOnSnapToBottom
-                zIndex={100_000}
-                animation="quick">
-                <Sheet.Overlay
-                  backgroundColor="transparent"
-                  animation="lazy"
-                  enterStyle={{ opacity: 0 }}
-                  exitStyle={{ opacity: 0 }}
-                />
-                <Sheet.Frame
-                  backgroundColor={SHEET_THEME_COLOR}
-                  marginHorizontal="auto"
-                  width={isFullscreen ? '50%' : '90%'}>
-                  <Sheet.ScrollView>
-                    <HorizontalTabs items={tabItems} initialTab="tab1" />
-                  </Sheet.ScrollView>
-                </Sheet.Frame>
-              </Sheet>
-            </XStack>
-          </AnimatedXStack>
-          {/* Center play/pause button */}
-          <AnimatedXStack
-            entering={FadeIn.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            exiting={FadeOut.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            alignItems="center"
-            gap="$8"
-            // backgroundColor= 'red'
-            position="absolute"
-            top="50%"
-            left="50%"
-            transform="translate(-50%, -50%)">
-            <RippleButton
-              onPress={() => {
-                if (prevEpisodeIndex >= 0) {
-                  router.push({
-                    pathname: '/watch/[mediaType]',
-                    params: {
-                      mediaType,
-                      provider,
-                      id,
-                      episodeId: episodes[prevEpisodeIndex].id,
-                      uniqueId: episodes[prevEpisodeIndex].uniqueId,
-                      ...(episodes[prevEpisodeIndex].dubId
-                        ? { episodeDubId: episodes[prevEpisodeIndex].dubId as string }
-                        : null),
-                      ...(episodes[prevEpisodeIndex].isDub
-                        ? { isDub: episodes[prevEpisodeIndex].isDub as string }
-                        : null),
-                      poster: episodes[prevEpisodeIndex].image ?? episodes[prevEpisodeIndex].img?.hd,
-                      title: episodes[prevEpisodeIndex].title,
-                      description: episodes[prevEpisodeIndex].description,
-                      episodeNumber: episodes[prevEpisodeIndex].number ?? episodes[prevEpisodeIndex].episode,
-                      seasonNumber: episodes[prevEpisodeIndex].season,
-                      type: routeInfo.type,
-                    },
-                  });
-                }
-              }}>
-              <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-            </RippleButton>
-            {isBuffering ? (
-              <Spinner size="large" color="white" />
-            ) : (
-              <RippleButton
-                onPress={() => {
-                  onPlayPress();
-                }}>
-                {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
-              </RippleButton>
-            )}
-            <RippleButton
-              onPress={() => {
-                if (nextEpisodeIndex >= 0) {
-                  router.push({
-                    pathname: '/watch/[mediaType]',
-                    params: {
-                      mediaType,
-                      provider,
-                      id,
-                      episodeId: episodes[nextEpisodeIndex].id,
-                      uniqueId: episodes[nextEpisodeIndex].uniqueId,
-                      ...(episodes[nextEpisodeIndex].dubId
-                        ? { episodeDubId: episodes[nextEpisodeIndex].dubId as string }
-                        : null),
-                      ...(episodes[nextEpisodeIndex].isDub
-                        ? { isDub: episodes[nextEpisodeIndex].isDub as string }
-                        : null),
-                      poster: episodes[nextEpisodeIndex].image ?? episodes[nextEpisodeIndex].img?.hd,
-                      title: episodes[nextEpisodeIndex].title,
-                      description: episodes[nextEpisodeIndex].description,
-                      episodeNumber: episodes[nextEpisodeIndex].number ?? episodes[nextEpisodeIndex].episode,
-                      seasonNumber: episodes[nextEpisodeIndex].season,
-                      type: routeInfo.type,
-                    },
-                  });
-                }
-              }}>
-              <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-            </RippleButton>
-          </AnimatedXStack>
+            </AnimatedXStack>
+          ) : null}
+
           {/* Bottom Controls */}
-          <AnimatedYStack
-            entering={FadeInDown.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            exiting={FadeOutDown.duration(300).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
-            paddingVertical={isFullscreen ? '$5' : '$2'}
-            gap="$2">
-            <XStack gap="$2" alignItems="center" justifyContent="space-between" width="100%">
-              <RippleButton onPress={onMutePress}>
-                {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
-              </RippleButton>
-              <XStack gap="$2" marginLeft="auto" alignItems="center">
-                <Button
-                  backgroundColor="$color"
-                  color="$color4"
-                  borderRadius="$10"
-                  height="$3"
-                  paddingHorizontal="$3"
-                  onPress={() => onSeek(Math.round(currentTime) + 85)}
-                  fontWeight={500}
-                  fontSize={13}>
-                  +85 s
-                </Button>
-                <RippleButton onPress={onFullscreenPress}>
-                  {isFullscreen ? <Minimize color="white" size={20} /> : <Maximize color="white" size={20} />}
+          {controlsVisible ? (
+            <AnimatedYStack
+              entering={FadeInDown.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              exiting={FadeOutDown.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
+              paddingVertical={isFullscreen ? '$5' : '$2'}
+              paddingHorizontal={isFullscreen ? '$4' : '$2'}
+              gap="$2">
+              <XStack gap="$2" alignItems="center" justifyContent="space-between" width="100%">
+                <RippleButton onPress={onMutePress}>
+                  {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
                 </RippleButton>
+                <XStack gap="$2" marginLeft="auto" alignItems="center">
+                  <Button
+                    backgroundColor="$color"
+                    color="$color4"
+                    borderRadius="$10"
+                    height="$3"
+                    paddingHorizontal="$3"
+                    onPress={() => onSeek(Math.round(currentTime) + 85)}
+                    fontWeight={500}
+                    fontSize={13}>
+                    +85 s
+                  </Button>
+                  <RippleButton onPress={onFullscreenPress}>
+                    {isFullscreen ? <Minimize color="white" size={20} /> : <Maximize color="white" size={20} />}
+                  </RippleButton>
+                </XStack>
               </XStack>
-            </XStack>
-            <XStack width="100%" alignItems="center" gap="$4" justifyContent="space-between">
-              <Text color="white" fontSize={13} fontWeight={700}>
-                {formatTime(currentTime)}
-              </Text>
-              <View flex={1}>
-                {/* <Slider
-                  value={[Math.round(currentTime)]}
-                  min={0}
-                  max={Math.round(seekableDuration)}
-                  onValueChange={([value]) => {
-                    onSeek(Math.round(value));
-                  }}>
-                  <Slider.Track height={5}>
-                    <Slider.TrackActive backgroundColor="$color" />
-                  </Slider.Track>
-                  <Slider.Thumb backgroundColor="$color" index={0} size={13} circular borderColor="$color" />
-                </Slider> */}
-                <CustomSlider
-                  value={Math.round(currentTime)}
-                  min={0}
-                  max={Math.round(seekableDuration)}
-                  onValueChange={(value) => {
-                    onSeek(value);
-                  }}
-                />
-              </View>
-              <Text color="white" fontSize={13} fontWeight={700}>
-                {formatTime(seekableDuration)}
-              </Text>
-            </XStack>
-          </AnimatedYStack>
+              <XStack width="100%" alignItems="center" gap="$4" justifyContent="space-between">
+                <Text color="white" fontSize={13} fontWeight={700}>
+                  {formatTime(currentTime)}
+                </Text>
+                <View flex={1}>
+                  <CustomSlider
+                    value={Math.round(currentTime)}
+                    min={0}
+                    max={Math.round(seekableDuration)}
+                    onValueChange={(value) => {
+                      onSeek(value);
+                    }}
+                  />
+                </View>
+                <Text color="white" fontSize={13} fontWeight={700}>
+                  {formatTime(seekableDuration)}
+                </Text>
+              </XStack>
+            </AnimatedYStack>
+          ) : null}
         </AnimatedYStack>
       </>
-    ) : null;
+    );
   },
 );
 ControlsOverlay.displayName = 'ControlsOverlay';

@@ -61,7 +61,6 @@ const EpisodeList = ({
   const currentTheme = useCurrentTheme();
   const flashListRef = useRef<FlashList<Episode | IMovieEpisode>>(null);
   const hasScrolledRef = useRef(false);
-  // const [seasonNumber, setSeasonNumber] = useState(0);
   const { setProvider, getProvider } = useProviderStore();
   useEffect(() => {
     setProvider(mediaType, getProvider(mediaType) ?? provider);
@@ -75,7 +74,6 @@ const EpisodeList = ({
           provider: getProvider(mediaType) === 'rive' ? '' : getProvider(mediaType),
         });
 
-  const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
   const { seasonNumber, setSeasonNumber, resetSeasonNumber } = useSeasonStore();
   const movieSeasons = episodeData?.seasons;
   // console.log('movieSeasons', movieSeasons);
@@ -88,10 +86,10 @@ const EpisodeList = ({
   }, [mediaType, movieSeasons, seasonNumber, animeEpisodes]);
   // console.log('episodes', episodes);
 
+  const { currentUniqueId } = useEpisodesIdStore();
   const progresses = useWatchProgressStore((state) => state.progresses);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
-  const displayMode = useEpisodeDisplayStore((state) => state.displayMode);
-  const setDisplayMode = useEpisodeDisplayStore((state) => state.setDisplayMode);
+  const { displayMode, setDisplayMode } = useEpisodeDisplayStore();
   const { setCurrentServer, getCurrentServer, servers } = useServerStore();
 
   // console.log('servers', servers[0], getCurrentServer());
@@ -110,8 +108,10 @@ const EpisodeList = ({
   }, [episodes, setEpisodes]);
 
   useEffect(() => {
-    resetSeasonNumber();
-  }, [id, resetSeasonNumber]);
+    if (swipeable) {
+      resetSeasonNumber();
+    }
+  }, [id, resetSeasonNumber, swipeable]);
 
   useEffect(() => {
     if (movieSeasons && seasonNumber >= movieSeasons.length) {
@@ -120,10 +120,7 @@ const EpisodeList = ({
   }, [episodeData, movieSeasons, seasonNumber, resetSeasonNumber]);
 
   const currentEpisode = episodes.find((episode: Episode | IMovieEpisode) => episode.id === currentUniqueId);
-  // console.log(
-  //   movieSeasons?.[seasonNumber]?.episodes?.map((episode) => episode),
-  //   seasonNumber,
-  // );
+
   useEffect(() => {
     return () => {
       hasScrolledRef.current = false;
@@ -384,7 +381,7 @@ const EpisodeList = ({
   return (
     <YStack flex={1} gap={2}>
       <XStack paddingHorizontal={16} paddingTop={8} gap="$5" alignItems="center">
-        {movieSeasons && (
+        {movieSeasons && type !== TvType.MOVIE && (
           <CustomSelect
             SelectItem={
               movieSeasons?.map((_: any, index: number): { name: string; value: string } => ({
@@ -395,6 +392,7 @@ const EpisodeList = ({
             SelectLabel="Season"
             value={String(seasonNumber)}
             onValueChange={(value: string) => {
+              console.log('value', value, seasonNumber);
               setSeasonNumber(Number(value));
               setEpisodes(movieSeasons[value].episodes);
             }}

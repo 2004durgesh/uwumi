@@ -16,7 +16,7 @@ import ControlsOverlay from './ControlsOverlay';
 import { ISubtitle, MediaFormat, MediaType, TvType } from '@/constants/types';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
-import { useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import * as Brightness from 'expo-brightness';
@@ -117,14 +117,19 @@ const Watch = () => {
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
 
-  useEffect(() => {
-    if (episodeId && uniqueId) {
-      setEpisodeIds(episodeId, uniqueId);
-    }
-    return () => {
-      setEpisodeIds('', '');
-    };
-  }, [uniqueId, setEpisodeIds, episodeId]);
+  useFocusEffect(
+    useCallback(() => {
+      // console.log('Screen focused - setting episode IDs');
+      if (episodeId && uniqueId) {
+        // console.log(`Setting episode IDs: ${episodeId}, ${uniqueId}`);
+        setEpisodeIds(episodeId, uniqueId);
+      }
+      return () => {
+        // console.log('Screen unfocused - clearing episode IDs');
+        setEpisodeIds('', '');
+      };
+    }, [uniqueId, episodeId, setEpisodeIds]),
+  );
 
   const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -172,7 +177,6 @@ const Watch = () => {
     }
   }, [serverData, setCurrentServer, setServers, serverInitialized]);
   useEffect(() => {
-    // Reset initialization when embed mode changes
     setServerInitialized(false);
   }, [isEmbed, provider]);
 
@@ -237,13 +241,17 @@ const Watch = () => {
     setCurrentTime(currentTime);
     setSeekableDuration(seekableDuration);
     if (uniqueId && seekableDuration > 0 && Math.floor(currentTime) % 5 === 0) {
-      const progress = {
-        currentTime: currentTime,
-        duration: seekableDuration,
-        progress: (currentTime / seekableDuration) * 100,
-      };
-      // console.log('Saving progress:', progress);
-      setProgress(uniqueId, progress);
+      const savedProgress = getProgress(uniqueId);
+
+      if (!savedProgress || currentTime > savedProgress.currentTime) {
+        const progress = {
+          currentTime: currentTime,
+          duration: seekableDuration,
+          progress: (currentTime / seekableDuration) * 100,
+        };
+        // console.log('Saving intermediate progress:', progress);
+        setProgress(uniqueId, progress);
+      }
     }
   };
 
@@ -522,7 +530,7 @@ const Watch = () => {
                     console.log('Video Error:', error);
                   }}
                   onLoad={(value) => {
-                    console.log('Video loaded:', value);
+                    console.log(getProgress(uniqueId)?.currentTime, 'Video loaded:', value);
                     setIsVideoReady(true);
                     // to find how much of the textTracks have null language and title
                     const nullTrackCount =
@@ -644,7 +652,7 @@ const Watch = () => {
                       const isSelected =
                         getProvider(mediaType) === value &&
                         ((key === 'embed' && isEmbed) || (key === 'nonEmbed' && !isEmbed));
-                      console.log('isEmbed:', isEmbed, isSelected);
+                      // console.log('isEmbed:', isEmbed, isSelected);
 
                       if (!isAvailable) return null;
 
