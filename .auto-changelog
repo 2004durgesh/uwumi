@@ -1,0 +1,24 @@
+{
+  "output": "CHANGELOG.md",
+  "template": "keepachangelog",
+  "unreleased": true,
+  "commitLimit": false,
+  "breakingPattern": "BREAKING CHANGE:",
+  "issueUrl": "https://github.com/2004durgesh/uwumi/issues/{id}",
+  "commitUrl": "https://github.com/2004durgesh/uwumi/commit/{id}",
+  "compareUrl": "https://github.com/2004durgesh/uwumi/compare/{from}...{to}",
+  "ignoreCommitPattern": "^(chore\\(release\\)|Merge|Initial commit|first commit)",
+  "sortCommits": "date-desc",
+  "groupCommits": true,
+  "includeBranch": ["main", "master"],
+  "types": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "perf", "section": "Performance Improvements"},
+    {"type": "refactor", "section": "Code Refactoring"},
+    {"type": "style", "section": "Styling"},
+    {"type": "docs", "section": "Documentation"},
+    {"type": "test", "section": "Tests"},
+    {"type": "chore", "section": "Miscellaneous Tasks"}
+  ]
+}

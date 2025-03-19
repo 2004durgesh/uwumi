@@ -2,7 +2,7 @@
 # . "$(dirname -- "$0")/_/husky.sh"
 
 # First run lint-staged
-npx lint-staged
+npx lint-staged && npm run format && npm run changelog
 
 # Then check versions
 echo "⚡ Checking version consistency..."
