@@ -2,6 +2,7 @@
 
 # Set environment variables
 export NODE_ENV=production
+npm run changelog
 
 # Color definitions
 RED='\033[0;31m'

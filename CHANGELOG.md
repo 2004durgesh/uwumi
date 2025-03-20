@@ -1,8 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## v1.0.1 (2025-03-20)
 
 ### Bug Fixes
+
+- *(controls)* Adjust visibility logic and improve ripple button duration (9e0729e)
 
 - *(controls | player)* Add auto-hide in controls and fixes in player and episodelist (76fe07d)
 
