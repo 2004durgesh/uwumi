@@ -12,8 +12,7 @@
     "format": "prettier --write .",
     "generate-themes": "tamagui generate-themes ./src/constants/Theme.ts ./src/constants/theme-out.ts",
     "prepare": "husky install",
-    "changelog": "auto-changelog -p && node ./src/scripts/organize-changelog.js && git add CHANGELOG.md",
-    "changelog:pretty": "node ./src/scripts/organize-changelog.js"
+    "changelog": "git fetch --tags && npx git-cliff --config cliff.toml --output CHANGELOG.md --sort newest"
   },
   "expo": {
     "install": {
@@ -112,6 +111,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "git-cliff": "^2.8.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-expo": "~52.0.3",
