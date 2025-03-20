@@ -19,7 +19,7 @@ const RippleButton: FC<RippleButtonProps> = ({ onPress, children }) => {
         // e.stopPropagation();
       }}
       rippleColor={themeName === 'light' ? 'black' : 'white'}
-      rippleDuration={700}
+      rippleDuration={500}
       rippleContainerBorderRadius={50}
       rippleOpacity={1}>
       <View padding={10}>{children}</View>

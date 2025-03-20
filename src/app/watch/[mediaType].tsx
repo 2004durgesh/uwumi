@@ -74,7 +74,7 @@ const OverlayedView = styled(Animated.View, {
   top: 0,
   // width: 200,
   // height: 200,
-  width: '35%',
+  width: '50%',
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
@@ -291,8 +291,8 @@ const Watch = () => {
   } = useDoubleTapGesture({
     videoRef,
     seekInterval: 10,
-    onSeekStart: () => console.log('Seeking started'),
-    onSeekEnd: () => console.log('Seeking ended'),
+    // onSeekStart: () => console.log('Seeking started'),
+    // onSeekEnd: () => console.log('Seeking ended'),
   });
   const updateBrightness = useCallback(async (value: number) => {
     await Brightness.setBrightnessAsync(value);

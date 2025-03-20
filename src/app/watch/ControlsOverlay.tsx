@@ -136,7 +136,7 @@ const ControlsOverlay = memo(
       },
       [resetInactivityTimer],
     );
-    const controlsVisible = openSettings || isBuffering || (showControls && isUserActive);
+    const controlsVisible = openSettings || (showControls && isUserActive);
 
     const router = useRouter();
     const { mediaType, provider, id } = routeInfo;
@@ -287,7 +287,7 @@ const ControlsOverlay = memo(
           ) : null}
 
           {/* Center play/pause button */}
-          {controlsVisible ? (
+          {controlsVisible || isBuffering ? (
             <AnimatedXStack
               entering={FadeIn.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}
               exiting={FadeOut.duration(100).easing(Easing.bezierFn(0.25, 0.1, 0.25, 1))}

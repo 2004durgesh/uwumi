@@ -7,6 +7,11 @@
 - *(controls | player)* Add auto-hide in controls and fixes in player and episodelist (76fe07d)
 
 
+### Chore
+
+- *(changelog)* Update changelog with recent enhancements and organization improvements (5c87bd5)
+
+
 ### Features
 
 - *(changelog)* Enhance changelog generation and organization; update pre-commit hook (a2a827c)
