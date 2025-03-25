@@ -33,7 +33,9 @@ import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvT
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';
-import { PROVIDERS, useProviderStore } from '@/constants/provider';
+import { useProviderStore } from '@/constants/provider';
+import TVFocusWrapper, { isTV } from './TVFocusWrapper';
+import TVSelect, { SelectOption } from './TVSelect';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -127,6 +129,13 @@ const EpisodeList = ({
     };
   }, [currentUniqueId]);
 
+  const totalEpisodesRef = useRef(0);
+
+  // Update the ref whenever episodes change
+  useEffect(() => {
+    totalEpisodesRef.current = episodes.length;
+  }, [episodes]);
+
   const handleProviderChange = useCallback(
     (value: string) => {
       setProvider(mediaType, value);
@@ -205,42 +214,96 @@ const EpisodeList = ({
     [currentUniqueId, progresses],
   );
 
-  const ListPressable = memo(({ item, children }: { item: Episode | IMovieEpisode; children: React.ReactNode }) => {
-    return (
-      <Pressable
-        onPress={() => {
-          router.push({
-            pathname: '/watch/[mediaType]',
-            params: {
-              mediaType,
-              provider: getProvider(mediaType),
-              id,
-              episodeId: item?.id,
-              ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
-              ...(item?.isDub ? { isDub: item.isDub as string } : null),
-              uniqueId: item?.uniqueId,
-              poster: item?.image ?? item?.img?.hd ?? '',
-              title: item?.title,
-              description: item?.description,
-              episodeNumber: item?.number ?? item?.episode,
-              seasonNumber: item?.season,
-              type,
-            },
-          });
-        }}>
-        <YStack
-          gap={'$4'}
-          padding={4}
-          marginVertical={1}
-          borderWidth={2}
-          borderRadius={10}
-          borderColor={currentUniqueId === item?.uniqueId ? '$color4' : 'transparent'}
-          backgroundColor={pureBlackBackground ? '#000' : '$background'}>
-          <XStack gap={'$4'}>{children}</XStack>
-        </YStack>
-      </Pressable>
-    );
-  });
+  // Define focus control IDs at component level
+  const seasonSelectId = 1;
+  const serverSelectId = 2;
+  const displayModeToggleId = swipeable ? 3 : undefined;
+  const episodeStartId = swipeable ? 4 : 3;
+
+  const ListPressable = memo(
+    ({
+      item,
+      children,
+      index,
+      totalEpisodes,
+    }: {
+      item: Episode | IMovieEpisode;
+      children: React.ReactNode;
+      index: number;
+      totalEpisodes: number;
+    }) => {
+      const navigateToEpisode = () => {
+        router.push({
+          pathname: '/watch/[mediaType]',
+          params: {
+            mediaType,
+            provider: getProvider(mediaType),
+            id,
+            episodeId: item?.id,
+            ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
+            ...(item?.isDub ? { isDub: item.isDub as string } : null),
+            uniqueId: item?.uniqueId,
+            poster: item?.image ?? item?.img?.hd ?? '',
+            title: item?.title,
+            description: item?.description,
+            episodeNumber: item?.number ?? item?.episode,
+            seasonNumber: item?.season,
+            type,
+          },
+        });
+      };
+
+      // Calculate episode-specific focus ID
+      const thisEpisodeId = episodeStartId + index;
+      // Determine UP focus target for episodes
+      let upFocusTarget;
+      if (index === 0) {
+        // First episode goes to controls
+        upFocusTarget = displayModeToggleId || serverSelectId || seasonSelectId;
+      } else {
+        // Other episodes go to previous episode
+        upFocusTarget = thisEpisodeId - 1;
+      }
+
+      // Determine DOWN focus target
+      const downFocusTarget = index < totalEpisodes - 1 ? thisEpisodeId + 1 : seasonSelectId;
+
+      // Determine LEFT focus target (when applicable)
+      const leftFocusTarget = swipeable
+        ? displayModeToggleId
+        : serverSelectId && serverSelectId > 0
+          ? serverSelectId
+          : seasonSelectId && seasonSelectId > 0
+            ? seasonSelectId
+            : undefined;
+
+      return (
+        <TVFocusWrapper
+          isFocusable={isTV}
+          hasTVPreferredFocus={currentUniqueId === item?.uniqueId && isTV}
+          onPress={navigateToEpisode}
+          id={`${thisEpisodeId}`}
+          nextFocusUp={upFocusTarget}
+          nextFocusDown={downFocusTarget}
+          nextFocusLeft={leftFocusTarget}
+          borderColor={currentTheme?.color4}
+          borderWidth={3}>
+          <Pressable onPress={navigateToEpisode}>
+            <YStack
+              gap={'$4'}
+              padding={4}
+              marginVertical={1}
+              borderWidth={2}
+              borderRadius={10}
+              borderColor={currentUniqueId === item?.uniqueId ? '$color4' : 'transparent'}
+              backgroundColor={pureBlackBackground ? '#000' : '$background'}>
+              <XStack gap={'$4'}>{children}</XStack>
+            </YStack>
+          </Pressable>
+        </TVFocusWrapper>
+      );
+    },
+  );
 
   const ProgressAndAirDate = useCallback(
     ({ item }: { item: Episode | IMovieEpisode }) => {
@@ -257,7 +320,7 @@ const EpisodeList = ({
   const renderFullMetadataPressableItem = useCallback(
     ({ item }: { item: Episode | IMovieEpisode }) => {
       return (
-        <ListPressable item={item}>
+        <>
           <View position="relative" overflow="hidden" borderRadius={4}>
             {/* 10 - 4 (of gap) = 6 */}
             <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
@@ -303,16 +366,16 @@ const EpisodeList = ({
             </YStack>
             {ProgressAndAirDate({ item })}
           </YStack>
-        </ListPressable>
+        </>
       );
     },
-    [ListPressable, ProgressAndAirDate, progresses, swipeable],
+    [ProgressAndAirDate, progresses, swipeable],
   );
 
   const renderTitleOnlyPressableItem = useCallback(
     ({ item }: { item: Episode | IMovieEpisode }) => {
       return (
-        <ListPressable item={item}>
+        <>
           <YStack padding={2} flex={1} justifyContent="space-between">
             <YStack>
               <XStack alignItems="center" justifyContent="space-between" gap={2}>
@@ -327,16 +390,16 @@ const EpisodeList = ({
             </YStack>
             {ProgressAndAirDate({ item })}
           </YStack>
-        </ListPressable>
+        </>
       );
     },
-    [ListPressable, ProgressAndAirDate],
+    [ProgressAndAirDate],
   );
 
   const renderNumberOnlyPressableItem = useCallback(
     ({ item }: { item: Episode | IMovieEpisode }) => {
       return (
-        <ListPressable item={item}>
+        <>
           <YStack padding={2} flex={1} justifyContent="space-between">
             <YStack>
               <XStack alignItems="center" justifyContent="space-between" gap={2}>
@@ -351,10 +414,10 @@ const EpisodeList = ({
             </YStack>
             {ProgressAndAirDate({ item })}
           </YStack>
-        </ListPressable>
+        </>
       );
     },
-    [ListPressable, ProgressAndAirDate],
+    [ProgressAndAirDate],
   );
 
   const renderItemContent = useCallback(
@@ -380,79 +443,168 @@ const EpisodeList = ({
 
   return (
     <YStack flex={1} gap={2}>
-      <XStack paddingHorizontal={16} paddingTop={8} gap="$5" alignItems="center">
-        {movieSeasons && type !== TvType.MOVIE && (
-          <CustomSelect
-            SelectItem={
-              movieSeasons?.map((_: any, index: number): { name: string; value: string } => ({
-                name: `Season ${index + 1}`,
-                value: String(index),
-              })) || []
-            }
-            SelectLabel="Season"
-            value={String(seasonNumber)}
-            onValueChange={(value: string) => {
-              console.log('value', value, seasonNumber);
-              setSeasonNumber(Number(value));
-              setEpisodes(movieSeasons[value].episodes);
-            }}
-          />
-        )}
-        {mediaType === MediaType.MOVIE && servers && servers.length > 0 && !swipeable && (
-          <CustomSelect
-            SelectItem={servers.map((server) => ({ name: server.name, value: server.name })) || []}
-            SelectLabel="Servers"
-            value={getCurrentServer()?.name!}
-            onValueChange={(value: string) => setCurrentServer(value || servers[0].name)}
-          />
-        )}
-        {mediaType === MediaType.ANIME && swipeable && (
-          <CustomSelect
-            SelectItem={mediaType === MediaType.ANIME ? PROVIDERS.anime : PROVIDERS.movie}
-            SelectLabel="Provider"
-            value={getProvider(mediaType)}
-            onValueChange={handleProviderChange}
-          />
-        )}
-        {swipeable && (
-          <Pressable
-            onPress={() => {
-              // Cycle through display modes: FullMetadata -> TitleOnly -> NumberOnly -> FullMetadata
-              setDisplayMode(
-                displayMode === EpisodeDisplayMode.FullMetadata
-                  ? EpisodeDisplayMode.TitleOnly
-                  : displayMode === EpisodeDisplayMode.TitleOnly
-                    ? EpisodeDisplayMode.NumberOnly
-                    : EpisodeDisplayMode.FullMetadata,
-              );
-            }}>
-            {displayMode === EpisodeDisplayMode.FullMetadata ? (
-              <TableProperties color="$color" />
-            ) : displayMode === EpisodeDisplayMode.TitleOnly ? (
-              <ListOrdered color="$color" />
-            ) : (
-              <Images color="$color" />
-            )}
-          </Pressable>
-        )}
-      </XStack>
       <FlashList
         key={listKey}
         ref={flashListRef}
         data={episodes}
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+        ListHeaderComponent={
+          <XStack paddingHorizontal={16} paddingTop={8} gap="$5" alignItems="center">
+            {movieSeasons &&
+              type !== TvType.MOVIE &&
+              (isTV ? (
+                <TVSelect
+                  options={
+                    movieSeasons?.map(
+                      (_: any, index: number): SelectOption => ({
+                        name: `Season ${index + 1}`,
+                        value: String(index),
+                      }),
+                    ) || []
+                  }
+                  label="Season"
+                  value={String(seasonNumber)}
+                  onValueChange={(value: string) => {
+                    setSeasonNumber(Number(value));
+                    setEpisodes(movieSeasons[Number(value)].episodes);
+                  }}
+                  hasTVPreferredFocus={isTV && episodes.length === 0}
+                  id={1}
+                  nextFocusDown={episodes.length > 0 ? (swipeable ? 4 : 3) : 2}
+                  nextFocusRight={2}
+                  // Add nextFocusUp to cycle back from the bottom
+                  nextFocusUp={
+                    episodes.length > 0
+                      ? swipeable
+                        ? episodeStartId + episodes.length - 1
+                        : episodeStartId + episodes.length - 1
+                      : undefined
+                  }
+                />
+              ) : (
+                <TVFocusWrapper
+                  isFocusable={isTV}
+                  hasTVPreferredFocus={isTV && episodes.length === 0}
+                  borderColor={currentTheme?.color4}
+                  borderWidth={2}>
+                  <CustomSelect
+                    SelectItem={
+                      movieSeasons?.map((_: any, index: number): { name: string; value: string } => ({
+                        name: `Season ${index + 1}`,
+                        value: String(index),
+                      })) || []
+                    }
+                    SelectLabel="Season"
+                    value={String(seasonNumber)}
+                    onValueChange={(value: string) => {
+                      setSeasonNumber(Number(value));
+                      setEpisodes(movieSeasons[value].episodes);
+                    }}
+                  />
+                </TVFocusWrapper>
+              ))}
+            {mediaType === MediaType.MOVIE &&
+              servers &&
+              servers.length > 0 &&
+              !swipeable &&
+              (isTV ? (
+                <TVSelect
+                  options={servers.map((server) => ({ name: server.name, value: server.name })) || []}
+                  label="Servers"
+                  value={getCurrentServer()?.name!}
+                  onValueChange={(value: string) => setCurrentServer(value || servers[0].name)}
+                  nextFocusDown={episodes.length > 0 ? (swipeable ? 4 : 3) : undefined}
+                  nextFocusLeft={movieSeasons && type !== TvType.MOVIE ? 1 : undefined}
+                  nextFocusRight={swipeable ? 3 : undefined}
+                  // Add nextFocusUp to cycle from bottom
+                  nextFocusUp={
+                    episodes.length > 0
+                      ? swipeable
+                        ? episodeStartId + episodes.length - 1
+                        : episodeStartId + episodes.length - 1
+                      : undefined
+                  }
+                />
+              ) : (
+                <TVFocusWrapper isFocusable={isTV} borderColor={currentTheme?.color4} borderWidth={2}>
+                  <CustomSelect
+                    SelectItem={servers.map((server) => ({ name: server.name, value: server.name })) || []}
+                    SelectLabel="Servers"
+                    value={getCurrentServer()?.name!}
+                    onValueChange={(value: string) => setCurrentServer(value || servers[0].name)}
+                  />
+                </TVFocusWrapper>
+              ))}
+            {swipeable && (
+              <TVFocusWrapper
+                isFocusable={isTV}
+                id={'3'} // Explicit ID for display mode toggle
+                nextFocusDown={episodes.length > 0 ? 4 : 1} // Go to first episode or season selector
+                nextFocusLeft={
+                  movieSeasons && type !== TvType.MOVIE ? (servers && servers.length > 0 ? 2 : 1) : undefined
+                }
+                nextFocusRight={episodes.length > 0 ? 4 : undefined} // Go to first episode if available
+                // Add nextFocusUp to cycle from bottom
+                nextFocusUp={episodes.length > 0 ? episodeStartId + episodes.length - 1 : undefined}
+                onPress={() => {
+                  // Cycle through display modes: FullMetadata -> TitleOnly -> NumberOnly -> FullMetadata
+                  setDisplayMode(
+                    displayMode === EpisodeDisplayMode.FullMetadata
+                      ? EpisodeDisplayMode.TitleOnly
+                      : displayMode === EpisodeDisplayMode.TitleOnly
+                        ? EpisodeDisplayMode.NumberOnly
+                        : EpisodeDisplayMode.FullMetadata,
+                  );
+                }}>
+                <Pressable
+                  onPress={() => {
+                    setDisplayMode(
+                      displayMode === EpisodeDisplayMode.FullMetadata
+                        ? EpisodeDisplayMode.TitleOnly
+                        : displayMode === EpisodeDisplayMode.TitleOnly
+                          ? EpisodeDisplayMode.NumberOnly
+                          : EpisodeDisplayMode.FullMetadata,
+                    );
+                  }}>
+                  {displayMode === EpisodeDisplayMode.FullMetadata ? (
+                    <TableProperties color="$color" />
+                  ) : displayMode === EpisodeDisplayMode.TitleOnly ? (
+                    <ListOrdered color="$color" />
+                  ) : (
+                    <Images color="$color" />
+                  )}
+                </Pressable>
+              </TVFocusWrapper>
+            )}
+          </XStack>
+        }
         ListEmptyComponent={<NoResults />}
         ListFooterComponent={<View height={100} />}
         estimatedItemSize={150}
         showsVerticalScrollIndicator={true}
         estimatedFirstItemOffset={900}
         drawDistance={500}
+        maintainVisibleContentPosition={{
+          // Add this property
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
         onLoad={(e) => {
-          flashListRef?.current?.scrollToItem({ item: currentEpisode, animated: true, viewPosition: 0.5 });
+          flashListRef?.current?.scrollToItem({ item: currentEpisode, animated: true, viewPosition: 0.1 });
         }}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }: { item: Episode | IMovieEpisode }) => {
+        renderItem={({ item, index }: { item: Episode | IMovieEpisode; index: number }) => {
           const itemKey = item?.id ?? item?.uniqueId;
+
+          // On TV we skip the swipeable component altogether
+          if (isTV) {
+            return (
+              <ListPressable item={item} index={index} totalEpisodes={episodes.length}>
+                {renderItemContent(item)}
+              </ListPressable>
+            );
+          }
+
           return swipeable ? (
             <ReanimatedSwipeable
               ref={(ref) => {
@@ -474,10 +626,14 @@ const EpisodeList = ({
               onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               onSwipeableWillClose={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               renderRightActions={rightActions}>
-              {renderItemContent(item)}
+              <ListPressable item={item} index={index} totalEpisodes={episodes.length}>
+                {renderItemContent(item)}
+              </ListPressable>
             </ReanimatedSwipeable>
           ) : (
-            renderItemContent(item as Episode | IMovieEpisode)
+            <ListPressable item={item} index={index} totalEpisodes={episodes.length}>
+              {renderItemContent(item)}
+            </ListPressable>
           );
         }}
       />

@@ -5,11 +5,11 @@ import { ThemedView } from '@/components/ThemedView';
 import { useCurrentTheme, useInfo, usePureBlackBackground } from '@/hooks';
 import { ArrowLeft, Clock, Star } from '@tamagui/lucide-icons';
 import { BlurView } from 'expo-blur';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, View, XStack, YStack, ZStack } from 'tamagui';
+import { Spinner, Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from '@/components/HorizontalTabs';
 import { IMangaChapter, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
@@ -19,6 +19,9 @@ import Chapters from './Chapters';
 import Details from './Details';
 import Similar from './Similar';
 import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
+import TVFocusWrapper, { isTV } from '@/components/TVFocusWrapper';
+import RippleButton from '@/components/RippleButton';
+import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -34,6 +37,9 @@ const Info = () => {
 
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
+  const router = useRouter();
+  const { isFavorite, addFavorite, removeFavorite } = useFavoriteStore();
+  const isFavorited = isFavorite(id);
   const tabItems = [
     {
       key: 'tab1',
@@ -52,6 +58,15 @@ const Info = () => {
     },
   ];
   // console.log(data);
+  if (isLoading) {
+    return (
+      <ThemedView useSafeArea={false}>
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="$color" />
+        </YStack>
+      </ThemedView>
+    );
+  }
   return (
     <>
       <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>
@@ -84,16 +99,39 @@ const Info = () => {
           </View>
           <View padding={10} marginTop={insets.top + 10}>
             <XStack alignItems="center" justifyContent="space-between" marginBlockEnd={20}>
-              <ArrowLeft />
-              <AnimatedFavoriteButton
-                id={id}
-                title={data?.title!}
-                image={image || data?.image!}
-                type={type}
-                mediaType={mediaType}
-                provider={provider}
-                metaProvider={metaProvider}
-              />
+              <TVFocusWrapper isFocusable={true} hasTVPreferredFocus={isTV} onPress={() => router.back()}>
+                <RippleButton onPress={() => router.back()}>
+                  <ArrowLeft />
+                </RippleButton>
+              </TVFocusWrapper>
+
+              <TVFocusWrapper
+                isFocusable={true}
+                onPress={() => {
+                  if (isFavorited) {
+                    removeFavorite(id);
+                  } else {
+                    addFavorite({
+                      id,
+                      title: data?.title!,
+                      image: image || data?.image!,
+                      type,
+                      mediaType,
+                      provider,
+                      metaProvider,
+                    });
+                  }
+                }}>
+                <AnimatedFavoriteButton
+                  id={id}
+                  title={data?.title!}
+                  image={image || data?.image!}
+                  type={type}
+                  mediaType={mediaType}
+                  provider={provider}
+                  metaProvider={metaProvider}
+                />
+              </TVFocusWrapper>
             </XStack>
 
             <XStack gap={10} alignItems="center">

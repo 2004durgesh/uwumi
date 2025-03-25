@@ -20,6 +20,7 @@ import pkg from '../../package.json';
 import axios from 'axios';
 import { compareVersions } from '@/constants/utils';
 import * as WebBrowser from 'expo-web-browser';
+import * as Orientation from 'expo-screen-orientation';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -126,6 +127,11 @@ export default function RootLayout() {
     newVersion: '',
     updateType: '',
   });
+
+  //when tv set orientation to landscape
+  useEffect(() => {
+    Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE);
+  }, []);
   useEffect(() => {
     const checkForUpdates = async () => {
       try {

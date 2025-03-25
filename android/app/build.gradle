@@ -147,11 +147,11 @@ android {
             // Get ABI name if it exists (like arm64-v8a)
             def abiName = output.getFilter(com.android.build.OutputFile.ABI)
             
-            // Set the filename to uwumi-versionname-archname.apk format
+            // Set the filename to uwumi-archname-versionname.apk format
             if (abiName != null) {
-                outputFileName = "uwumi-${versionName}-${abiName}.apk"
+                outputFileName = "uwumi-${abiName}-v${versionName}.apk"
             } else {
-                outputFileName = "uwumi-${versionName}.apk"
+                outputFileName = "uwumi-universal-v${versionName}.apk"
             }
         }
     }

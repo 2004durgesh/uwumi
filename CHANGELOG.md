@@ -11,6 +11,8 @@
 
 ### Chore
 
+- *(release)* Update version to 1.0.1 and regenerate changelog (6fba30e)
+
 - *(changelog)* Update changelog with recent enhancements and organization improvements (5c87bd5)
 
 

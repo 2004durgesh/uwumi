@@ -7,6 +7,8 @@ import { useCurrentTheme, useTabsStore } from '@/hooks';
 import IconTitle from '@/components/IconTitle';
 import SearchBar from '@/components/SearchBar';
 import { MediaType } from '@/constants/types';
+import TVFocusWrapper, { isTV } from './TVFocusWrapper';
+
 interface MediaBrowserProps {
   mediaType: MediaType;
 }
@@ -31,24 +33,42 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
   const currentTab = useTabsStore((state) => state.currentTab);
   const setCurrentTab = useTabsStore((state) => state.setCurrentTab);
   const currentTheme = useCurrentTheme();
-  const TabList = memo(() => (
-    <Tabs.List disablePassBorderRadius width="65%" marginVertical="$2" marginHorizontal="$4" gap="$2">
-      {TABS.map(({ id, icon, text }) => (
-        <Tabs.Tab
-          key={id}
-          flex={1}
-          padding={0}
-          height={35}
-          value={id}
-          // overflow="hidden"
-          borderWidth={2}
-          borderColor={currentTab === id ? '$color4' : '$color1'}
-          style={{ backgroundColor: currentTab === id ? currentTheme?.color4 : 'transparent' }}>
-          <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
-        </Tabs.Tab>
-      ))}
-    </Tabs.List>
-  ));
+  const TabList = memo(() => {
+    return (
+      <Tabs.List disablePassBorderRadius width="65%" marginVertical="$2" marginHorizontal="$4" gap="$2">
+        {TABS.map(({ id, icon, text }, index) => {
+          const isActive = currentTab === id;
+          const bgColor = isActive ? currentTheme?.color4 : 'transparent';
+
+          return (
+            <TVFocusWrapper
+              key={id}
+              isFocusable={true}
+              hasTVPreferredFocus={isActive && isTV}
+              nextFocusDown={0}
+              nextFocusRight={index < TABS.length - 1 ? undefined : 0}
+              nextFocusLeft={index > 0 ? undefined : 0}
+              onPress={() => setCurrentTab(id)}
+              style={{ flex: 1, height: 35 }}>
+              <Tabs.Tab
+                key={id}
+                flex={1}
+                value={id}
+                height={35}
+                padding={0}
+                borderWidth={2}
+                borderColor={isActive ? '$color4' : '$color1'}
+                style={{
+                  backgroundColor: bgColor,
+                }}>
+                <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
+              </Tabs.Tab>
+            </TVFocusWrapper>
+          );
+        })}
+      </Tabs.List>
+    );
+  });
   const metaProvider =
     mediaType === MediaType.ANIME ? 'anilist' : mediaType === MediaType.MANGA ? 'anilist-manga' : 'tmdb';
   console.log(metaProvider, mediaType);
