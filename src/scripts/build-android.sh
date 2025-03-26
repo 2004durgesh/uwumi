@@ -31,8 +31,8 @@ print_step "STEP 2: CHANGING DIRECTORY TO ANDROID"
 cd android
 
 # Clean build
-print_step "STEP 3: CLEANING PREVIOUS BUILD"
-./gradlew clean
+# print_step "STEP 3: CLEANING PREVIOUS BUILD"
+# ./gradlew clean
 
 # Stop Gradle daemon
 print_step "STEP 4: STOPPING GRADLE DAEMON"

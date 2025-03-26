@@ -4,7 +4,7 @@
 
 ### Chore
 
-- *(release)* Bump version to 2.0.0 (726d2f4)
+- *(release)* Bump version to 2.0.0 (fa72462)
 
 
 ### Features

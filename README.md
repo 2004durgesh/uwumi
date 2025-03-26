@@ -1,50 +1,133 @@
-# Welcome to your Expo app 👋
+<h1 align="center">
+  <img src="./assets/images/icon.png" alt="uwumi" width="128" />
+  <br />
+  Uwumi
+</h1>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  A feature-rich anime, manga and movie streaming app built with React Native and Expo
+</p>
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- 📱 Cross-platform (Android, Android TV) support
+- 🎬 Stream anime and movies with multiple quality options
+- 📺 Track watch progress across episodes and series
+- ⭐ Favorites management for quick access to your preferred content
+- 📖 Manga chapter reading functionality
+- 🔍 Powerful search with debounced input
+- 🌙 Customizable themes with pure black background support
+- 🎨 Accent color customization
+- 🌐 Multiple server support with dynamic API selection
+- 💾 Persistent storage for user preferences
 
+## 📸 Screenshots
+
+| Home & Discovery | Content Details | Video Player | Manga Reader |
+|:---------------:|:---------------:|:---------------:|:---------------:|
+| <img src="./assets/screenshots/anime.png" alt="Anime Screen" width="250"/> | <img src="./assets/screenshots/anime-info.png" alt="Anime Info" width="250"/> | <img src="./assets/screenshots/video-player.png" alt="Video Player" width="250"/> | <img src="./assets/screenshots/manga-reader.png" alt="Manga Reader" width="250"/> |
+
+| Library & Tracking | Settings & Customization |
+|:---------------:|:---------------:|
+| <img src="./assets/screenshots/favorites.png" alt="Favorites" width="250"/> | <img src="./assets/screenshots/theme.png" alt="Theme Customization" width="250"/> |
+
+## 🚀 Getting Started
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/2004durgesh/uwumi.git
+   cd uwumi
+   ```
+
+2. Install dependencies
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-2. Start the app
-
+3. Start the development server
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### ENV Variables
 ```bash
-npm run reset-project
+
+# Create a .env file in the root of the project and add the following variables
+
+EXPO_PUBLIC_API_URL= # API URL for production (Consumet API)
+EXPO_PUBLIC_API_URL_DEV= # API URL for development
+
+EXPO_PUBLIC_EPISODE_API_URL= # API URL for episodes in production (https://github.com/2004durgesh/episodes)
+EXPO_PUBLIC_EPISODE_API_URL_DEV= # API URL for episodes in development
+
+EXPO_TV=1  # Set to 1 to enable Android TV support
+```   
+
+## 🏗️ Building for Production
+
+### Android
+```bash
+npm run android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🤝 **Contributing**  
 
-## Learn more
+We ❤️ contributions! Whether it's a **bug fix, feature addition, or documentation improvement**, your help makes **Uwumi** even better.  
 
-To learn more about developing your project with Expo, look at the following resources:
+### 🛠 **How to Contribute**  
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+1. **Fork** the repository  
 
-## Join the community
+2. **Clone your fork**  
+   ```bash
+   git clone https://github.com/YOUR_GITHUB_USERNAME/uwumi.git
+   cd uwumi
+   ```
 
-Join our community of developers creating universal apps.
+3. **Create a new branch**  
+   ```bash
+      git checkout -b fix/video-player-controls
+      ```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+   4. **Make your changes**  
+      - Follow the existing **code style** and **best practices**.  
+      - Ensure your code is **well-tested and functional**.  
+
+   5. **Commit your changes**  
+      ```bash
+      git commit -m "feat: add manga chapter bookmark functionality"
+      ```
+
+   6. **Push to your branch**  
+      ```bash
+      git push origin fix/video-player-controls
+      ```
+
+7. **Open a Pull Request (PR)**  
+   - Go to the [**Uwumi repository**](https://github.com/2004durgesh/uwumi).  
+   - Click **New Pull Request** and select your branch.  
+   - Add a **clear title & description** explaining your changes.  
+   - Submit the PR and wait for review! 🚀  
+
+### ✅ **Contribution Guidelines**  
+
+✔️ Keep commit messages **clear and descriptive** (e.g., `fix: Adjust button visibility`).  
+✔️ Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.  
+✔️ Ensure **no breaking changes** unless necessary.  
+✔️ Run tests before submitting a PR (if applicable).  
+✔️ If adding a new feature, update the **README** if needed.  
+
+### 🏅 **Need Help?**  
+
+If you have any questions, feel free to:  
+💬 **Open an issue** – Report bugs, suggest features, or ask for help.  
+🚀 **Your contributions help make Uwumi better!** 🎉  
+
+
+
+## Acknowledgements
+[Consumet API](https://github.com/consumet/api.consumet.org)
