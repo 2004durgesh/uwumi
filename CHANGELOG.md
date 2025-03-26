@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0 (2025-03-26)
+
+### Chore
+
+- *(release)* Bump version to 2.0.0 (726d2f4)
+
+
+### Features
+
+- *(tvos)* Implement android tv feature (070f7fa)
+
 ## v1.0.1 (2025-03-20)
 
 ### Bug Fixes
