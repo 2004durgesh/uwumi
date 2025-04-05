@@ -1,7 +1,7 @@
 {
   "name": "uwumi",
   "main": "expo-router/entry",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "scripts": {
     "start": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo start --localhost",
     "android:reverse": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo run:android",
@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "generate-themes": "tamagui generate-themes ./src/constants/Theme.ts ./src/constants/theme-out.ts",
     "prepare": "husky install",
-    "changelog": "git fetch --tags && npx git-cliff --config cliff.toml --output CHANGELOG.md --sort newest"
+    "changelog": "git fetch --tags && npx git-cliff --config cliff.toml --output CHANGELOG.md --sort newest",
+    "release": "release-it"
   },
   "expo": {
     "install": {
@@ -32,6 +33,23 @@
       "eslint --fix",
       "prettier --write ."
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": {
+          "name": "conventionalcommits"
+        },
+        "infile": "CHANGELOG.md"
+      }
+    }
   },
   "jest": {
     "preset": "jest-expo"
@@ -100,6 +118,7 @@
     "@commitlint/config-conventional": "^19.7.1",
     "@expo/ngrok": "^4.1.3",
     "@react-native-community/cli": "latest",
+    "@release-it/conventional-changelog": "^10.0.0",
     "@tanstack/eslint-plugin-query": "^5.60.1",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.14",
@@ -120,6 +139,7 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "react-test-renderer": "18.2.0",
+    "release-it": "^18.1.2",
     "typescript": "~5.3.3"
   },
   "private": true

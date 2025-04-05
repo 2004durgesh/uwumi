@@ -1,5 +1,11 @@
 # Changelog
 
+## <small>2.1.1 (2025-04-05)</small>
+
+* fix(release): use absolute path for build script and improve script directory handling ([c627d07](https://github.com/2004durgesh/uwumi/commit/c627d07))
+* feat(about,update-checker): implement about screen and update checker hook ([4c090b5](https://github.com/2004durgesh/uwumi/commit/4c090b5))
+* chore(readme): add env.local and update readme ([8dda059](https://github.com/2004durgesh/uwumi/commit/8dda059))
+
 ## [Unreleased]
 
 ### Chore
@@ -193,4 +199,3 @@
 - Update episode management and enhance controls overlay functionality (45516ec)
 
 - Remove .env file, update .gitignore, and enhance ReadMore component with animations (54fc59a)
-
