@@ -2,15 +2,10 @@
 
 ## <small>2.1.1 (2025-04-05)</small>
 
-* fix(release): use absolute path for build script and improve script directory handling ([c627d07](https://github.com/2004durgesh/uwumi/commit/c627d07))
+* fix(release): use absolute path for build script and improve script directory handling ([222bd83](https://github.com/2004durgesh/uwumi/commit/222bd83))
 * feat(about,update-checker): implement about screen and update checker hook ([4c090b5](https://github.com/2004durgesh/uwumi/commit/4c090b5))
 * chore(readme): add env.local and update readme ([8dda059](https://github.com/2004durgesh/uwumi/commit/8dda059))
 
-## [Unreleased]
-
-### Chore
-
-- *(readme)* Add env.local and update readme (8dda059)
 
 ## v2.0.0 (2025-03-26)
 

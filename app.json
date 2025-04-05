@@ -15,7 +15,7 @@
       "android": {
         "adaptiveIcon": {
           "foregroundImage": "./assets/images/icon.png",
-          "backgroundColor": "#000"
+          "backgroundColor": "#000000"
         },
         "package": "com.x2004durgesh.uwumi"
       },
@@ -32,7 +32,7 @@
             "image": "./assets/images/icon.png",
             "imageWidth": 200,
             "resizeMode": "contain",
-            "backgroundColor": "#000"
+            "backgroundColor": "#000000"
           }
         ],
         "expo-font",

@@ -2,7 +2,6 @@
 
 # Set environment variables
 export NODE_ENV=production
-npm run changelog
 
 # Color definitions
 RED='\033[0;31m'
@@ -43,8 +42,8 @@ print_step "STEP 5: BUILDING RELEASE APK"
 ./gradlew assembleRelease
 
 # Install release APK
-print_step "STEP 6: INSTALLING RELEASE APK"
-./gradlew installRelease
+# print_step "STEP 6: INSTALLING RELEASE APK"
+# ./gradlew installRelease
 
 # Uncomment if you need to bundle AAB
 # print_step "STEP 7: BUNDLING RELEASE AAB"

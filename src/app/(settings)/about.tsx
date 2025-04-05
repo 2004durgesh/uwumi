@@ -27,7 +27,6 @@ const About = () => {
 
         <Separator />
 
-        {/* Version Information */}
         <Card elevation="$2" padding="$4" borderRadius="$4">
           <YStack gap="$3">
             <XStack gap="$2" alignItems="center">
