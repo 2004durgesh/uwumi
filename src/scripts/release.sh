@@ -2,6 +2,9 @@
 # Exit on error
 set -e
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Validate semantic version format
 validate_semver() {
     if [[ ! "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
@@ -13,7 +16,8 @@ validate_semver() {
 # Build Android APK
 build_android() {
     echo "Building Android APK..."
-    ./build-android.sh || { echo "Android build failed!"; exit 1; }
+     # Use the absolute path to the build script
+    bash "${SCRIPT_DIR}/build-android.sh" || { echo "Android build failed!"; exit 1; }
 }
 
 # Ensure the working directory is clean
