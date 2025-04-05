@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Chore
+
+- *(readme)* Add env.local and update readme (8dda059)
+
 ## v2.0.0 (2025-03-26)
 
 ### Chore

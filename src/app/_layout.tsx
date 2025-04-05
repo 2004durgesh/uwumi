@@ -1,7 +1,7 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { TamaguiProvider, Theme, Dialog, Unspaced, XStack, Text, YStack, Button, Separator } from 'tamagui';
 import { X, Download, ArrowUpCircle } from '@tamagui/lucide-icons';
@@ -16,12 +16,10 @@ import {
 } from '@expo-google-fonts/inter';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeStore, useAccentStore } from '@/hooks';
-import pkg from '../../package.json';
-import axios from 'axios';
-import { compareVersions } from '@/constants/utils';
 import * as WebBrowser from 'expo-web-browser';
 import * as Orientation from 'expo-screen-orientation';
 import { isTV } from '@/components/TVFocusWrapper';
+import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -121,46 +119,15 @@ const DownloadDialog = ({
 };
 
 export default function RootLayout() {
-  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
-  const [isUpdateChecked, setIsUpdateChecked] = useState(false);
-  const [updateInfo, setUpdateInfo] = useState({
-    currentVersion: pkg.version,
-    newVersion: '',
-    updateType: '',
-  });
+  const { isUpdateAvailable, isUpdateChecked, updateInfo, checkForUpdates, setIsUpdateAvailable } = useUpdateChecker();
 
   //when tv set orientation to landscape
   useEffect(() => {
     if (isTV) Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE);
   }, []);
+
   useEffect(() => {
-    const checkForUpdates = async () => {
-      try {
-        const { data } = await axios.get(`https://api.github.com/repos/2004durgesh/uwumi/releases`);
-        const localVersion = pkg.version;
-        const remoteVersion = data[0].tag_name.replace('v', '');
-
-        // Get update type
-        const updateType = compareVersions(localVersion, remoteVersion);
-
-        // Set update available if it's not "No update available"
-        const hasUpdate = !updateType.includes('No update');
-
-        setUpdateInfo({
-          currentVersion: localVersion,
-          newVersion: remoteVersion,
-          updateType,
-        });
-
-        setIsUpdateAvailable(hasUpdate);
-        setIsUpdateChecked(true);
-      } catch (error) {
-        console.log(error);
-        setIsUpdateChecked(true); // Still mark as checked even on error
-      }
-    };
-
-    checkForUpdates();
+    checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases`);
   }, []);
   const [loaded] = useFonts({
     InterMedium,

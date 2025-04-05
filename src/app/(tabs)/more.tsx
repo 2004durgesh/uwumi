@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { Text, YStack, XStack, Separator } from 'tamagui';
 import { Route, useRouter } from 'expo-router';
@@ -71,17 +71,16 @@ const More = () => {
   // Maintain refs to all menu items for programmatic focus management
   const itemRefs = useRef<(View | null)[]>([]);
 
-  // Create menu items array to manage indices
-  const menuItems = [
-    { href: '/(settings)/appearance' as Route, icon: Palette, label: 'Appearance' },
-    { href: '/(settings)' as Route, icon: Settings, label: 'Settings' },
-    { href: '/(settings)/favorites' as Route, icon: Heart, label: 'Favorites' },
-  ];
-
-  // Add About item in development mode
-  if (process.env.NODE_ENV === 'development') {
-    menuItems.push({ href: '/(settings)/about' as Route, icon: Info, label: 'About' });
-  }
+  // Create menu items array to manage indices with useMemo to prevent recreation on each render
+  const menuItems = useMemo(
+    () => [
+      { href: '/(settings)/appearance' as Route, icon: Palette, label: 'Appearance' },
+      { href: '/(settings)' as Route, icon: Settings, label: 'Settings' },
+      { href: '/(settings)/favorites' as Route, icon: Heart, label: 'Favorites' },
+      { href: '/(settings)/about' as Route, icon: Info, label: 'About' },
+    ],
+    [],
+  );
 
   const totalItems = menuItems.length;
 
