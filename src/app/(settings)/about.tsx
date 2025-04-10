@@ -10,7 +10,7 @@ const About = () => {
   const { checkForUpdates, updateInfo } = useUpdateChecker();
   useEffect(() => {
     checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases/latest`);
-  }, []);
+  }, [checkForUpdates]);
 
   const hasNewVersion = !updateInfo.isNewVersionPreRelease && updateInfo.newVersion !== updateInfo.currentVersion;
 

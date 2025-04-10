@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/hooks/stores/MMKV';
 
-type AccentName = string | null;
+export type AccentName = string | null;
 
 interface AccentState {
   accentName: AccentName;
