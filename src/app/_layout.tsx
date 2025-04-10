@@ -121,7 +121,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases`);
-  }, [checkForUpdates]);
+  }, []);
   const [loaded] = useFonts({
     InterMedium,
     InterSemiBold,

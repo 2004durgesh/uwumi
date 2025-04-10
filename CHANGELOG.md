@@ -1,5 +1,11 @@
 # Changelog
 
+## <small>2.2.1 (2025-04-10)</small>
+
+* chore: changes for new version ([4c50428](https://github.com/2004durgesh/uwumi/commit/4c50428))
+* refactor: remove tv-support from main branch ([47bf34d](https://github.com/2004durgesh/uwumi/commit/47bf34d))
+* fix(about, tabs): memoize heavy tasks in about and tabs layout ([3918647](https://github.com/2004durgesh/uwumi/commit/3918647))
+
 ## <small>2.1.1 (2025-04-05)</small>
 
 * fix(release): use absolute path for build script and improve script directory handling ([222bd83](https://github.com/2004durgesh/uwumi/commit/222bd83))
