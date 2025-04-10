@@ -1,7 +1,6 @@
 import { Tabs, YStack, Text, styled, AnimatePresence } from 'tamagui';
 import React, { useState } from 'react';
 import type { StackProps, TabLayout, TabsTabProps } from 'tamagui';
-import TVFocusWrapper, { isTV } from './TVFocusWrapper';
 
 interface TabItem {
   key: string;
@@ -86,10 +85,6 @@ const HorizontalTabs: React.FC<HorizontalTabsProps> = ({ items, initialTab }) =>
     }
   };
 
-  const handleTabSelect = (tabKey: string) => {
-    setTabState((prev) => ({ ...prev, currentTab: tabKey }));
-  };
-
   return (
     <Tabs
       value={tabState.currentTab}
@@ -119,29 +114,19 @@ const HorizontalTabs: React.FC<HorizontalTabsProps> = ({ items, initialTab }) =>
           borderBottomWidth="$0.5"
           backgroundColor="transparent">
           {items.map((item, index) => (
-            <TVFocusWrapper
+            <Tabs.Tab
               key={item.key}
-              isFocusable={isTV}
-              hasTVPreferredFocus={isTV && item.key === currentTab}
-              nextFocusDown={0} // Focus goes to content below
-              nextFocusRight={index < items.length - 1 ? undefined : 0} // Default behavior for last tab
-              nextFocusLeft={index > 0 ? undefined : 0} // Default behavior for first tab
-              onPress={() => handleTabSelect(item.key)}
-              style={{ flex: 1, height: 50 }}
-              borderWidth={1}>
-              <Tabs.Tab
-                flex={1}
-                height={50}
-                value={item.key}
-                style={{ backgroundColor: 'transparent' }}
-                onInteraction={handleOnInteraction}>
-                <Text
-                  fontWeight={currentTab === item.key ? '800' : '400'}
-                  color={currentTab === item.key ? '$color' : '$color1'}>
-                  {item.label}
-                </Text>
-              </Tabs.Tab>
-            </TVFocusWrapper>
+              flex={1}
+              height={50}
+              value={item.key}
+              style={{ backgroundColor: 'transparent' }}
+              onInteraction={handleOnInteraction}>
+              <Text
+                fontWeight={currentTab === item.key ? '800' : '400'}
+                color={currentTab === item.key ? '$color' : '$color1'}>
+                {item.label}
+              </Text>
+            </Tabs.Tab>
           ))}
         </Tabs.List>
       </YStack>

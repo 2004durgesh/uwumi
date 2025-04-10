@@ -7,7 +7,6 @@ import { useCurrentTheme, useTabsStore } from '@/hooks';
 import IconTitle from '@/components/IconTitle';
 import SearchBar from '@/components/SearchBar';
 import { MediaType } from '@/constants/types';
-import TVFocusWrapper, { isTV } from './TVFocusWrapper';
 
 interface MediaBrowserProps {
   mediaType: MediaType;
@@ -41,29 +40,19 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
           const bgColor = isActive ? currentTheme?.color4 : 'transparent';
 
           return (
-            <TVFocusWrapper
+            <Tabs.Tab
               key={id}
-              isFocusable={true}
-              hasTVPreferredFocus={isActive && isTV}
-              nextFocusDown={0}
-              nextFocusRight={index < TABS.length - 1 ? undefined : 0}
-              nextFocusLeft={index > 0 ? undefined : 0}
-              onPress={() => setCurrentTab(id)}
-              style={{ flex: 1, height: 35 }}>
-              <Tabs.Tab
-                key={id}
-                flex={1}
-                value={id}
-                height={35}
-                padding={0}
-                borderWidth={2}
-                borderColor={isActive ? '$color4' : '$color1'}
-                style={{
-                  backgroundColor: bgColor,
-                }}>
-                <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
-              </Tabs.Tab>
-            </TVFocusWrapper>
+              flex={1}
+              value={id}
+              height={35}
+              padding={0}
+              borderWidth={2}
+              borderColor={isActive ? '$color4' : '$color1'}
+              style={{
+                backgroundColor: bgColor,
+              }}>
+              <IconTitle icon={icon} text={text} iconProps={TabIconStyle} textProps={TabTextStyle} />
+            </Tabs.Tab>
           );
         })}
       </Tabs.List>

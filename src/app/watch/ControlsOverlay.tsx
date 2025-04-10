@@ -31,7 +31,6 @@ import { VideoTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs from '@/components/HorizontalTabs';
 import CustomSlider from './CustomSlider';
-import TVFocusWrapper, { isTV } from '@/components/TVFocusWrapper';
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -254,43 +253,21 @@ const ControlsOverlay = memo(
               </Text>
               <XStack gap="$4">
                 {(selectedSubtitleIndex ?? -1) > -1 ? (
-                  <TVFocusWrapper
-                    isFocusable={isTV}
-                    onPress={() => setSelectedSubtitleIndex(-1)}
-                    nextFocusRight={2} // Focus settings button
-                    nextFocusDown={4} // Focus play/pause button
-                    id="subtitle-button">
-                    <RippleButton onPress={() => setSelectedSubtitleIndex(-1)}>
-                      <Captions color="white" size={20} />
-                    </RippleButton>
-                  </TVFocusWrapper>
+                  <RippleButton onPress={() => setSelectedSubtitleIndex(-1)}>
+                    <Captions color="white" size={20} />
+                  </RippleButton>
                 ) : (
-                  <TVFocusWrapper
-                    isFocusable={isTV}
-                    onPress={() => setSelectedSubtitleIndex(0)}
-                    nextFocusRight={2} // Focus settings button
-                    nextFocusDown={4} // Focus play/pause button
-                    id="subtitle-button">
-                    <RippleButton onPress={() => setSelectedSubtitleIndex(0)}>
-                      <CaptionsOff color="white" size={20} />
-                    </RippleButton>
-                  </TVFocusWrapper>
+                  <RippleButton onPress={() => setSelectedSubtitleIndex(0)}>
+                    <CaptionsOff color="white" size={20} />
+                  </RippleButton>
                 )}
-                <TVFocusWrapper
-                  isFocusable={isTV}
+
+                <RippleButton
                   onPress={() => {
                     setOpenSettings(!openSettings);
-                  }}
-                  nextFocusLeft={1} // Focus subtitle button
-                  nextFocusDown={4} // Focus play/pause button
-                  id="settings-button">
-                  <RippleButton
-                    onPress={() => {
-                      setOpenSettings(!openSettings);
-                    }}>
-                    <Settings color="white" size={20} />
-                  </RippleButton>
-                </TVFocusWrapper>
+                  }}>
+                  <Settings color="white" size={20} />
+                </RippleButton>
                 <Sheet
                   forceRemoveScrollEnabled={false}
                   modal={true}
@@ -331,9 +308,7 @@ const ControlsOverlay = memo(
               top="50%"
               left="50%"
               transform="translate(-50%, -50%)">
-              <TVFocusWrapper
-                isFocusable={isTV && prevEpisodeIndex >= 0}
-                hasTVPreferredFocus={false}
+              <RippleButton
                 onPress={() => {
                   if (prevEpisodeIndex >= 0) {
                     router.push({
@@ -359,63 +334,21 @@ const ControlsOverlay = memo(
                       },
                     });
                   }
-                }}
-                nextFocusRight={4}
-                nextFocusUp={1}
-                id="prev-episode-button">
-                <RippleButton
-                  onPress={() => {
-                    if (prevEpisodeIndex >= 0) {
-                      router.push({
-                        pathname: '/watch/[mediaType]',
-                        params: {
-                          mediaType,
-                          provider,
-                          id,
-                          episodeId: episodes[prevEpisodeIndex].id,
-                          uniqueId: episodes[prevEpisodeIndex].uniqueId,
-                          ...(episodes[prevEpisodeIndex].dubId
-                            ? { episodeDubId: episodes[prevEpisodeIndex].dubId as string }
-                            : null),
-                          ...(episodes[prevEpisodeIndex].isDub
-                            ? { isDub: episodes[prevEpisodeIndex].isDub as string }
-                            : null),
-                          poster: episodes[prevEpisodeIndex].image ?? episodes[prevEpisodeIndex].img?.hd,
-                          title: episodes[prevEpisodeIndex].title,
-                          description: episodes[prevEpisodeIndex].description,
-                          episodeNumber: episodes[prevEpisodeIndex].number ?? episodes[prevEpisodeIndex].episode,
-                          seasonNumber: episodes[prevEpisodeIndex].season,
-                          type: routeInfo.type,
-                        },
-                      });
-                    }
-                  }}>
-                  <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-                </RippleButton>
-              </TVFocusWrapper>
+                }}>
+                <SkipBack color={prevEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
+              </RippleButton>
               {isBuffering ? (
                 <Spinner scale={2} size="large" color="white" />
               ) : (
-                <TVFocusWrapper
-                  isFocusable={isTV}
-                  hasTVPreferredFocus={isTV}
+                <RippleButton
                   onPress={() => {
                     onPlayPress();
-                  }}
-                  nextFocusLeft={3}
-                  nextFocusRight={5}
-                  nextFocusUp={2}
-                  id="play-pause-button">
-                  <RippleButton
-                    onPress={() => {
-                      onPlayPress();
-                    }}>
-                    {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
-                  </RippleButton>
-                </TVFocusWrapper>
+                  }}>
+                  {isPlaying ? <Pause color="white" size={40} /> : <Play color="white" size={40} />}
+                </RippleButton>
               )}
-              <TVFocusWrapper
-                isFocusable={isTV && nextEpisodeIndex >= 0}
+
+              <RippleButton
                 onPress={() => {
                   if (nextEpisodeIndex >= 0) {
                     router.push({
@@ -441,40 +374,9 @@ const ControlsOverlay = memo(
                       },
                     });
                   }
-                }}
-                nextFocusLeft={4}
-                nextFocusUp={2}
-                id="next-episode-button">
-                <RippleButton
-                  onPress={() => {
-                    if (nextEpisodeIndex >= 0) {
-                      router.push({
-                        pathname: '/watch/[mediaType]',
-                        params: {
-                          mediaType,
-                          provider,
-                          id,
-                          episodeId: episodes[nextEpisodeIndex].id,
-                          uniqueId: episodes[nextEpisodeIndex].uniqueId,
-                          ...(episodes[nextEpisodeIndex].dubId
-                            ? { episodeDubId: episodes[nextEpisodeIndex].dubId as string }
-                            : null),
-                          ...(episodes[nextEpisodeIndex].isDub
-                            ? { isDub: episodes[nextEpisodeIndex].isDub as string }
-                            : null),
-                          poster: episodes[nextEpisodeIndex].image ?? episodes[nextEpisodeIndex].img?.hd,
-                          title: episodes[nextEpisodeIndex].title,
-                          description: episodes[nextEpisodeIndex].description,
-                          episodeNumber: episodes[nextEpisodeIndex].number ?? episodes[nextEpisodeIndex].episode,
-                          seasonNumber: episodes[nextEpisodeIndex].season,
-                          type: routeInfo.type,
-                        },
-                      });
-                    }
-                  }}>
-                  <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
-                </RippleButton>
-              </TVFocusWrapper>
+                }}>
+                <SkipForward color={nextEpisodeIndex >= 0 ? 'white' : 'gray'} size={30} />
+              </RippleButton>
             </AnimatedXStack>
           ) : null}
 
@@ -487,46 +389,24 @@ const ControlsOverlay = memo(
               paddingHorizontal={isFullscreen ? '$4' : '$2'}
               gap="$2">
               <XStack gap="$2" alignItems="center" justifyContent="space-between" width="100%">
-                <TVFocusWrapper
-                  isFocusable={isTV}
-                  onPress={onMutePress}
-                  nextFocusRight={7}
-                  nextFocusUp={4}
-                  id="mute-button">
-                  <RippleButton onPress={onMutePress}>
-                    {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
-                  </RippleButton>
-                </TVFocusWrapper>
+                <RippleButton onPress={onMutePress}>
+                  {isMuted ? <VolumeOff color="white" size={20} /> : <Volume2 color="white" size={20} />}
+                </RippleButton>
                 <XStack gap="$2" marginLeft="auto" alignItems="center">
-                  <TVFocusWrapper
-                    isFocusable={isTV}
+                  <Button
                     onPress={() => onSeek(Math.round(currentTime) + 85)}
-                    nextFocusLeft={6}
-                    nextFocusRight={8}
-                    nextFocusUp={4}
-                    id="skip-button">
-                    <Button
-                      onPress={() => onSeek(Math.round(currentTime) + 85)}
-                      backgroundColor="$color"
-                      color="$color4"
-                      borderRadius="$10"
-                      height="$3"
-                      paddingHorizontal="$3"
-                      fontWeight={500}
-                      fontSize={13}>
-                      +85 s
-                    </Button>
-                  </TVFocusWrapper>
-                  <TVFocusWrapper
-                    isFocusable={isTV}
-                    onPress={onFullscreenPress}
-                    nextFocusLeft={7}
-                    nextFocusUp={4}
-                    id="fullscreen-button">
-                    <RippleButton onPress={onFullscreenPress}>
-                      {isFullscreen ? <Minimize color="white" size={20} /> : <Maximize color="white" size={20} />}
-                    </RippleButton>
-                  </TVFocusWrapper>
+                    backgroundColor="$color"
+                    color="$color4"
+                    borderRadius="$10"
+                    height="$3"
+                    paddingHorizontal="$3"
+                    fontWeight={500}
+                    fontSize={13}>
+                    +85 s
+                  </Button>
+                  <RippleButton onPress={onFullscreenPress}>
+                    {isFullscreen ? <Minimize color="white" size={20} /> : <Maximize color="white" size={20} />}
+                  </RippleButton>
                 </XStack>
               </XStack>
               <XStack width="100%" alignItems="center" gap="$4" justifyContent="space-between">

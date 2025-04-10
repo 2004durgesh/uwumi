@@ -18,7 +18,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeStore, useAccentStore } from '@/hooks';
 import * as WebBrowser from 'expo-web-browser';
 import * as Orientation from 'expo-screen-orientation';
-import { isTV } from '@/components/TVFocusWrapper';
 import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -120,11 +119,6 @@ const DownloadDialog = ({
 
 export default function RootLayout() {
   const { isUpdateAvailable, isUpdateChecked, updateInfo, checkForUpdates, setIsUpdateAvailable } = useUpdateChecker();
-
-  //when tv set orientation to landscape
-  useEffect(() => {
-    if (isTV) Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE);
-  }, []);
 
   useEffect(() => {
     checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases`);

@@ -3,7 +3,6 @@ import { X } from '@tamagui/lucide-icons';
 import React, { useCallback, useRef } from 'react';
 import { TextInput } from 'react-native';
 import { Button, View, XStack } from 'tamagui';
-import TVFocusWrapper, { isTV } from './TVFocusWrapper';
 
 const SearchBar: React.FC = () => {
   const searchQuery = useSearchStore((state) => state.searchQuery);
@@ -32,13 +31,6 @@ const SearchBar: React.FC = () => {
     setCurrentTab('tab3');
   }, [searchQuery]);
 
-  const handleTVInputFocus = useCallback(() => {
-    if (isTV && inputRef.current) {
-      inputRef.current.focus();
-      console.log('Focused input');
-    }
-  }, []);
-
   return (
     <View width="100%">
       <XStack
@@ -49,36 +41,25 @@ const SearchBar: React.FC = () => {
         marginTop="$4"
         marginHorizontal="$4"
         alignItems="center">
-        <TVFocusWrapper
-          isFocusable={true}
-          hasTVPreferredFocus={isTV}
-          onPress={handleTVInputFocus}
-          onFocus={handleTVInputFocus}
-          style={{ flex: 1, height: 50 }}>
-          <TextInput
-            ref={inputRef}
-            onChangeText={handleTextChange}
-            value={searchQuery}
-            keyboardType="web-search"
-            returnKeyType="search"
-            onSubmitEditing={handleSearch}
-            placeholderTextColor={currentTheme?.color1}
-            placeholder="Search..."
-            style={{
-              color: currentTheme?.color1,
-              padding: 10,
-              flex: 1,
-              fontWeight: 700,
-              // height:50
-            }}
-            focusable
-          />
-        </TVFocusWrapper>
-        {searchQuery && (
-          <TVFocusWrapper isFocusable={true} onPress={handleClear}>
-            <Button icon={X} circular onPress={handleClear} />
-          </TVFocusWrapper>
-        )}
+        <TextInput
+          ref={inputRef}
+          onChangeText={handleTextChange}
+          value={searchQuery}
+          keyboardType="web-search"
+          returnKeyType="search"
+          onSubmitEditing={handleSearch}
+          placeholderTextColor={currentTheme?.color1}
+          placeholder="Search..."
+          style={{
+            color: currentTheme?.color1,
+            padding: 10,
+            flex: 1,
+            fontWeight: 700,
+            // height:50
+          }}
+          focusable
+        />
+        {searchQuery && <Button icon={X} circular onPress={handleClear} />}
       </XStack>
     </View>
   );

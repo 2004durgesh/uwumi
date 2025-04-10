@@ -2,7 +2,6 @@ import { View, Theme, ViewProps } from 'tamagui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeStore, useAccentStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { StatusBar, StatusBarProps } from 'expo-status-bar';
-import { getTVSafeInsets, isTV } from './TVFocusWrapper';
 
 export type ThemedViewProps = {
   children?: React.ReactNode;
@@ -22,17 +21,9 @@ export function ThemedView({
   const accentName = useAccentStore((state) => state.accentName);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
-  const tvSafeInsets = isTV ? getTVSafeInsets() : undefined;
-  const additionalStyle = tvSafeInsets
-    ? {
-        paddingLeft: tvSafeInsets.left,
-        paddingRight: tvSafeInsets.right,
-        paddingTop: tvSafeInsets.top,
-        paddingBottom: tvSafeInsets.bottom,
-      }
-    : {};
+
   const content = (
-    <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} style={additionalStyle} {...props}>
+    <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} {...props}>
       {children}
     </View>
   );

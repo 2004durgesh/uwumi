@@ -19,7 +19,6 @@ import Chapters from './Chapters';
 import Details from './Details';
 import Similar from './Similar';
 import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
-import TVFocusWrapper, { isTV } from '@/components/TVFocusWrapper';
 import RippleButton from '@/components/RippleButton';
 import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
 
@@ -99,39 +98,19 @@ const Info = () => {
           </View>
           <View padding={10} marginTop={insets.top + 10}>
             <XStack alignItems="center" justifyContent="space-between" marginBlockEnd={20}>
-              <TVFocusWrapper isFocusable={true} hasTVPreferredFocus={isTV} onPress={() => router.back()}>
-                <RippleButton onPress={() => router.back()}>
-                  <ArrowLeft />
-                </RippleButton>
-              </TVFocusWrapper>
+              <RippleButton onPress={() => router.back()}>
+                <ArrowLeft />
+              </RippleButton>
 
-              <TVFocusWrapper
-                isFocusable={true}
-                onPress={() => {
-                  if (isFavorited) {
-                    removeFavorite(id);
-                  } else {
-                    addFavorite({
-                      id,
-                      title: data?.title!,
-                      image: image || data?.image!,
-                      type,
-                      mediaType,
-                      provider,
-                      metaProvider,
-                    });
-                  }
-                }}>
-                <AnimatedFavoriteButton
-                  id={id}
-                  title={data?.title!}
-                  image={image || data?.image!}
-                  type={type}
-                  mediaType={mediaType}
-                  provider={provider}
-                  metaProvider={metaProvider}
-                />
-              </TVFocusWrapper>
+              <AnimatedFavoriteButton
+                id={id}
+                title={data?.title!}
+                image={image || data?.image!}
+                type={type}
+                mediaType={mediaType}
+                provider={provider}
+                metaProvider={metaProvider}
+              />
             </XStack>
 
             <XStack gap={10} alignItems="center">

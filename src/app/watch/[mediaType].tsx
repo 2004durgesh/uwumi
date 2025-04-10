@@ -38,7 +38,6 @@ import axios from 'axios';
 import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import { Check } from '@tamagui/lucide-icons';
 import FullscreenModule from '../../../modules/fullscreen-module';
-import { isTV } from '@/components/TVFocusWrapper';
 
 export interface SubtitleTrack {
   index: number;
@@ -110,7 +109,7 @@ const Watch = () => {
   const { setProgress, getProgress } = useWatchProgressStore();
   const { setProvider, getProvider } = useProviderStore();
   const { setServers, setCurrentServer, currentServer } = useServerStore();
-  const [isEmbed, setIsEmbed] = useState<boolean>(true);
+  const [isEmbed, setIsEmbed] = useState<boolean>(false);
   const [serverInitialized, setServerInitialized] = useState(false);
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
@@ -200,13 +199,11 @@ const Watch = () => {
       subscription?.remove();
       const cleanup = async () => {
         StatusBar.setHidden(false);
-        if (!isTV) {
-          SystemNavigationBar.setNavigationColor(
-            pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
-          );
-          SystemNavigationBar.navigationShow();
-          await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-        }
+        SystemNavigationBar.setNavigationColor(
+          pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
+        );
+        SystemNavigationBar.navigationShow();
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
         await FullscreenModule.exitFullscreen();
       };
       cleanup();
@@ -218,10 +215,8 @@ const Watch = () => {
       StatusBar.setHidden(true);
       await FullscreenModule.enterFullscreen();
 
-      if (!isTV) {
-        SystemNavigationBar.stickyImmersive();
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-      }
+      SystemNavigationBar.stickyImmersive();
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
 
       setIsFullscreen(true);
     } catch (error) {
@@ -232,13 +227,11 @@ const Watch = () => {
   const exitFullscreen = async () => {
     try {
       StatusBar.setHidden(false);
-      if (!isTV) {
-        SystemNavigationBar.setNavigationColor(
-          pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
-        );
-        SystemNavigationBar.navigationShow();
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-      }
+      SystemNavigationBar.setNavigationColor(
+        pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black',
+      );
+      SystemNavigationBar.navigationShow();
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
       await FullscreenModule.exitFullscreen();
       setIsFullscreen(false);
     } catch (error) {
@@ -596,7 +589,7 @@ const Watch = () => {
             </OverlayedView>
           </View>
         </GestureDetector>
-        {!isFullscreen && !isTV && (
+        {!isFullscreen && (
           <YStack flex={1} gap="$2">
             {/* {description && (
             <>
