@@ -1,7 +1,7 @@
 {
   "name": "uwumi",
   "main": "expo-router/entry",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "scripts": {
     "start": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo start --localhost",
     "android:reverse": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo run:android",
@@ -93,7 +93,7 @@
     "moti": "^0.29.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "npm:react-native-tvos@^0.77.1-0",
+    "react-native": "^0.77.1",
     "react-native-awesome-slider": "^2.9.0",
     "react-native-gesture-handler": "^2.22.1",
     "react-native-material-ripple": "^0.9.1",

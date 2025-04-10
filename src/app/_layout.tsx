@@ -17,7 +17,6 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeStore, useAccentStore } from '@/hooks';
 import * as WebBrowser from 'expo-web-browser';
-import * as Orientation from 'expo-screen-orientation';
 import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -122,7 +121,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases`);
-  }, []);
+  }, [checkForUpdates]);
   const [loaded] = useFonts({
     InterMedium,
     InterSemiBold,

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { BookImage, Ellipsis, TvMinimalPlay } from '@tamagui/lucide-icons';
 import { View } from 'tamagui';
 import { useThemeStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
@@ -35,7 +35,6 @@ export default function TabLayout() {
     },
     [currentTheme?.color4],
   );
-
 
   return (
     <Tabs
