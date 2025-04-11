@@ -1,7 +1,8 @@
-import React, { memo } from 'react';
-import { Check, ChevronDown } from '@tamagui/lucide-icons';
+import React, { memo, useState } from 'react';
+import { Check, ChevronDown, X } from '@tamagui/lucide-icons';
 import { Adapt, Select, Sheet } from 'tamagui';
 import { usePureBlackBackground } from '@/hooks';
+import RippleButton from './RippleButton';
 
 type SelectOption = {
   name: string;
@@ -21,14 +22,28 @@ const CustomSelect = ({
 }) => {
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const bgColor = pureBlackBackground ? '$color3' : 'black';
+  const [openSelect, setOpenSelect] = useState(false);
+
+  const handleValueChange = (newValue: string) => {
+    onValueChange(newValue);
+    setOpenSelect(false);
+  };
+
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select open={openSelect} value={value} onValueChange={handleValueChange} onOpenChange={setOpenSelect}>
       <Select.Trigger backgroundColor={bgColor} width={150} iconAfter={ChevronDown}>
         <Select.Value width={90}>{SelectItem.find((opt) => opt.value === value)?.name || SelectLabel}</Select.Value>
       </Select.Trigger>
 
       <Adapt platform="touch">
-        <Sheet snapPoints={[30]} modal dismissOnSnapToBottom animation="quick">
+        <Sheet
+          modal
+          open={openSelect}
+          onOpenChange={setOpenSelect}
+          snapPoints={[30]}
+          dismissOnSnapToBottom
+          animation="quick">
+          <Sheet.Overlay backgroundColor="transparent" />
           <Sheet.Frame backgroundColor={bgColor}>
             <Sheet.ScrollView showsVerticalScrollIndicator>
               <Adapt.Contents />
@@ -45,7 +60,13 @@ const CustomSelect = ({
           exitStyle={{ x: 0, y: 10 }}
           minWidth={200}>
           <Select.Group>
-            <Select.Label backgroundColor={bgColor}>{SelectLabel}</Select.Label>
+            <Select.Label backgroundColor={bgColor} width={'100%'}>
+              {SelectLabel}{' '}
+              <RippleButton onPress={() => setOpenSelect(false)}>
+                <X />
+              </RippleButton>
+            </Select.Label>
+
             {SelectItem.map((item, index) => (
               <Select.Item backgroundColor={bgColor} key={item.value} index={index} value={item.value}>
                 <Select.ItemText>{item.name}</Select.ItemText>

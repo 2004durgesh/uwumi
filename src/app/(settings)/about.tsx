@@ -26,6 +26,26 @@ const About = () => {
         </YStack>
 
         <Separator />
+        {process.env.NODE_ENV && (
+          <Card
+            elevation="$1"
+            padding="$2"
+            borderRadius="$4"
+            backgroundColor="$background"
+            marginVertical="$2"
+            width="$25"
+            alignSelf="center">
+            <XStack gap="$2" alignItems="center" justifyContent="center">
+              <AlertCircle size={16} />
+              <Text fontSize="$3" fontWeight="500">
+                Environment:{' '}
+                <Text fontWeight="600" textTransform="capitalize">
+                  {process.env.NODE_ENV}
+                </Text>
+              </Text>
+            </XStack>
+          </Card>
+        )}
 
         <Card elevation="$2" padding="$4" borderRadius="$4">
           <YStack gap="$3">

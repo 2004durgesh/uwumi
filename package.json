@@ -104,6 +104,7 @@
     "react-dom": "18.3.1",
     "react-native": "^0.77.1",
     "react-native-awesome-slider": "^2.9.0",
+    "react-native-consumet": "^0.2.2",
     "react-native-gesture-handler": "^2.22.1",
     "react-native-material-ripple": "^0.9.1",
     "react-native-mmkv": "^3.1.0",
