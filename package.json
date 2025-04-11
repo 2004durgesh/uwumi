@@ -14,7 +14,9 @@
     "generate-themes": "tamagui generate-themes ./src/constants/Theme.ts ./src/constants/theme-out.ts",
     "prepare": "husky install",
     "changelog": "git fetch --tags && npx git-cliff --config cliff.toml --output CHANGELOG.md --sort newest",
-    "release": "release-it"
+    "release": "release-it",
+    "sync-versions": "node ./src/scripts/sync-versions.js",
+    "build-android": "bash src/scripts/build-android.sh"
   },
   "expo": {
     "install": {
@@ -38,6 +40,13 @@
     "git": {
       "commitMessage": "chore: release ${version}",
       "tagName": "v${version}"
+    },
+    "hooks": {
+      "after:bump": [
+        "npm run sync-versions",
+        "npm run build-android"
+      ],
+      "after:release": "echo Successfully released v${version}"
     },
     "github": {
       "release": true

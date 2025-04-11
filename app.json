@@ -1,88 +1,90 @@
-  {
-    "expo": {
-      "name": "uwumi",
-      "slug": "uwumi",
-      "version": "1.0.0",
-      "orientation": "portrait",
-      "icon": "./assets/images/icon.png",
-      "scheme": "myapp",
-      "userInterfaceStyle": "automatic",
-      "newArchEnabled": true,
-      "ios": {
-        "supportsTablet": true,
-        "requireFullScreen": true
+{
+  "expo": {
+    "name": "uwumi",
+    "slug": "uwumi",
+    "version": "2.2.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "requireFullScreen": true,
+      "buildNumber": "5"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#000000"
       },
-      "android": {
-        "adaptiveIcon": {
-          "foregroundImage": "./assets/images/icon.png",
+      "package": "com.x2004durgesh.uwumi",
+      "versionCode": 5
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
           "backgroundColor": "#000000"
-        },
-        "package": "com.x2004durgesh.uwumi"
-      },
-      "web": {
-        "bundler": "metro",
-        "output": "static",
-        "favicon": "./assets/images/favicon.png"
-      },
-      "plugins": [
-        "expo-router",
-        [
-          "expo-splash-screen",
-          {
-            "image": "./assets/images/icon.png",
-            "imageWidth": 200,
-            "resizeMode": "contain",
-            "backgroundColor": "#000000"
-          }
-        ],
-        "expo-font",
-        [
-          "expo-build-properties",
-          {
-            "android": {
-              "compileSdkVersion": 35,
-              "targetSdkVersion": 34,
-              "buildToolsVersion": "34.0.0"
-            },
-            "ios": {
-              "useFrameworks": "static",
-              "deploymentTarget": "15.2"
-            }
-          }
-        ],
-        [
-          "expo-screen-orientation",
-          {
-            "initialOrientation": "DEFAULT"
-          }
-        ],
-        [
-          "react-native-video",
-          {
-            "enableAndroidPictureInPicture": true,
-            "enableNotificationControls": false,
-            "androidExtensions": {
-              "useExoplayerRtsp": false,
-              "useExoplayerSmoothStreaming": true,
-              "useExoplayerHls": true,
-              "useExoplayerDash": false
-            }
-          }
-        ],
-        [
-          "@react-native-tvos/config-tv",
-          {
-            "isTV": true,
-            "showVerboseWarnings": false,
-            "tvosDeploymentTarget": "15.1",
-            "removeFlipperOnAndroid": false,
-            "androidTVBanner": "./assets/images/tv_banner.png",
-            "androidTVIcon": "./assets/images/tv_icon.png"
-          }
-        ]
+        }
       ],
-      "experiments": {
-        "typedRoutes": true
-      }
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "useFrameworks": "static",
+            "deploymentTarget": "15.2"
+          }
+        }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
+        }
+      ],
+      [
+        "react-native-video",
+        {
+          "enableAndroidPictureInPicture": true,
+          "enableNotificationControls": false,
+          "androidExtensions": {
+            "useExoplayerRtsp": false,
+            "useExoplayerSmoothStreaming": true,
+            "useExoplayerHls": true,
+            "useExoplayerDash": false
+          }
+        }
+      ],
+      [
+        "@react-native-tvos/config-tv",
+        {
+          "isTV": true,
+          "showVerboseWarnings": false,
+          "tvosDeploymentTarget": "15.1",
+          "removeFlipperOnAndroid": false,
+          "androidTVBanner": "./assets/images/tv_banner.png",
+          "androidTVIcon": "./assets/images/tv_icon.png"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
+}
