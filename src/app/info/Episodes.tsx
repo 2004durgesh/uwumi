@@ -1,14 +1,16 @@
 import EpisodeList from '@/components/EpisodeList';
-import { MediaFormat, MediaType, TvType } from '@/constants/types';
+import { MediaType } from '@/constants/types';
 import { useLocalSearchParams } from 'expo-router';
+import { MediaFormat, TvType } from 'react-native-consumet';
 import { View } from 'tamagui';
 
 const Episodes = () => {
-  const { mediaType, provider, id, type } = useLocalSearchParams<{
+  const { mediaType, provider, id, type, mediaId } = useLocalSearchParams<{
     mediaType: MediaType;
     provider: string;
     type?: MediaFormat | TvType;
     id: string;
+    mediaId: string;
   }>();
   return (
     <View height="100%">

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/hooks/stores/MMKV';
 import { MediaType } from '@/constants/types';
+import { ANIME, MOVIES } from 'react-native-consumet';
 
 interface Provider {
   name: string;
@@ -20,10 +21,10 @@ interface ProviderGroups {
 // Define all providers in one place
 const PROVIDERS: ProviderGroups = {
   [MediaType.ANIME]: [
-    // { name: 'Gogoanime', value: 'gogo', sub: true, dub: true },
+    // { name: 'Gogoanime', value: 'gogo', subbed: true, dubbed: true },
     { name: 'Zoro', value: 'zoro', subbed: true, dubbed: true },
     { name: 'AnimeKai', value: 'animekai', subbed: true, dubbed: true },
-    // { name: 'AnimePahe', value: 'animepahe', sub: true, dub: true },
+    { name: 'AnimePahe', value: 'animepahe', subbed: true, dubbed: true },
   ],
   [MediaType.MANGA]: [
     { name: 'Mangadex', value: 'mangadex' },
@@ -38,9 +39,9 @@ const PROVIDERS: ProviderGroups = {
 
 // Default providers for each media type
 const DEFAULT_PROVIDERS = {
-  [MediaType.ANIME]: 'zoro',
+  [MediaType.ANIME]: 'animepahe',
   [MediaType.MANGA]: 'mangadex',
-  [MediaType.MOVIE]: 'rive',
+  [MediaType.MOVIE]: 'multimovies',
 };
 
 // Meta providers (if needed)
@@ -48,6 +49,45 @@ const META_PROVIDERS = {
   [MediaType.ANIME]: 'anilist',
   [MediaType.MANGA]: 'anilist-manga',
   [MediaType.MOVIE]: 'tmdb',
+};
+
+export const createProviderInstance = (mediaType: MediaType, providerValue: string) => {
+  // Anime provider mapping
+  if (mediaType === MediaType.ANIME) {
+    const animeProviders: Record<string, () => any> = {
+      zoro: () => new ANIME.Zoro(),
+      animekai: () => new ANIME.AnimeKai(),
+      animepahe: () => new ANIME.AnimePahe(),
+      // Add new providers here in the future
+    };
+
+    const providerFunc = animeProviders[providerValue] || animeProviders[DEFAULT_PROVIDERS.anime];
+
+    if (!providerFunc) {
+      throw new Error(`Unsupported anime provider: ${providerValue}`);
+    }
+
+    return providerFunc();
+  }
+
+  // Movie provider mapping
+  if (mediaType === MediaType.MOVIE) {
+    const movieProviders: Record<string, () => any> = {
+      // rive: () => new MOVIES.Rive(),
+      multimovies: () => new MOVIES.MultiMovies(),
+      // Add new providers here in the future
+    };
+
+    const providerFunc = movieProviders[providerValue] || movieProviders[DEFAULT_PROVIDERS.movie];
+
+    if (!providerFunc) {
+      throw new Error(`Unsupported movie provider: ${providerValue}`);
+    }
+
+    return providerFunc();
+  }
+
+  throw new Error(`Unsupported media type: ${mediaType}`);
 };
 
 interface ProviderState {

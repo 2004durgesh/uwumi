@@ -29,11 +29,12 @@ import {
   useSeasonStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
-import { Episode, EpisodeDisplayMode, IMovieEpisode, MediaFormat, MediaType, TvType } from '@/constants/types';
+import { EpisodeDisplayMode, IMovieSeason, MediaType } from '@/constants/types';
+import { IAnimeEpisode, IMovieEpisode, MediaFormat, TvType } from 'react-native-consumet';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';
-import { useProviderStore } from '@/constants/provider';
+import { PROVIDERS, useProviderStore } from '@/constants/provider';
 
 const LoadingState = () => (
   <YStack justifyContent="center" alignItems="center" minHeight={300}>
@@ -44,12 +45,14 @@ const LoadingState = () => (
 const StyledText = styled(Text, { fontWeight: '500', color: '$color1', fontSize: '$2.5', opacity: 0.7 });
 
 const EpisodeList = ({
+  // episodes,
   mediaType,
   provider,
   id,
   type,
   swipeable = false,
 }: {
+  // episodes?: IAnimeEpisode[] | IMovieEpisode[] | undefined;
   mediaType: MediaType;
   provider: string;
   id: string;
@@ -59,7 +62,7 @@ const EpisodeList = ({
   const swipeableRefs = useRef<Map<string, SwipeableMethods>>(new Map());
   const router = useRouter();
   const currentTheme = useCurrentTheme();
-  const flashListRef = useRef<FlashList<Episode | IMovieEpisode>>(null);
+  const flashListRef = useRef<FlashList<IAnimeEpisode | IMovieEpisode>>(null);
   const hasScrolledRef = useRef(false);
   const { setProvider, getProvider } = useProviderStore();
   useEffect(() => {
@@ -73,9 +76,10 @@ const EpisodeList = ({
           type: type!,
           provider: getProvider(mediaType) === 'rive' ? '' : getProvider(mediaType),
         });
+  // console.log('episodeData', episodeData);
 
   const { seasonNumber, setSeasonNumber, resetSeasonNumber } = useSeasonStore();
-  const movieSeasons = episodeData?.seasons;
+  const movieSeasons = episodeData?.seasons as IMovieSeason[];
   // console.log('movieSeasons', movieSeasons);
   const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
   const episodes = useMemo(() => {
@@ -118,8 +122,9 @@ const EpisodeList = ({
       resetSeasonNumber();
     }
   }, [episodeData, movieSeasons, seasonNumber, resetSeasonNumber]);
-
-  const currentEpisode = episodes.find((episode: Episode | IMovieEpisode) => episode.id === currentUniqueId);
+  // console.log('episodes', episodes);
+  const currentEpisode = episodes.find((episode: IAnimeEpisode | IMovieEpisode) => episode.id === currentUniqueId);
+  // console.log('currentUniqueId', currentUniqueId, currentEpisode);
 
   useEffect(() => {
     return () => {
@@ -188,12 +193,12 @@ const EpisodeList = ({
   };
 
   const renderEpisodeProgress = useMemo(
-    () => (item: Episode | IMovieEpisode) => {
+    () => (item: IAnimeEpisode | IMovieEpisode) => {
       if (currentUniqueId === item?.uniqueId) {
         return <WavyAnimation />;
       }
 
-      const progress = progresses[item?.uniqueId];
+      const progress = progresses[item?.uniqueId as string];
       // console.log('progress', progress);
       if (progress?.currentTime && progress?.progress < 90) {
         return (
@@ -212,12 +217,6 @@ const EpisodeList = ({
     [currentUniqueId, progresses],
   );
 
-  // Define focus control IDs at component level
-  const seasonSelectId = 1;
-  const serverSelectId = 2;
-  const displayModeToggleId = swipeable ? 3 : undefined;
-  const episodeStartId = swipeable ? 4 : 3;
-
   const ListPressable = memo(
     ({
       item,
@@ -225,7 +224,7 @@ const EpisodeList = ({
       index,
       totalEpisodes,
     }: {
-      item: Episode | IMovieEpisode;
+      item: IAnimeEpisode | IMovieEpisode;
       children: React.ReactNode;
       index: number;
       totalEpisodes: number;
@@ -237,15 +236,16 @@ const EpisodeList = ({
             mediaType,
             provider: getProvider(mediaType),
             id,
+            mediaId: item?.id,
             episodeId: item?.id,
             ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
-            ...(item?.isDub ? { isDub: item.isDub as string } : null),
-            uniqueId: item?.uniqueId,
-            poster: item?.image ?? item?.img?.hd ?? '',
+            ...(item?.isDubbed ? { isDubbed: item.isDubbed as string } : null),
+            uniqueId: item?.uniqueId as string,
+            poster: typeof item?.image === 'string' ? item.image : (item?.image?.hd ?? ''),
             title: item?.title,
             description: item?.description,
-            episodeNumber: item?.number ?? item?.episode,
-            seasonNumber: item?.season,
+            episodeNumber: (item?.number ?? item?.episode) as string,
+            seasonNumber: item?.season as string,
             type,
           },
         });
@@ -269,11 +269,11 @@ const EpisodeList = ({
   );
 
   const ProgressAndAirDate = useCallback(
-    ({ item }: { item: Episode | IMovieEpisode }) => {
+    ({ item }: { item: IAnimeEpisode | IMovieEpisode }) => {
       return (
         <XStack justifyContent="space-between" alignItems="center">
           <View>{renderEpisodeProgress(item)}</View>
-          <StyledText>{new Date(item?.airDate ?? item?.releaseDate ?? '').toDateString()}</StyledText>
+          <StyledText>{new Date(item?.releaseDate ?? '').toDateString()}</StyledText>
         </XStack>
       );
     },
@@ -281,12 +281,15 @@ const EpisodeList = ({
   );
 
   const renderFullMetadataPressableItem = useCallback(
-    ({ item }: { item: Episode | IMovieEpisode }) => {
+    ({ item }: { item: IAnimeEpisode | IMovieEpisode }) => {
       return (
         <>
           <View position="relative" overflow="hidden" borderRadius={4}>
             {/* 10 - 4 (of gap) = 6 */}
-            <CustomImage source={item?.image || item?.img?.mobile} style={{ width: 160, height: 107 }} />
+            <CustomImage
+              source={typeof item?.image === 'string' ? item.image : (item?.image?.hd ?? '')}
+              style={{ width: 160, height: 107 }}
+            />
             <View
               position="absolute"
               bottom="$2.5"
@@ -300,14 +303,14 @@ const EpisodeList = ({
                 EP {item.number ?? item.episode}
               </Text>
             </View>
-            {progresses[item?.uniqueId] && swipeable && (
+            {progresses[item?.uniqueId as string] && swipeable && (
               <View position="absolute" bottom="$0" left="50%" transform={[{ translateX: '-50%' }]}>
                 <Progress
                   size={'$2'}
                   scaleX={1.15}
                   borderRadius={0}
                   backgroundColor="$color1"
-                  value={Math.round(progresses[item?.uniqueId]?.progress) || 0}
+                  value={Math.round(progresses[item?.uniqueId as string]?.progress) || 0}
                   max={100}>
                   <Progress.Indicator animation="bouncy" backgroundColor="$color4" />
                 </Progress>
@@ -322,7 +325,7 @@ const EpisodeList = ({
                 </Text>
                 <XStack gap={2}>
                   <Captions size={20} color="$color1" opacity={0.7} />
-                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                  {item?.isDubbed && <Mic size={20} color="$color1" opacity={0.7} />}
                 </XStack>
               </XStack>
               <StyledText numberOfLines={4}>{item?.description}</StyledText>
@@ -336,7 +339,7 @@ const EpisodeList = ({
   );
 
   const renderTitleOnlyPressableItem = useCallback(
-    ({ item }: { item: Episode | IMovieEpisode }) => {
+    ({ item }: { item: IAnimeEpisode | IMovieEpisode }) => {
       return (
         <>
           <YStack padding={2} flex={1} justifyContent="space-between">
@@ -347,7 +350,7 @@ const EpisodeList = ({
                 </Text>
                 <XStack gap={2}>
                   <Captions size={20} color="$color1" opacity={0.7} />
-                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                  {item?.isDubbed && <Mic size={20} color="$color1" opacity={0.7} />}
                 </XStack>
               </XStack>
             </YStack>
@@ -360,7 +363,7 @@ const EpisodeList = ({
   );
 
   const renderNumberOnlyPressableItem = useCallback(
-    ({ item }: { item: Episode | IMovieEpisode }) => {
+    ({ item }: { item: IAnimeEpisode | IMovieEpisode }) => {
       return (
         <>
           <YStack padding={2} flex={1} justifyContent="space-between">
@@ -371,7 +374,7 @@ const EpisodeList = ({
                 </Text>
                 <XStack gap={2}>
                   <Captions size={20} color="$color1" opacity={0.7} />
-                  {item?.isDub && <Mic size={20} color="$color1" opacity={0.7} />}
+                  {item?.isDubbed && <Mic size={20} color="$color1" opacity={0.7} />}
                 </XStack>
               </XStack>
             </YStack>
@@ -384,7 +387,7 @@ const EpisodeList = ({
   );
 
   const renderItemContent = useCallback(
-    (item: Episode | IMovieEpisode) => {
+    (item: IAnimeEpisode | IMovieEpisode) => {
       // console.log('renderContent', displayMode);
       switch (displayMode) {
         case EpisodeDisplayMode.FullMetadata:
@@ -413,6 +416,14 @@ const EpisodeList = ({
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
         ListHeaderComponent={
           <XStack paddingHorizontal={16} padding={8} gap="$5" alignItems="center" justifyContent="center">
+            {swipeable && (
+              <CustomSelect
+                SelectItem={mediaType === MediaType.ANIME ? PROVIDERS.anime : PROVIDERS.movie}
+                SelectLabel="Provider"
+                value={getProvider(mediaType)}
+                onValueChange={handleProviderChange}
+              />
+            )}
             {movieSeasons && type !== TvType.MOVIE && (
               <CustomSelect
                 SelectItem={
@@ -425,7 +436,7 @@ const EpisodeList = ({
                 value={String(seasonNumber)}
                 onValueChange={(value: string) => {
                   setSeasonNumber(Number(value));
-                  setEpisodes(movieSeasons[value].episodes);
+                  setEpisodes(movieSeasons[Number(value)].episodes);
                 }}
               />
             )}
@@ -474,7 +485,7 @@ const EpisodeList = ({
           flashListRef?.current?.scrollToItem({ item: currentEpisode, animated: true, viewPosition: 0.1 });
         }}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }: { item: Episode | IMovieEpisode; index: number }) => {
+        renderItem={({ item, index }: { item: IAnimeEpisode | IMovieEpisode; index: number }) => {
           const itemKey = item?.id ?? item?.uniqueId;
           return swipeable ? (
             <ReanimatedSwipeable

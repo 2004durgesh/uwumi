@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Spinner, Text, View, XStack, YStack, ZStack } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import HorizontalTabs from '@/components/HorizontalTabs';
-import { IMangaChapter, MediaFormat, MediaType, MetaProvider, TvType } from '@/constants/types';
+import { MediaType, MetaProvider } from '@/constants/types';
 import { hexToRGB } from '@/constants/utils';
 import Episodes from './Episodes';
 import Chapters from './Chapters';
@@ -20,7 +20,7 @@ import Details from './Details';
 import Similar from './Similar';
 import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
 import RippleButton from '@/components/RippleButton';
-import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
+import { IMangaChapter, MediaFormat, TvType } from 'react-native-consumet';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -33,12 +33,10 @@ const Info = () => {
   }>();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
-
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
   const router = useRouter();
-  const { isFavorite, addFavorite, removeFavorite } = useFavoriteStore();
-  const isFavorited = isFavorite(id);
+
   const tabItems = [
     {
       key: 'tab1',
@@ -48,12 +46,12 @@ const Info = () => {
     {
       key: 'tab2',
       label: 'Details',
-      content: <Details data={data} />,
+      content: <Details data={data as any} />,
     },
     {
       key: 'tab3',
       label: 'Similar',
-      content: <Similar data={data} mediaType={mediaType} metaProvider={metaProvider} />,
+      content: <Similar data={data as any} mediaType={mediaType} metaProvider={metaProvider} />,
     },
   ];
   // console.log(data);
@@ -96,7 +94,7 @@ const Info = () => {
               flex={1}
             />
           </View>
-          <View padding={10} marginTop={insets.top + 10}>
+          <View padding={10} marginTop={insets.top}>
             <XStack alignItems="center" justifyContent="space-between" marginBlockEnd={20}>
               <RippleButton onPress={() => router.back()}>
                 <ArrowLeft />
@@ -144,7 +142,7 @@ const Info = () => {
         </ZStack>
 
         <YStack alignItems="center" marginTop={20} flex={1}>
-          {data && <HorizontalTabs items={tabItems} initialTab="tab1" />}
+          <HorizontalTabs items={tabItems} initialTab="tab1" />
         </YStack>
       </ThemedView>
     </>

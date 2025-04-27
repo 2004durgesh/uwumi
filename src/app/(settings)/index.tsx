@@ -1,8 +1,13 @@
 import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
+import { Text } from 'tamagui';
 
 const Settings = () => {
-  return <ThemedView>Any suggestions as to what to add here</ThemedView>;
+  return (
+    <ThemedView>
+      <Text>Any suggestions as to what to add here</Text>
+    </ThemedView>
+  );
 };
 
 export default Settings;

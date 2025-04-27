@@ -23,7 +23,7 @@ import Animated, {
   FadeInUp,
   FadeOutUp,
 } from 'react-native-reanimated';
-import { ISubtitle, MediaFormat, TvType } from '@/constants/types';
+import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { useRouter } from 'expo-router';
 import { useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
@@ -148,8 +148,9 @@ const ControlsOverlay = memo(
     const currentEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === currentUniqueId);
     const prevEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === prevUniqueId);
     const nextEpisodeIndex = episodes.findIndex((ep) => ep.uniqueId === nextUniqueId);
-    const prevId = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1].uniqueId : null;
-    const nextId = currentEpisodeIndex < episodes.length - 1 ? episodes[currentEpisodeIndex + 1].uniqueId : null;
+    const prevId = currentEpisodeIndex > 0 ? String(episodes[currentEpisodeIndex - 1].uniqueId) : null;
+    const nextId =
+      currentEpisodeIndex < episodes.length - 1 ? String(episodes[currentEpisodeIndex + 1].uniqueId) : null;
     const themeName = useThemeStore((state) => state.themeName);
     // console.log({
     //   prevUniqueId,
@@ -177,7 +178,7 @@ const ControlsOverlay = memo(
                   backgroundColor: SHEET_THEME_COLOR,
                 }}
                 onPress={() => {
-                  console.log(index, selectedSubtitleIndex, track.index);
+                  // console.log(index, selectedSubtitleIndex, track.index);
                   setSelectedVideoTrackIndex(track.index);
                 }}>
                 <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>{track.height}p</Text>
@@ -322,14 +323,18 @@ const ControlsOverlay = memo(
                         ...(episodes[prevEpisodeIndex].dubId
                           ? { episodeDubId: episodes[prevEpisodeIndex].dubId as string }
                           : null),
-                        ...(episodes[prevEpisodeIndex].isDub
-                          ? { isDub: episodes[prevEpisodeIndex].isDub as string }
+                        ...(episodes[prevEpisodeIndex].isDubbed
+                          ? { isDubbed: episodes[prevEpisodeIndex].isDubbed as string }
                           : null),
-                        poster: episodes[prevEpisodeIndex].image ?? episodes[prevEpisodeIndex].img?.hd,
+                        poster:
+                          typeof episodes[prevEpisodeIndex].image === 'string'
+                            ? episodes[prevEpisodeIndex].image
+                            : episodes[prevEpisodeIndex].image?.hd,
                         title: episodes[prevEpisodeIndex].title,
                         description: episodes[prevEpisodeIndex].description,
-                        episodeNumber: episodes[prevEpisodeIndex].number ?? episodes[prevEpisodeIndex].episode,
-                        seasonNumber: episodes[prevEpisodeIndex].season,
+                        episodeNumber: (episodes[prevEpisodeIndex].number ??
+                          episodes[prevEpisodeIndex].episode) as string,
+                        seasonNumber: episodes[prevEpisodeIndex].season as string,
                         type: routeInfo.type,
                       },
                     });
@@ -362,14 +367,18 @@ const ControlsOverlay = memo(
                         ...(episodes[nextEpisodeIndex].dubId
                           ? { episodeDubId: episodes[nextEpisodeIndex].dubId as string }
                           : null),
-                        ...(episodes[nextEpisodeIndex].isDub
-                          ? { isDub: episodes[nextEpisodeIndex].isDub as string }
+                        ...(episodes[nextEpisodeIndex].isDubbed
+                          ? { isDubbed: episodes[nextEpisodeIndex].isDubbed as string }
                           : null),
-                        poster: episodes[nextEpisodeIndex].image ?? episodes[nextEpisodeIndex].img?.hd,
+                        poster:
+                          typeof episodes[nextEpisodeIndex].image === 'string'
+                            ? episodes[nextEpisodeIndex].image
+                            : episodes[nextEpisodeIndex].image?.hd,
                         title: episodes[nextEpisodeIndex].title,
                         description: episodes[nextEpisodeIndex].description,
-                        episodeNumber: episodes[nextEpisodeIndex].number ?? episodes[nextEpisodeIndex].episode,
-                        seasonNumber: episodes[nextEpisodeIndex].season,
+                        episodeNumber: (episodes[nextEpisodeIndex].number ??
+                          episodes[nextEpisodeIndex].episode) as string,
+                        seasonNumber: episodes[nextEpisodeIndex].season as string,
                         type: routeInfo.type,
                       },
                     });

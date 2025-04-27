@@ -2,10 +2,11 @@
 /* eslint-disable react/display-name */
 import React, { memo, useMemo } from 'react';
 import { Text, Card, ZStack, styled, XStack, Spinner, YStack, View } from 'tamagui';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { LinearGradient } from 'tamagui/linear-gradient';
 import { AnimatedCustomImage } from './CustomImage';
-import { IAnimeResult, IMovieResult, ISearch, MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
+import { MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
+import { IAnimeResult, IMovieResult, ISearch } from 'react-native-consumet';
 import { RefreshControl } from 'react-native';
 import { InfiniteData } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';

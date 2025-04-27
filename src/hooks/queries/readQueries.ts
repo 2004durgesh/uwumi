@@ -1,4 +1,4 @@
-import { IMangaChapterPage } from '@/constants/types';
+import { IMangaChapterPage } from 'react-native-consumet';
 import { getFetchUrl } from '@/constants/utils';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';

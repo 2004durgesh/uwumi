@@ -40,7 +40,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        animation: 'shift',
+        animation: 'fade',
         tabBarActiveTintColor: themeName === 'dark' ? '#fff' : '#000',
         tabBarInactiveTintColor: themeName === 'dark' ? '#ccc' : '#333',
         tabBarHideOnKeyboard: true,

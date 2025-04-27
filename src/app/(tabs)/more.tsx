@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { Text, YStack, XStack, Separator } from 'tamagui';
 import { Route, useRouter } from 'expo-router';
 import { Settings, Palette, Info, Heart } from '@tamagui/lucide-icons';
-import { Pressable, View, findNodeHandle } from 'react-native';
-import { useCurrentTheme } from '@/hooks';
+import { Pressable, View } from 'react-native';
 
 // Enhanced MenuItem with improved TV focus support
 const MenuItem = ({
@@ -41,9 +40,6 @@ const MenuItem = ({
 };
 
 const More = () => {
-  // Maintain refs to all menu items for programmatic focus management
-  const itemRefs = useRef<(View | null)[]>([]);
-
   // Create menu items array to manage indices with useMemo to prevent recreation on each render
   const menuItems = useMemo(
     () => [
@@ -54,6 +50,12 @@ const More = () => {
     ],
     [],
   );
+  /**
+   * * Add a development-only menu item for testing purposes.
+   */
+  if (process.env.NODE_ENV === 'development') {
+    menuItems.push({ href: '/(settings)/example' as Route, icon: Info, label: 'Example' });
+  }
 
   const totalItems = menuItems.length;
 

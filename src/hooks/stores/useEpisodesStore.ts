@@ -1,5 +1,6 @@
-import { Episode, EpisodeDisplayMode, IMovieEpisode } from '@/constants/types';
+import { EpisodeDisplayMode } from '@/constants/types';
 import { create } from 'zustand';
+import { IAnimeEpisode, IMovieEpisode } from 'react-native-consumet';
 
 interface EpisodesIdState {
   currentUniqueId: string | null;
@@ -25,13 +26,13 @@ export const useEpisodesIdStore = create<EpisodesIdState>((set) => ({
 }));
 
 interface EpisodesState {
-  episodes: Episode[] | IMovieEpisode[];
-  setEpisodes: (episodes: Episode[] | IMovieEpisode[]) => void;
+  episodes: IAnimeEpisode[] | IMovieEpisode[];
+  setEpisodes: (episodes: IAnimeEpisode[] | IMovieEpisode[]) => void;
 }
 
 export const useEpisodesStore = create<EpisodesState>((set) => ({
   episodes: [],
-  setEpisodes: (episodes: Episode[] | IMovieEpisode[]) => set({ episodes }),
+  setEpisodes: (episodes: IAnimeEpisode[] | IMovieEpisode[]) => set({ episodes }),
 }));
 
 interface EpisodeDisplayState {

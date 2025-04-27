@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { IAnimeResult, IMovieResult } from '@/constants/types';
+import { IAnimeResult, IMovieResult } from 'react-native-consumet';
 import { storage } from './MMKV';
 
 interface FavoriteState {

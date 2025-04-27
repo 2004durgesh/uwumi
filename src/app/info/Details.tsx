@@ -3,14 +3,14 @@ import { LinearGradient } from 'tamagui/linear-gradient';
 import { Text, View, YStack, XStack, styled, ZStack, ScrollView } from 'tamagui';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
-import { IAnimeInfo, IMovieInfo } from '@/constants/types';
 import { WebView } from 'react-native-webview';
 import { hexToRGB } from '@/constants/utils';
 import { useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import RippleButton from '@/components/RippleButton';
+import { IAnimeInfo, IMovieInfo } from 'react-native-consumet';
 
 type DetailsProps = {
-  data?: IAnimeInfo | IMovieInfo;
+  data?: IAnimeInfo | IMovieInfo | undefined;
   lineHeight?: number;
 };
 

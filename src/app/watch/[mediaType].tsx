@@ -13,7 +13,8 @@ import { YStack, Spinner, Text, View, styled, XStack, Button } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
-import { ISubtitle, MediaFormat, MediaType, TvType } from '@/constants/types';
+import { MediaType } from '@/constants/types';
+import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import { ThemedView } from '@/components/ThemedView';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -54,11 +55,20 @@ interface PlaybackState {
 }
 
 export interface VideoTrack {
-  width: number;
-  height: number;
-  codecs: string;
+  width?: number;
+  height?: number;
+  codecs?: string;
   index: number;
-  bitrate: number;
+  bitrate?: number;
+}
+
+export interface AudioTrack {
+  index: number;
+  title?: string;
+  language?: string;
+  bitrate?: number;
+  type?: string;
+  selected?: boolean;
 }
 
 const SeekText = styled(Text, {
@@ -87,29 +97,42 @@ const OverlayedView = styled(Animated.View, {
 });
 
 const Watch = () => {
-  const { mediaType, provider, id, episodeId, uniqueId, isDub, poster, title, episodeNumber, seasonNumber, type } =
-    useLocalSearchParams<{
-      mediaType: MediaType;
-      provider: string;
-      id: string;
-      episodeId: string;
-      episodeDubId: string;
-      uniqueId: string;
-      isDub: string;
-      poster: string;
-      title: string;
-      description: string;
-      episodeNumber: string;
-      seasonNumber: string;
-      type: MediaFormat | TvType;
-    }>();
+  const {
+    mediaType,
+    provider,
+    id,
+    mediaId,
+    episodeId,
+    uniqueId,
+    isDubbed,
+    poster,
+    title,
+    episodeNumber,
+    seasonNumber,
+    type,
+  } = useLocalSearchParams<{
+    mediaType: MediaType;
+    provider: string;
+    id: string;
+    mediaId: string;
+    episodeId: string;
+    episodeDubId: string;
+    uniqueId: string;
+    isDubbed: string;
+    poster: string;
+    title: string;
+    description: string;
+    episodeNumber: string;
+    seasonNumber: string;
+    type: MediaFormat | TvType;
+  }>();
   // console.log(useLocalSearchParams());
 
   const { top } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const { setProvider, getProvider } = useProviderStore();
   const { setServers, setCurrentServer, currentServer } = useServerStore();
-  const [isEmbed, setIsEmbed] = useState<boolean>(false);
+  const [isEmbed, setIsEmbed] = useState<boolean>(true);
   const [serverInitialized, setServerInitialized] = useState(false);
 
   const setEpisodeIds = useEpisodesIdStore((state) => state.setEpisodeIds);
@@ -151,12 +174,11 @@ const Watch = () => {
     mediaType === MediaType.ANIME
       ? useWatchAnimeEpisodes({ episodeId: currentEpisodeId ?? episodeId, provider: getProvider(mediaType), dub })
       : useWatchMoviesEpisodes({
-          tmdbId: id,
-          episodeNumber,
-          seasonNumber,
+          episodeId: currentEpisodeId ?? episodeId,
+          mediaId,
           type,
-          server: currentServer?.name,
           provider,
+          server: currentServer?.name,
           embed: isEmbed,
         });
   const {
@@ -185,6 +207,7 @@ const Watch = () => {
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
   const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>();
   const [isBuffering, setIsBuffering] = useState(false);
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
@@ -397,19 +420,34 @@ const Watch = () => {
   );
   // console.log(videoStyle);
   // const source ="https://cdn-xqrgj99p8krmzj4e.orbitcache.com/engine/hls2/01/09140/gc5lpxuqgrak_,n,.urlset/master.m3u8?t=F3z4Vr5gayxRKGOuvX39UtLtNdP04WDOIWHHfr0P6MQ&s=1741878671&e=14400&f=45704535&node=5LpKIhsv95HV1Q3x7jrfRXldwp3y8CT5PdX8aM588gQ=&i=103.123&sp=2500&asn=138296&q=n";
-  const source = useMemo(
-    () =>
-      data?.sources?.find((s) => s.quality === 'default')?.url ||
-      data?.sources?.find((s) => s.quality === 'backup')?.url ||
-      data?.sources?.find((s) => s.quality === 'auto')?.url ||
-      data?.sources?.[0]?.url ||
-      (Array.isArray(data) ? data[0]?.sources?.[0]?.url : '') ||
-      '',
-    [data],
-  );
+  const source = useMemo(() => {
+    if (provider === 'animepahe') {
+      const tracks: VideoTrack[] = [];
+      data?.sources?.map((track, index) => {
+        if (track?.url) {
+          tracks.push({
+            width: undefined,
+            height: Number((track.quality!.match(/(\d{3,4})p/) || [])[1]?.trim() || 0),
+            index,
+          });
+        }
+      });
+      setVideoTracks(tracks);
+      return data?.sources?.[selectedVideoTrackIndex || 0]?.url;
+    } else {
+      return (
+        data?.sources?.find((s) => s.quality === 'default')?.url ||
+        data?.sources?.find((s) => s.quality === 'backup')?.url ||
+        data?.sources?.find((s) => s.quality === 'auto')?.url ||
+        data?.sources?.[0]?.url ||
+        (Array.isArray(data) ? data[0]?.sources?.[0]?.url : '') ||
+        ''
+      );
+    }
+  }, [data, provider, selectedVideoTrackIndex, setVideoTracks]);
   // console.log(source);
   useEffect(() => {
-    if (source) {
+    if (source && provider !== 'animepahe') {
       const fetchQuality = async () => {
         try {
           const { data } = await axios.get(`${source}`);
@@ -539,6 +577,7 @@ const Watch = () => {
                       value.textTracks?.filter((track) => !track.language && !track.title).length || 0;
                     setNullSubtitleIndex(nullTrackCount);
                     console.log('nullIndex:', nullTrackCount);
+                    setAudioTracks(value.audioTracks);
                     videoRef?.current?.seek(getProgress(uniqueId)?.currentTime || 0);
                   }}
                   selectedVideoTrack={{ type: SelectedVideoTrackType.INDEX, value: selectedVideoTrackIndex ?? 0 }}
@@ -600,7 +639,7 @@ const Watch = () => {
           )} */}
             {mediaType === MediaType.ANIME && (
               <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
-                {[{ label: 'Sub', key: 'sub' }, isDub === 'true' && { label: 'Dub', key: 'dub' }]
+                {[{ label: 'Sub', key: 'sub' }, isDubbed === 'true' && { label: 'Dub', key: 'dub' }]
                   // @ts-ignore
                   .map(({ label, key }, index) => (
                     <XStack
@@ -627,6 +666,7 @@ const Watch = () => {
                               }}
                               backgroundColor={isSelected ? '$color' : '$color3'}
                               flex={1}
+                              minWidth={150}
                               justifyContent="center">
                               <XStack alignItems="center">
                                 {isSelected && <Check color="$color4" />}

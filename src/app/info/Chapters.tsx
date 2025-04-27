@@ -1,12 +1,12 @@
 import IconTitle from '@/components/IconTitle';
 import NoResults from '@/components/NoResults';
 import RippleButton from '@/components/RippleButton';
-import { IMangaChapter } from '@/constants/types';
 import { usePureBlackBackground } from '@/hooks';
 import { FlashList } from '@shopify/flash-list';
 import { Album, Library, ScrollText } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { IMangaChapter } from 'react-native-consumet';
 import { Text, View, XStack, YStack } from 'tamagui';
 
 const Chapters = ({ data }: { data?: IMangaChapter[] }) => {

@@ -1,6 +1,6 @@
-import { ISearch, MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
+import { MediaFeedType, MediaType, MetaProvider } from '@/constants/types';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { META } from 'react-native-consumet';
+import { ISearch, META } from 'react-native-consumet';
 
 export function useMediaFeed<T>(
   mediaType: MediaType,
@@ -56,7 +56,7 @@ export function useMediaFeed<T>(
       if (!data) {
         throw new Error(`Unsupported combination of metaProvider: ${metaProvider} and mediaFeedType: ${mediaFeedType}`);
       }
-      console.log('data', data);
+      // console.log('data', data);
       return data;
     },
     getNextPageParam: (lastPage: ISearch<T>, pages) => {

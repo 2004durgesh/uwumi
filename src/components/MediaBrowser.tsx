@@ -11,6 +11,7 @@ import { MediaType } from '@/constants/types';
 interface MediaBrowserProps {
   mediaType: MediaType;
 }
+
 const TabTextStyle = {
   fontSize: 13,
   fontWeight: '600',
@@ -60,7 +61,7 @@ const MediaBrowser: React.FC<MediaBrowserProps> = ({ mediaType }) => {
   });
   const metaProvider =
     mediaType === MediaType.ANIME ? 'anilist' : mediaType === MediaType.MANGA ? 'anilist-manga' : 'tmdb';
-  console.log(metaProvider, mediaType);
+
   return (
     <YStack gap="$2">
       <SearchBar />

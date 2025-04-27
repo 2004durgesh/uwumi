@@ -1,4 +1,4 @@
-import { IEpisodeServer } from '@/constants/types';
+import { IEpisodeServer } from 'react-native-consumet';
 import { create } from 'zustand';
 
 interface ServerState {
