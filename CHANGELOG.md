@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0 (2025-04-27)
+
+* feat: add version synchronization script for android and ios ([9530a23](https://github.com/2004durgesh/uwumi/commit/9530a23))
+* feat: integrate react-native-consumet and tweak media queries & about ui ([6feb2d0](https://github.com/2004durgesh/uwumi/commit/6feb2d0))     
+* feat: new animepahe provider and major changes for react-native-consumet ([fbdc32a](https://github.com/2004durgesh/uwumi/commit/fbdc32a))     
+
 ## <small>2.2.1 (2025-04-10)</small>
 
 * chore: changes for new version ([4c50428](https://github.com/2004durgesh/uwumi/commit/4c50428))

@@ -1,7 +1,7 @@
 {
   "name": "uwumi",
   "main": "expo-router/entry",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "scripts": {
     "start": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo start --localhost",
     "android:reverse": "adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001 && expo run:android",
@@ -13,7 +13,6 @@
     "format": "prettier --write .",
     "generate-themes": "tamagui generate-themes ./src/constants/Theme.ts ./src/constants/theme-out.ts",
     "prepare": "husky install",
-    "changelog": "git fetch --tags && npx git-cliff --config cliff.toml --output CHANGELOG.md --sort newest",
     "release": "release-it",
     "sync-versions": "node ./src/scripts/sync-versions.js",
     "build-android": "bash src/scripts/build-android.sh"
