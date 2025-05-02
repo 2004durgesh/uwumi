@@ -31,15 +31,16 @@ const PROVIDERS: ProviderGroups = {
     { name: 'Mangakakalot', value: 'mangakakalot' },
   ],
   [MediaType.MOVIE]: [
-    { name: 'Rive', value: 'rive', embed: true, nonEmbed: true },
+    // { name: 'Rive', value: 'rive', embed: true, nonEmbed: true },
     { name: 'MultiMovies', value: 'multimovies', embed: true, nonEmbed: false },
+    { name: 'NetflixMirror', value: 'netflixmirror', embed: true, nonEmbed: false },
     // { name: 'DramaCool', value: 'dramacool' },
   ],
 };
 
 // Default providers for each media type
 const DEFAULT_PROVIDERS = {
-  [MediaType.ANIME]: 'animepahe',
+  [MediaType.ANIME]: 'zoro',
   [MediaType.MANGA]: 'mangadex',
   [MediaType.MOVIE]: 'multimovies',
 };
@@ -74,7 +75,8 @@ export const createProviderInstance = (mediaType: MediaType, providerValue: stri
   if (mediaType === MediaType.MOVIE) {
     const movieProviders: Record<string, () => any> = {
       // rive: () => new MOVIES.Rive(),
-      multimovies: () => new MOVIES.MultiMovies(),
+      multimovies: () => new MOVIES.MultiMovies('https://multimovies.media'),
+      netflixmirror: () => new MOVIES.NetflixMirror(),
       // Add new providers here in the future
     };
 

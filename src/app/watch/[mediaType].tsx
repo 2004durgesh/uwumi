@@ -177,7 +177,7 @@ const Watch = () => {
           episodeId: currentEpisodeId ?? episodeId,
           mediaId,
           type,
-          provider,
+          provider: getProvider(mediaType),
           server: currentServer?.name,
           embed: isEmbed,
         });
@@ -421,7 +421,7 @@ const Watch = () => {
   // console.log(videoStyle);
   // const source ="https://cdn-xqrgj99p8krmzj4e.orbitcache.com/engine/hls2/01/09140/gc5lpxuqgrak_,n,.urlset/master.m3u8?t=F3z4Vr5gayxRKGOuvX39UtLtNdP04WDOIWHHfr0P6MQ&s=1741878671&e=14400&f=45704535&node=5LpKIhsv95HV1Q3x7jrfRXldwp3y8CT5PdX8aM588gQ=&i=103.123&sp=2500&asn=138296&q=n";
   const source = useMemo(() => {
-    if (provider === 'animepahe') {
+    if (getProvider(mediaType) === 'animepahe') {
       const tracks: VideoTrack[] = [];
       data?.sources?.map((track, index) => {
         if (track?.url) {
@@ -444,8 +444,8 @@ const Watch = () => {
         ''
       );
     }
-  }, [data, provider, selectedVideoTrackIndex, setVideoTracks]);
-  // console.log(source);
+  }, [data, getProvider, mediaType, provider, selectedVideoTrackIndex]);
+  console.log('source', source);
   useEffect(() => {
     if (source && provider !== 'animepahe') {
       const fetchQuality = async () => {
@@ -478,7 +478,7 @@ const Watch = () => {
       };
       fetchQuality();
     }
-  }, [source]);
+  }, [provider, source]);
 
   // useEffect(() => {
   //   console.log('Selected quality changed:', {
@@ -690,9 +690,11 @@ const Watch = () => {
                   { label: 'Direct', key: 'nonEmbed' },
                 ].map(({ label, key }) => (
                   <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
-                    <Text color="$color1" fontWeight="bold" width={70}>
-                      {label}:
-                    </Text>
+                    {key && (
+                      <Text color="$color1" fontWeight="bold" width={50}>
+                        {label}:
+                      </Text>
+                    )}
                     <XStack flexWrap="wrap" flex={1} gap={4}>
                       {PROVIDERS[mediaType].map(({ name, value, embed, nonEmbed }) => {
                         const isAvailable = key === 'embed' ? embed : key === 'nonEmbed' ? nonEmbed : false;
@@ -712,6 +714,7 @@ const Watch = () => {
                             }}
                             backgroundColor={isSelected ? '$color' : '$color3'}
                             flex={1}
+                            minWidth={150}
                             justifyContent="center">
                             <XStack alignItems="center">
                               {isSelected && <Check color="$color4" />}

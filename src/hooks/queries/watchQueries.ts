@@ -80,10 +80,10 @@ export function useWatchMoviesEpisodes({
         //     embed,
         //   },
         // });
-        const animeProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
-        // console.log(animeProviderInitializer);
+        const moviesProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
+        // console.log(moviesProviderInitializer);
         console.log({ episodeId, mediaId, type, provider, server, embed });
-        const data = await new animeProviderInitializer.fetchEpisodeSources(episodeId, mediaId);
+        const data = await new moviesProviderInitializer.fetchEpisodeSources(episodeId, mediaId);
         console.log(data);
         return data;
       } catch (error) {

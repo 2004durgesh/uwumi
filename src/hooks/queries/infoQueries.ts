@@ -1,7 +1,7 @@
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
 import { Episode, MediaType, MetaProvider } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
-import { IAnimeInfo, IMovieInfo, MediaFormat, META, TvType, MOVIES, IAnimeEpisode } from 'react-native-consumet';
+import { IAnimeInfo, IMovieInfo, MediaFormat, META, TvType, IAnimeEpisode } from 'react-native-consumet';
 
 export function useInfo({
   mediaType,
@@ -34,7 +34,8 @@ export function useInfo({
           data = (await new META.Anilist().fetchAnilistInfoById(id)) as unknown as IAnimeInfo;
         }
         if (metaProvider === 'tmdb') {
-          data = (await new META.TMDB(undefined, new MOVIES.MultiMovies()).fetchMediaInfo(
+          const movieProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
+          data = (await new META.TMDB(process.env.EXPO_TMDB_API_KEY, movieProviderInitializer).fetchMediaInfo(
             id,
             type,
           )) as unknown as IMovieInfo;
@@ -89,12 +90,12 @@ export function useMoviesEpisodes({
       // let url = `${getFetchUrl().episodeApiUrl}/movies/tmdb/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
       // console.log(url);
       // const { data } = await axios.get(url);
-      // console.log(data);
-      const animeProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
-      const data = (await new META.TMDB(process.env.EXPO_TMDB_API_KEY, animeProviderInitializer).fetchMediaInfo(
+      const movieProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
+      const data = (await new META.TMDB(process.env.EXPO_TMDB_API_KEY, movieProviderInitializer).fetchMediaInfo(
         id,
         type,
       )) as unknown as IMovieInfo;
+      console.log(data);
       return data;
     },
   });
