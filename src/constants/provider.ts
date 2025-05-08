@@ -32,6 +32,7 @@ const PROVIDERS: ProviderGroups = {
   ],
   [MediaType.MOVIE]: [
     // { name: 'Rive', value: 'rive', embed: true, nonEmbed: true },
+    { name: 'HiMovies', value: 'himovies', embed: true, nonEmbed: false },
     { name: 'MultiMovies', value: 'multimovies', embed: true, nonEmbed: false },
     { name: 'NetflixMirror', value: 'netflixmirror', embed: true, nonEmbed: false },
     // { name: 'DramaCool', value: 'dramacool' },
@@ -42,7 +43,7 @@ const PROVIDERS: ProviderGroups = {
 const DEFAULT_PROVIDERS = {
   [MediaType.ANIME]: 'zoro',
   [MediaType.MANGA]: 'mangadex',
-  [MediaType.MOVIE]: 'multimovies',
+  [MediaType.MOVIE]: 'himovies',
 };
 
 // Meta providers (if needed)
@@ -77,6 +78,7 @@ export const createProviderInstance = (mediaType: MediaType, providerValue: stri
       // rive: () => new MOVIES.Rive(),
       multimovies: () => new MOVIES.MultiMovies('https://multimovies.media'),
       netflixmirror: () => new MOVIES.NetflixMirror(),
+      himovies: () => new MOVIES.HiMovies(),
       // Add new providers here in the future
     };
 

@@ -444,8 +444,8 @@ const Watch = () => {
         ''
       );
     }
-  }, [data, getProvider, mediaType, provider, selectedVideoTrackIndex]);
-  console.log('source', source);
+  }, [data, getProvider, mediaType, selectedVideoTrackIndex]);
+  // console.log('source', source);
   useEffect(() => {
     if (source && provider !== 'animepahe') {
       const fetchQuality = async () => {
