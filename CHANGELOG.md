@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.0 (2025-05-09)
+
+* feat(himovies): add new movie provider ([a19943e](https://github.com/2004durgesh/uwumi/commit/a19943e))
+* feat(netflixmirror): new movie provider ([c35b0e0](https://github.com/2004durgesh/uwumi/commit/c35b0e0))
+
 ## 2.3.0 (2025-04-27)
 
 * feat: add version synchronization script for android and ios ([9530a23](https://github.com/2004durgesh/uwumi/commit/9530a23))
