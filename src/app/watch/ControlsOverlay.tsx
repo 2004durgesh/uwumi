@@ -25,12 +25,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { useRouter } from 'expo-router';
-import { useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
 import { VideoTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs from '@/components/HorizontalTabs';
-import CustomSlider from './CustomSlider';
+import SkiaSlider from './SkiaSlider';
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -39,6 +39,9 @@ interface ControlsOverlayProps {
     provider: string;
     id: string;
     type: MediaFormat | TvType;
+    title: string;
+    episodeNumber: string;
+    seasonNumber: string;
   };
   isPlaying: boolean;
   isMuted: boolean;
@@ -52,7 +55,6 @@ interface ControlsOverlayProps {
   setSelectedVideoTrackIndex: (height: number | undefined) => void;
   currentTime: number;
   seekableDuration: number;
-  title: string;
   onPlayPress: () => void;
   onMutePress: () => void;
   onFullscreenPress: () => void;
@@ -78,7 +80,6 @@ const ControlsOverlay = memo(
     setSelectedVideoTrackIndex,
     currentTime,
     seekableDuration,
-    title,
     onPlayPress,
     onMutePress,
     onFullscreenPress,
@@ -86,9 +87,12 @@ const ControlsOverlay = memo(
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     const [isUserActive, setIsUserActive] = useState(true);
+    const [sliderWidth, setSliderWidth] = useState(0);
     const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
     const lastActivityTimeRef = useRef(Date.now());
     const controlsTimeoutDuration = 5000;
+
+    const currentTheme = useCurrentTheme();
 
     // Function to reset inactivity timer with debounce protection
     const resetInactivityTimer = useCallback(() => {
@@ -180,6 +184,7 @@ const ControlsOverlay = memo(
                 onPress={() => {
                   // console.log(index, selectedSubtitleIndex, track.index);
                   setSelectedVideoTrackIndex(track.index);
+                  setOpenSettings(false);
                 }}>
                 <Text color={selectedVideoTrackIndex === track.index ? '$color' : '$color1'}>{track.height}p</Text>
               </RippleButton>
@@ -200,6 +205,7 @@ const ControlsOverlay = memo(
                 }}
                 onPress={() => {
                   setSelectedSubtitleIndex(index);
+                  setOpenSettings(false);
                 }}>
                 <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
               </RippleButton>
@@ -249,9 +255,14 @@ const ControlsOverlay = memo(
               width="100%"
               justifyContent="space-between"
               alignItems="center">
-              <Text color="white" fontWeight={700} fontSize="$3.5">
-                {title}
-              </Text>
+              <YStack width="60%">
+                <Text color="white" numberOfLines={1} fontWeight={700} fontSize="$3.5">
+                  {routeInfo.title}
+                </Text>
+                <Text color="white" fontStyle="italic" fontWeight={500} fontSize="$2.5">
+                  {routeInfo.seasonNumber ? `Season ${routeInfo.seasonNumber}` : null} Episode {routeInfo.episodeNumber}
+                </Text>
+              </YStack>
               <XStack gap="$4">
                 {(selectedSubtitleIndex ?? -1) > -1 ? (
                   <RippleButton onPress={() => setSelectedSubtitleIndex(-1)}>
@@ -418,16 +429,27 @@ const ControlsOverlay = memo(
                   </RippleButton>
                 </XStack>
               </XStack>
-              <XStack width="100%" alignItems="center" gap="$4" justifyContent="space-between">
+              <XStack width="100%" alignItems="center" gap="$1" justifyContent="space-between">
                 <Text color="white" fontSize={13} fontWeight={700}>
                   {formatTime(currentTime)}
                 </Text>
-                <View flex={1}>
-                  <CustomSlider
-                    value={Math.round(currentTime)}
-                    min={0}
-                    max={Math.round(seekableDuration)}
+                <View
+                  flex={1}
+                  onLayout={(e) => {
+                    setSliderWidth(e.nativeEvent.layout.width);
+                  }}>
+                  <SkiaSlider
+                    width={sliderWidth}
+                    thumbColor={currentTheme?.color}
+                    thumbSize={15}
+                    activeTrackColor={currentTheme?.color}
+                    initialValue={Math.round(currentTime)}
+                    minValue={0}
+                    maxValue={Math.round(seekableDuration)}
                     onValueChange={(value) => {
+                      onSeek(value);
+                    }}
+                    onSlidingComplete={(value) => {
                       onSeek(value);
                     }}
                   />

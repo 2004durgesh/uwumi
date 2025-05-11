@@ -595,13 +595,12 @@ const Watch = () => {
                 />
                 <ControlsOverlay
                   showControls={showControls}
-                  routeInfo={{ mediaType, provider, id, type }}
+                  routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber }}
                   isPlaying={playbackState.isPlaying}
                   isMuted={isMuted}
                   isFullscreen={isFullscreen}
                   currentTime={currentTime}
                   seekableDuration={seekableDuration}
-                  title={title}
                   isBuffering={isBuffering}
                   subtitleTracks={subtitleTracks}
                   selectedSubtitleIndex={selectedSubtitleIndex}
@@ -691,7 +690,7 @@ const Watch = () => {
                 ].map(({ label, key }) => (
                   <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
                     {key && (
-                      <Text color="$color1" fontWeight="bold" width={50}>
+                      <Text color="$color1" fontWeight="bold" width={70}>
                         {label}:
                       </Text>
                     )}

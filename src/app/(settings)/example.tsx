@@ -1,11 +1,11 @@
-import { ThemedView } from '@/components/ThemedView';
-import React from 'react';
-import { Text } from 'react-native';
+import { ThemedView } from '@/components/ThemedView'; // Assuming this component exists
+import { Text } from 'react-native'; // Import Button
 
 const Example = () => {
-  <ThemedView>
-    <Text>Example</Text>
-  </ThemedView>;
+  return (
+    <ThemedView>
+      <Text>Slider Example</Text>
+    </ThemedView>
+  );
 };
-
 export default Example;

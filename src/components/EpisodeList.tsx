@@ -74,7 +74,7 @@ const EpisodeList = ({
       : useMoviesEpisodes({
           id,
           type: type!,
-          provider: getProvider(mediaType) === 'rive' ? '' : getProvider(mediaType),
+          provider: getProvider(mediaType),
         });
   // console.log('episodeData', episodeData);
 
