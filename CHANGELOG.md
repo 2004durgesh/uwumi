@@ -1,5 +1,10 @@
 # Changelog
 
+## <small>2.4.1 (2025-05-25)</small>
+
+* refactor: optimize components and gestures; add advanced ripple-button ([ef1aaaa](https://github.com/2004durgesh/uwumi/commit/ef1aaaa))
+* fix(slider): using skia for better performant slider ([944909d](https://github.com/2004durgesh/uwumi/commit/944909d))
+
 ## 2.4.0 (2025-05-09)
 
 * feat(himovies): add new movie provider ([a19943e](https://github.com/2004durgesh/uwumi/commit/a19943e))
