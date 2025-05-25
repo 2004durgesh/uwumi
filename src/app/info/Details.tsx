@@ -39,7 +39,7 @@ const Details: React.FC<DetailsProps> = ({ data, lineHeight = 20 }) => {
   const [contentHeight, setContentHeight] = useState(0);
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
-  console.log(contentHeight);
+
   return (
     <YStack gap={2}>
       <ScrollView

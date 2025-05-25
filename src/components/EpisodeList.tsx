@@ -45,14 +45,12 @@ const LoadingState = () => (
 const StyledText = styled(Text, { fontWeight: '500', color: '$color1', fontSize: '$2.5', opacity: 0.7 });
 
 const EpisodeList = ({
-  // episodes,
   mediaType,
   provider,
   id,
   type,
   swipeable = false,
 }: {
-  // episodes?: IAnimeEpisode[] | IMovieEpisode[] | undefined;
   mediaType: MediaType;
   provider: string;
   id: string;
@@ -76,7 +74,6 @@ const EpisodeList = ({
           type: type!,
           provider: getProvider(mediaType),
         });
-  // console.log('episodeData', episodeData);
 
   const { seasonNumber, setSeasonNumber, resetSeasonNumber } = useSeasonStore();
   const movieSeasons = episodeData?.seasons as IMovieSeason[];
@@ -122,7 +119,7 @@ const EpisodeList = ({
       resetSeasonNumber();
     }
   }, [episodeData, movieSeasons, seasonNumber, resetSeasonNumber]);
-  // console.log('episodes', episodes);
+  // console.log('episodes', episodeData);
   const currentEpisode = episodes.find((episode: IAnimeEpisode | IMovieEpisode) => episode.id === currentUniqueId);
   // console.log('currentUniqueId', currentUniqueId, currentEpisode);
 
@@ -218,17 +215,7 @@ const EpisodeList = ({
   );
 
   const ListPressable = memo(
-    ({
-      item,
-      children,
-      index,
-      totalEpisodes,
-    }: {
-      item: IAnimeEpisode | IMovieEpisode;
-      children: React.ReactNode;
-      index: number;
-      totalEpisodes: number;
-    }) => {
+    ({ item, children }: { item: IAnimeEpisode | IMovieEpisode; children: React.ReactNode }) => {
       const navigateToEpisode = () => {
         router.push({
           pathname: '/watch/[mediaType]',
@@ -236,7 +223,7 @@ const EpisodeList = ({
             mediaType,
             provider: getProvider(mediaType),
             id,
-            mediaId: item?.id,
+            mediaId: episodeData?.id,
             episodeId: item?.id,
             ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
             ...(item?.isDubbed ? { isDubbed: item.isDubbed as string } : null),
@@ -508,14 +495,10 @@ const EpisodeList = ({
               onSwipeableWillOpen={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               onSwipeableWillClose={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
               renderRightActions={rightActions}>
-              <ListPressable item={item} index={index} totalEpisodes={episodes.length}>
-                {renderItemContent(item)}
-              </ListPressable>
+              <ListPressable item={item}>{renderItemContent(item)}</ListPressable>
             </ReanimatedSwipeable>
           ) : (
-            <ListPressable item={item} index={index} totalEpisodes={episodes.length}>
-              {renderItemContent(item)}
-            </ListPressable>
+            <ListPressable item={item}>{renderItemContent(item)}</ListPressable>
           );
         }}
       />

@@ -12,7 +12,6 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 
 interface UseDoubleTapGestureProps {
   videoRef: React.RefObject<any>;
@@ -80,14 +79,6 @@ export const useDoubleTapGesture = ({
     [seekInterval],
   );
 
-  const triggerHapticFeedback = useCallback(async () => {
-    try {
-      await impactAsync(ImpactFeedbackStyle.Light);
-    } catch (error) {
-      console.warn('Haptic feedback failed:', error);
-    }
-  }, []);
-
   const showTapAnimation = useCallback(
     (direction: 'forward' | 'backward') => {
       if (animationTimeoutRef.current) {
@@ -144,13 +135,12 @@ export const useDoubleTapGesture = ({
         consecutiveTapCount.current.lastDirection = direction;
         consecutiveTapCount.current.lastTapTime = now;
 
-        runOnJS(triggerHapticFeedback)();
         runOnJS(showTapAnimation)(direction);
       } catch (error) {
         console.error('Seek failed:', error);
       }
     },
-    [videoRef, seekInterval, showTapAnimation, triggerHapticFeedback],
+    [videoRef, seekInterval, showTapAnimation],
   );
 
   const doubleTapGesture = useMemo(

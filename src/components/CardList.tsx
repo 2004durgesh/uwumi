@@ -23,7 +23,6 @@ export interface CardListProps {
 }
 
 interface CardProps {
-  getItems: (IAnimeResult | IMovieResult)[];
   item: IAnimeResult | IMovieResult;
   index: number;
   mediaType: MediaType;
@@ -38,7 +37,7 @@ const StyledCard = styled(Card, {
 
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
-const CustomCard: React.FC<CardProps> = memo(({ getItems, item, index, mediaType, metaProvider }) => {
+const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProvider }) => {
   return (
     item.image &&
     !item.image.includes('/originalundefined') &&
@@ -126,7 +125,6 @@ const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaTyp
         : useMediaFeed<IAnimeResult | IMovieResult>(mediaType, metaProvider, mediaFeedType!);
 
   const data = staticData || dynamicData;
-  // console.log(data, 'data cardlist');
   const isInfiniteData = (
     data: InfiniteData<ISearch<IAnimeResult | IMovieResult>> | (IAnimeResult | IMovieResult)[] | undefined,
   ): data is InfiniteData<ISearch<IAnimeResult | IMovieResult>> => {
@@ -139,6 +137,7 @@ const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaTyp
     }
     return data;
   }, [data]);
+  // console.log(getItems, 'data cardlist');
 
   if (isLoading && !data) {
     return (
@@ -163,16 +162,14 @@ const CardList: React.FC<CardListProps> = ({ staticData, mediaFeedType, mediaTyp
   return (
     <YStack flex={1}>
       <FlashList
-        data={getItems || []}
+        data={
+          getItems?.filter(
+            (item) => item.image && !item.image.includes('/originalundefined') && !item.image.includes('/originalnull'),
+          ) || []
+        }
         renderItem={({ item, index }: { item: IAnimeResult | IMovieResult; index: number }) => (
           <View flex={1} paddingVertical={4} paddingHorizontal={4}>
-            <CustomCard
-              getItems={getItems}
-              item={item}
-              index={index}
-              mediaType={mediaType}
-              metaProvider={metaProvider}
-            />
+            <CustomCard item={item} index={index} mediaType={mediaType} metaProvider={metaProvider} />
           </View>
         )}
         ListEmptyComponent={<NoResults />}

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, memo } from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
 import { Canvas, Circle, Path, SkFont, Text, useFont } from '@shopify/react-native-skia'; // Import Text and useFont
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -373,4 +373,4 @@ const SkiaSlider: React.FC<SkiaSliderProps> = ({
   );
 };
 
-export default SkiaSlider;
+export default memo(SkiaSlider);

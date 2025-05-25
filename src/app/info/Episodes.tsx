@@ -5,12 +5,11 @@ import { MediaFormat, TvType } from 'react-native-consumet';
 import { View } from 'tamagui';
 
 const Episodes = () => {
-  const { mediaType, provider, id, type, mediaId } = useLocalSearchParams<{
+  const { mediaType, provider, id, type } = useLocalSearchParams<{
     mediaType: MediaType;
     provider: string;
     type?: MediaFormat | TvType;
     id: string;
-    mediaId: string;
   }>();
   return (
     <View height="100%">
