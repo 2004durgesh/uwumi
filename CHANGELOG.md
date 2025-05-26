@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0 (2025-05-26)
+
+* feat: implement manga chapter functionality ([a3131c7](https://github.com/2004durgesh/uwumi/commit/a3131c7))
+
 ## <small>2.4.1 (2025-05-25)</small>
 
 * refactor: optimize components and gestures; add advanced ripple-button ([ef1aaaa](https://github.com/2004durgesh/uwumi/commit/ef1aaaa))
