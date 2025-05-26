@@ -7,11 +7,17 @@ import { FlashList } from '@shopify/flash-list';
 import NoResults from '@/components/NoResults';
 import CustomImage from '@/components/CustomImage';
 import { Dimensions } from 'react-native';
+import { MediaType } from '@/constants/types';
+import { useProviderStore } from '@/constants/provider';
 
 const Read = () => {
   const { width } = Dimensions.get('window');
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { data, isLoading } = useMangaChapterRead({ id: id, provider: 'mangadex' });
+  const { mediaType, id } = useLocalSearchParams<{
+    mediaType: MediaType;
+    id: string;
+  }>();
+  const { getProvider } = useProviderStore();
+  const { data, isLoading } = useMangaChapterRead({ id: id, provider: getProvider(mediaType) });
 
   if (isLoading) {
     return (

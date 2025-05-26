@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/hooks/stores/MMKV';
 import { MediaType } from '@/constants/types';
-import { ANIME, MOVIES } from 'react-native-consumet';
+import { ANIME, MANGA, MOVIES } from 'react-native-consumet';
 
 interface Provider {
   name: string;
@@ -60,6 +60,23 @@ export const createProviderInstance = (mediaType: MediaType, providerValue: stri
       zoro: () => new ANIME.Zoro(),
       animekai: () => new ANIME.AnimeKai(),
       animepahe: () => new ANIME.AnimePahe(),
+      // Add new providers here in the future
+    };
+
+    const providerFunc = animeProviders[providerValue] || animeProviders[DEFAULT_PROVIDERS.anime];
+
+    if (!providerFunc) {
+      throw new Error(`Unsupported anime provider: ${providerValue}`);
+    }
+
+    return providerFunc();
+  }
+
+  // Manga provider mapping
+  if (mediaType === MediaType.MANGA) {
+    const animeProviders: Record<string, () => any> = {
+      mangadex: () => new MANGA.MangaDex(),
+      mangakakalot: () => new MANGA.MangaKakalot(),
       // Add new providers here in the future
     };
 

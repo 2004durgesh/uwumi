@@ -20,7 +20,7 @@ import Details from './Details';
 import Similar from './Similar';
 import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
 import RippleButton from '@/components/RippleButton';
-import { IMangaChapter, MediaFormat, TvType } from 'react-native-consumet';
+import { MediaFormat, TvType } from 'react-native-consumet';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -41,7 +41,7 @@ const Info = () => {
     {
       key: 'tab1',
       label: mediaType === MediaType.MANGA ? 'Chapters' : 'Episodes',
-      content: mediaType === MediaType.MANGA ? <Chapters data={data?.chapters as IMangaChapter[]} /> : <Episodes />,
+      content: mediaType === MediaType.MANGA ? <Chapters /> : <Episodes />,
     },
     {
       key: 'tab2',

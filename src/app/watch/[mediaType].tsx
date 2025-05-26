@@ -9,7 +9,7 @@ import Video, {
   type VideoRef,
 } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { Spinner, Text, View, styled } from 'tamagui';
+import { Button, Spinner, Text, View, XStack, YStack, styled } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
@@ -35,9 +35,11 @@ import {
 } from '@/hooks';
 import { toast } from 'sonner-native';
 import axios from 'axios';
-import { useProviderStore } from '@/constants/provider';
+import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import FullscreenModule from '../../../modules/fullscreen-module';
 import { RippleOverlay } from '@/components/RippleButton';
+import EpisodeList from '@/components/EpisodeList';
+import { Check } from '@tamagui/lucide-icons';
 
 // SubtitleTrack, VideoTrack, AudioTrack interfaces remain the same
 
@@ -651,6 +653,113 @@ const Watch = () => {
             </View>
           </View>
         </GestureDetector>
+        {!isFullscreen && (
+          <YStack flex={1} gap="$2">
+            {/* {description && (
+            <>
+              <Text textAlign="justify" padding="$2">
+                {description}
+              </Text>
+            </>
+          )} */}
+            {mediaType === MediaType.ANIME && (
+              <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
+                {[{ label: 'Sub', key: 'sub' }, isDubbed === 'true' && { label: 'Dub', key: 'dub' }]
+                  // @ts-ignore
+                  .map(({ label, key }, index) => (
+                    <XStack
+                      key={`${key}-${index}`}
+                      alignItems="center"
+                      justifyContent="space-between"
+                      marginBottom="$2">
+                      {key && (
+                        <Text color="$color1" fontWeight="bold" width={50}>
+                          {label}:
+                        </Text>
+                      )}
+                      <XStack flexWrap="wrap" flex={1} gap={4}>
+                        {PROVIDERS[mediaType].map(({ name, value, subbed, dubbed }) => {
+                          const isAvailable = key === 'sub' ? subbed : key === 'dub' ? dubbed : false;
+                          const isSelected = getProvider(mediaType) === value && dub === (key === 'dub');
+                          if (!isAvailable) return null;
+                          return (
+                            <Button
+                              key={value}
+                              onPress={() => {
+                                setDub(key === 'dub');
+                                setProvider(mediaType, value);
+                              }}
+                              backgroundColor={isSelected ? '$color' : '$color3'}
+                              flex={1}
+                              minWidth={150}
+                              justifyContent="center">
+                              <XStack alignItems="center">
+                                {isSelected && <Check color="$color4" />}
+                                <Text fontWeight={900} color={isSelected ? '$color4' : '$color'}>
+                                  {name}
+                                </Text>
+                              </XStack>
+                            </Button>
+                          );
+                        })}
+                      </XStack>
+                    </XStack>
+                  ))}
+              </YStack>
+            )}
+
+            {mediaType === MediaType.MOVIE && (
+              <YStack paddingTop="$2" paddingHorizontal="$2" borderRadius="$4">
+                {[
+                  { label: 'Embed', key: 'embed' },
+                  { label: 'Direct', key: 'nonEmbed' },
+                ].map(({ label, key }) => (
+                  <XStack key={key} alignItems="center" justifyContent="space-between" marginBottom="$2">
+                    {key && (
+                      <Text color="$color1" fontWeight="bold" width={70}>
+                        {label}:
+                      </Text>
+                    )}
+                    <XStack flexWrap="wrap" flex={1} gap={4}>
+                      {PROVIDERS[mediaType].map(({ name, value, embed, nonEmbed }) => {
+                        const isAvailable = key === 'embed' ? embed : key === 'nonEmbed' ? nonEmbed : false;
+                        const isSelected =
+                          getProvider(mediaType) === value &&
+                          ((key === 'embed' && isEmbed) || (key === 'nonEmbed' && !isEmbed));
+                        // console.log('isEmbed:', isEmbed, isSelected);
+
+                        if (!isAvailable) return null;
+
+                        return (
+                          <Button
+                            key={`${value}-${key}`}
+                            onPress={() => {
+                              setProvider(mediaType, value);
+                              setIsEmbed(key === 'embed');
+                            }}
+                            backgroundColor={isSelected ? '$color' : '$color3'}
+                            flex={1}
+                            minWidth={150}
+                            justifyContent="center">
+                            <XStack alignItems="center">
+                              {isSelected && <Check color="$color4" />}
+                              <Text fontWeight={900} color={isSelected ? '$color4' : '$color'}>
+                                {name}
+                              </Text>
+                            </XStack>
+                          </Button>
+                        );
+                      })}
+                    </XStack>
+                  </XStack>
+                ))}
+              </YStack>
+            )}
+            <View flex={1}>
+              <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable={false} />
+            </View>
+          </YStack>
+        )}
       </View>
     </ThemedView>
   );

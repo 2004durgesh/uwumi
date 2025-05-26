@@ -1,17 +1,23 @@
-import { IMangaChapterPage } from 'react-native-consumet';
-import { getFetchUrl } from '@/constants/utils';
+import { IMangaChapterPage, META } from 'react-native-consumet';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
+import { MediaType } from '@/constants/types';
 
-export function useMangaChapterRead({ id, provider = 'mangadex' }: { id: string; provider: string }) {
+export function useMangaChapterRead({ id, provider = DEFAULT_PROVIDERS.manga }: { id: string; provider: string }) {
   return useQuery<IMangaChapterPage[]>({
     queryKey: ['manga', 'read', id, provider],
     queryFn: async () => {
-      console.log(`${getFetchUrl().apiUrl}/meta/anilist-manga/read?chapterId=${id}&provider=${provider}`);
-      const { data } = await axios.get(`${getFetchUrl().apiUrl}/meta/anilist-manga/read`, {
-        params: { chapterId: id, provider: provider },
-      });
-      return data;
+      try {
+        const mangaProviderInitializer = createProviderInstance(MediaType.MANGA, provider);
+        // console.log(id,"mangaProviderInitializer", mangaProviderInitializer);
+        const data = (await new META.Anilist.Manga(mangaProviderInitializer).fetchChapterPages(
+          id,
+        )) as IMangaChapterPage[];
+        // console.log(data);
+        return data;
+      } catch (error) {
+        throw new Error(`Error fetching reading: ${error}`);
+      }
     },
   });
 }

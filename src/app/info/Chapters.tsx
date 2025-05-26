@@ -1,15 +1,24 @@
+import CustomSelect from '@/components/CustomSelect';
 import IconTitle from '@/components/IconTitle';
 import NoResults from '@/components/NoResults';
 import RippleButton from '@/components/RippleButton';
-import { usePureBlackBackground } from '@/hooks';
+import { PROVIDERS, useProviderStore } from '@/constants/provider';
+import { MediaType } from '@/constants/types';
+import { useMangaChapters, usePureBlackBackground } from '@/hooks';
 import { FlashList } from '@shopify/flash-list';
 import { Album, Library, ScrollText } from '@tamagui/lucide-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { IMangaChapter } from 'react-native-consumet';
-import { Text, View, XStack, YStack } from 'tamagui';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { Spinner, Text, View, XStack, YStack } from 'tamagui';
 
-const Chapters = ({ data }: { data?: IMangaChapter[] }) => {
+const Chapters = () => {
+  const { mediaType, provider, id } = useLocalSearchParams<{
+    mediaType: MediaType;
+    provider: string;
+    id: string;
+  }>();
+  const { getProvider, setProvider } = useProviderStore();
+  const { data, isLoading } = useMangaChapters({ id, provider: getProvider(mediaType) });
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const IconProps = {
     size: 20,
@@ -17,6 +26,20 @@ const Chapters = ({ data }: { data?: IMangaChapter[] }) => {
     opacity: 0.7,
   };
   const router = useRouter();
+
+  const handleProviderChange = useCallback(
+    (value: string) => {
+      setProvider(mediaType, value);
+    },
+    [mediaType, setProvider],
+  );
+  if (isLoading) {
+    return (
+      <YStack justifyContent="center" alignItems="center" minHeight={300}>
+        <Spinner size="large" color="$color" />
+      </YStack>
+    );
+  }
   return (
     <View height="100%">
       <FlashList
@@ -26,6 +49,16 @@ const Chapters = ({ data }: { data?: IMangaChapter[] }) => {
           paddingHorizontal: 16,
           paddingVertical: 8,
         }}
+        ListHeaderComponent={
+          <XStack paddingHorizontal={16} padding={8} gap="$5" alignItems="center" justifyContent="center">
+            <CustomSelect
+              SelectItem={PROVIDERS.manga}
+              SelectLabel="Provider"
+              value={getProvider(mediaType)}
+              onValueChange={handleProviderChange}
+            />
+          </XStack>
+        }
         ListEmptyComponent={<NoResults />}
         ListFooterComponent={<View height={100} />}
         estimatedItemSize={150}

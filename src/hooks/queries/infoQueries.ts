@@ -1,7 +1,7 @@
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
 import { Episode, MediaType, MetaProvider } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
-import { IAnimeInfo, IMovieInfo, MediaFormat, META, TvType, IAnimeEpisode } from 'react-native-consumet';
+import { IAnimeInfo, IMovieInfo, MediaFormat, META, TvType, IAnimeEpisode, IMangaChapter } from 'react-native-consumet';
 
 export function useInfo({
   mediaType,
@@ -60,16 +60,31 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_PROVIDERS.anime }: { i
     queryKey: ['anime', 'episodes', id, provider],
     queryFn: async () => {
       try {
-        // console.log(`${getFetchUrl().episodeApiUrl}/anime/episodes/anilist/${id}?provider=${provider}`);
-        // const { data } = await axios.get(
-        //   `${getFetchUrl().episodeApiUrl}/anime/episodes/anilist/${id}?provider=${provider}`,
-        // );
         const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
         const data = (await new META.Anilist(animeProviderInitializer).fetchEpisodesListById(id)) as unknown as Episode;
         console.log(data);
         return data;
       } catch (error) {
         throw new Error(`Error fetching episodes: ${error}`);
+      }
+    },
+  });
+}
+
+export function useMangaChapters({ id, provider = DEFAULT_PROVIDERS.manga }: { id: string; provider: string }) {
+  // console.log('useMangaEpisodes is called');
+
+  return useQuery<IMangaChapter[]>({
+    queryKey: ['manga', 'chapters', id, provider],
+    queryFn: async () => {
+      try {
+        const mangaProviderInitializer = createProviderInstance(MediaType.MANGA, provider);
+        const data = (await new META.Anilist.Manga(mangaProviderInitializer).fetchMangaInfo(id))
+          .chapters as IMangaChapter[];
+        // console.log(data);
+        return data;
+      } catch (error) {
+        throw new Error(`Error fetching chapters: ${error}`);
       }
     },
   });
