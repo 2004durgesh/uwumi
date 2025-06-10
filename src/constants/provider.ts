@@ -57,7 +57,7 @@ export const createProviderInstance = (mediaType: MediaType, providerValue: stri
   // Anime provider mapping
   if (mediaType === MediaType.ANIME) {
     const animeProviders: Record<string, () => any> = {
-      zoro: () => new ANIME.Zoro(),
+      zoro: () => new ANIME.Zoro('https://hianime.to'),
       animekai: () => new ANIME.AnimeKai(),
       animepahe: () => new ANIME.AnimePahe(),
       // Add new providers here in the future
@@ -93,7 +93,7 @@ export const createProviderInstance = (mediaType: MediaType, providerValue: stri
   if (mediaType === MediaType.MOVIE) {
     const movieProviders: Record<string, () => any> = {
       // rive: () => new MOVIES.Rive(),
-      multimovies: () => new MOVIES.MultiMovies('https://multimovies.media'),
+      multimovies: () => new MOVIES.MultiMovies(),
       netflixmirror: () => new MOVIES.NetflixMirror(),
       himovies: () => new MOVIES.HiMovies(),
       // Add new providers here in the future
