@@ -65,6 +65,7 @@ EXPO_PUBLIC_EPISODE_API_URL= # API URL for episodes in production (https://githu
 EXPO_PUBLIC_EPISODE_API_URL_DEV= # API URL for episodes in development
 
 EXPO_TV=1  # Set to 1 to enable Android TV support
+EXPO_TMDB_API_KEY=123456789 # TMDB API key for movie and series data
 ```   
 
 ## 🏗️ Building for Production
@@ -84,7 +85,7 @@ We ❤️ contributions! Whether it's a **bug fix, feature addition, or document
 
 2. **Clone your fork**  
    ```bash
-   git clone https://github.com/YOUR_GITHUB_USERNAME/uwumi.git
+   git clone https://github.com/2004durgesh/uwumi.git
    cd uwumi
    ```
 

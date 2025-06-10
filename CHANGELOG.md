@@ -1,5 +1,9 @@
 # Changelog
 
+## <small>2.5.1 (2025-06-10)</small>
+
+* chore(update): update react-native-consumet to version 0.7.1, fixes multimovies stream-play ([9b09ea0](https://github.com/2004durgesh/uwumi/commit/9b09ea0))
+
 ## 2.5.0 (2025-05-26)
 
 * feat: implement manga chapter functionality ([a3131c7](https://github.com/2004durgesh/uwumi/commit/a3131c7))
