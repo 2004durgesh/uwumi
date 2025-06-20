@@ -1,5 +1,9 @@
 # Changelog
 
+## <small>2.5.2 (2025-06-20)</small>
+
+* feat: add audio track support to controls-overlay and watch components ([6e11286](https://github.com/2004durgesh/uwumi/commit/6e11286))
+
 ## <small>2.5.1 (2025-06-10)</small>
 
 * chore(update): update react-native-consumet to version 0.7.1, fixes multimovies stream-play ([9b09ea0](https://github.com/2004durgesh/uwumi/commit/9b09ea0))
