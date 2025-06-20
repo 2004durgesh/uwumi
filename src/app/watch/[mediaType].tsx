@@ -208,11 +208,13 @@ const Watch = () => {
   }, [isEmbed, provider]);
 
   const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
-  const [NullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
+  const [nullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
   const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
+  const [nullAudioTrackIndex, setNullAudioTrackIndex] = useState<number | undefined>(0);
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>();
+  const [selectedAudioTrackIndex, setSelectedAudioTrackIndex] = useState<number | undefined>(0);
   const [isBuffering, setIsBuffering] = useState(false);
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
@@ -581,18 +583,35 @@ const Watch = () => {
                   console.log(getProgress(uniqueId)?.currentTime, 'Video loaded:', value);
                   setIsVideoReady(true);
                   // to find how much of the textTracks have null language and title
-                  const nullTrackCount =
+                  const nullTextTrackCount =
                     value.textTracks?.filter((track) => !track.language && !track.title).length || 0;
-                  setNullSubtitleIndex(nullTrackCount);
-                  console.log('nullIndex:', nullTrackCount);
-                  setAudioTracks(value.audioTracks);
+                  const nullAudioTrackCount =
+                    value.audioTracks?.filter((track) => !track.language && !track.title).length || 0;
+                  const uniqueAudioTrack = value.audioTracks.slice(nullAudioTrackCount)?.reduce((acc, track) => {
+                    const exists = acc.some(
+                      (existingTrack) =>
+                        existingTrack.language === track.language && existingTrack.title === track.title,
+                    );
+                    if (!exists) {
+                      acc.push(track);
+                    }
+                    return acc;
+                  }, [] as AudioTrack[]);
+                  setNullSubtitleIndex(nullTextTrackCount);
+                  setNullAudioTrackIndex(nullAudioTrackCount);
+                  // console.log('nullAudioTrackCount:', nullAudioTrackCount, uniqueAudioTrack);
+                  setAudioTracks(uniqueAudioTrack);
                   videoRef?.current?.seek(getProgress(uniqueId)?.currentTime || 0);
                   videoRef?.current?.resume();
                 }}
                 selectedVideoTrack={{ type: SelectedVideoTrackType.INDEX, value: selectedVideoTrackIndex ?? 0 }}
                 selectedTextTrack={{
                   type: SelectedTrackType.INDEX,
-                  value: (selectedSubtitleIndex ?? 0) + NullSubtitleIndex!,
+                  value: (selectedSubtitleIndex ?? 0) + nullSubtitleIndex!,
+                }}
+                selectedAudioTrack={{
+                  type: SelectedTrackType.INDEX,
+                  value: (selectedAudioTrackIndex ?? 0) + nullAudioTrackIndex!,
                 }}
                 // onVideoTracks={(tracks) => {
                 //   console.log('Video Tracks:', tracks);
@@ -618,6 +637,9 @@ const Watch = () => {
                 videoTracks={videoTracks}
                 selectedVideoTrackIndex={selectedVideoTrackIndex}
                 setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}
+                audioTracks={audioTracks}
+                selectedAudioTrackIndex={selectedAudioTrackIndex}
+                setSelectedAudioTrackIndex={setSelectedAudioTrackIndex}
                 onPlayPress={handlePlayPress}
                 onMutePress={handleMutePress}
                 onFullscreenPress={isFullscreen ? exitFullscreen : enterFullscreen}

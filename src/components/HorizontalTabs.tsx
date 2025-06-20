@@ -2,7 +2,7 @@ import { Tabs, YStack, Text, styled, AnimatePresence } from 'tamagui';
 import React, { useState } from 'react';
 import type { StackProps, TabLayout, TabsTabProps } from 'tamagui';
 
-interface TabItem {
+export interface TabItem {
   key: string;
   label: string;
   content: React.ReactNode;

@@ -20,9 +20,9 @@ import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { useRouter } from 'expo-router';
 import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
-import { VideoTrack } from './[mediaType]';
+import { VideoTrack, AudioTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
-import HorizontalTabs from '@/components/HorizontalTabs';
+import HorizontalTabs, { TabItem } from '@/components/HorizontalTabs';
 import SkiaSlider from './SkiaSlider';
 
 interface ControlsOverlayProps {
@@ -46,6 +46,9 @@ interface ControlsOverlayProps {
   videoTracks: VideoTrack[] | undefined;
   selectedVideoTrackIndex: number | undefined;
   setSelectedVideoTrackIndex: (height: number | undefined) => void;
+  audioTracks: AudioTrack[] | undefined;
+  selectedAudioTrackIndex: number | undefined;
+  setSelectedAudioTrackIndex: (index: number | undefined) => void;
   currentTime: number;
   seekableDuration: number;
   onPlayPress: () => void;
@@ -75,6 +78,9 @@ const ControlsOverlay = memo(
     videoTracks,
     selectedVideoTrackIndex,
     setSelectedVideoTrackIndex,
+    audioTracks,
+    selectedAudioTrackIndex,
+    setSelectedAudioTrackIndex,
     currentTime,
     seekableDuration,
     onPlayPress,
@@ -214,11 +220,30 @@ const ControlsOverlay = memo(
           </YStack>
         ),
       },
-      {
-        key: 'tab3',
-        label: 'Audio',
-        content: <Text>Working</Text>,
-      },
+      audioTracks &&
+        audioTracks.length > 0 && {
+          key: 'tab3',
+          label: 'Audio',
+          content: (
+            <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+              {audioTracks?.map((track, index) => (
+                <RippleButton
+                  key={index}
+                  style={{
+                    backgroundColor: SHEET_THEME_COLOR,
+                  }}
+                  onPress={() => {
+                    setSelectedAudioTrackIndex(index);
+                    setOpenSettings(false);
+                  }}>
+                  <Text color={selectedAudioTrackIndex === index ? '$color' : '$color1'}>
+                    {track.language}-{track.title}
+                  </Text>
+                </RippleButton>
+              ))}
+            </YStack>
+          ),
+        },
     ];
     useEffect(() => {
       if (prevId || nextId) {
@@ -291,9 +316,11 @@ const ControlsOverlay = memo(
               <Text color="white" numberOfLines={1} fontWeight={700} fontSize="$3.5">
                 {routeInfo.title}
               </Text>
-              <Text color="white" fontStyle="italic" fontWeight={500} fontSize="$2.5">
-                {routeInfo.seasonNumber ? `Season ${routeInfo.seasonNumber}` : null} Episode {routeInfo.episodeNumber}
-              </Text>
+              {routeInfo.type !== TvType.MOVIE && (
+                <Text color="white" fontStyle="italic" fontWeight={500} fontSize="$2.5">
+                  {routeInfo.seasonNumber ? `Season ${routeInfo.seasonNumber}` : null} Episode {routeInfo.episodeNumber}
+                </Text>
+              )}
             </YStack>
             <XStack gap="$4">
               {(selectedSubtitleIndex ?? -1) > -1 ? (
@@ -333,7 +360,7 @@ const ControlsOverlay = memo(
                   marginHorizontal="auto"
                   width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <HorizontalTabs items={tabItems} initialTab="tab1" />
+                    <HorizontalTabs items={tabItems as TabItem[]} initialTab="tab1" />
                   </Sheet.ScrollView>
                 </Sheet.Frame>
               </Sheet>
@@ -501,13 +528,10 @@ const ControlsOverlay = memo(
                 </RippleButton>
               </XStack>
             </XStack>
-            <XStack width="100%" alignItems="center" gap="$1" justifyContent="space-between">
-              <Text color="white" fontSize={13} fontWeight={700}>
-                {formatTime(currentTime)}
-              </Text>
+            <YStack width={screenWidth - 10} alignItems="center">
               <View alignItems="center" justifyContent="center">
                 <SkiaSlider
-                  width={screenWidth - 100}
+                  width={screenWidth - 10}
                   thumbColor={currentTheme?.color}
                   thumbSize={15}
                   activeTrackColor={currentTheme?.color}
@@ -522,10 +546,15 @@ const ControlsOverlay = memo(
                   }}
                 />
               </View>
-              <Text color="white" fontSize={13} fontWeight={700}>
-                {formatTime(seekableDuration)}
-              </Text>
-            </XStack>
+              <XStack justifyContent="space-between" width="100%" paddingHorizontal="$2">
+                <Text color="white" fontSize={13} fontWeight={700}>
+                  {formatTime(currentTime)}
+                </Text>
+                <Text color="white" fontSize={13} fontWeight={700}>
+                  {formatTime(seekableDuration)}
+                </Text>
+              </XStack>
+            </YStack>
           </AnimatedYStack>
         </AnimatedYStack>
       </>
