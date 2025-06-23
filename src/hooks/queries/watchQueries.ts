@@ -24,20 +24,14 @@ export function useWatchAnimeEpisodes({
         // console.log(url);
         // const { data } = await axios.get(url);
         const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
-        // console.log(animeProviderInitializer);
         const data =
           provider === 'animepahe'
-            ? await new animeProviderInitializer.fetchEpisodeSources(
-                episodeId,
-                // 'megaup server 1' as StreamingServers,
-                dub ? SubOrSub.DUB : SubOrSub.SUB,
-              )
+            ? await new animeProviderInitializer.fetchEpisodeSources(episodeId, dub ? SubOrSub.DUB : SubOrSub.SUB)
             : await new animeProviderInitializer.fetchEpisodeSources(
                 episodeId,
                 undefined,
                 dub ? SubOrSub.DUB : SubOrSub.SUB,
               );
-        // console.log(data);
         return data;
       } catch (error) {
         console.error('Error fetching episode sources:', error);

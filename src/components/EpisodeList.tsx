@@ -20,17 +20,17 @@ import {
   useEpisodesIdStore,
   useEpisodesStore,
   useWatchProgressStore,
-  useAnimeEpisodes,
+  // useAnimeEpisodes,
   useCurrentTheme,
   usePureBlackBackground,
   useEpisodeDisplayStore,
-  useMoviesEpisodes,
+  // useMoviesEpisodes,
   useServerStore,
   useSeasonStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
 import { EpisodeDisplayMode, IMovieSeason, MediaType } from '@/constants/types';
-import { IAnimeEpisode, IMovieEpisode, MediaFormat, TvType } from 'react-native-consumet';
+import { IAnimeEpisode, IAnimeInfo, IMovieEpisode, IMovieInfo, MediaFormat, TvType } from 'react-native-consumet';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';
@@ -45,12 +45,14 @@ const LoadingState = () => (
 const StyledText = styled(Text, { fontWeight: '500', color: '$color1', fontSize: '$2.5', opacity: 0.7 });
 
 const EpisodeList = ({
+  data,
   mediaType,
   provider,
   id,
   type,
   swipeable = false,
 }: {
+  data: IAnimeInfo | IMovieInfo | undefined;
   mediaType: MediaType;
   provider: string;
   id: string;
@@ -66,19 +68,19 @@ const EpisodeList = ({
   useEffect(() => {
     setProvider(mediaType, getProvider(mediaType) ?? provider);
   }, [mediaType, provider, setProvider, getProvider]);
-  const { data: episodeData, isLoading } =
-    mediaType === MediaType.ANIME
-      ? useAnimeEpisodes({ id, provider: getProvider(mediaType) })
-      : useMoviesEpisodes({
-          id,
-          type: type!,
-          provider: getProvider(mediaType),
-        });
-
+  // const { data: episodeData, isLoading } =
+  //   mediaType === MediaType.ANIME
+  //     ? useAnimeEpisodes({ id, provider: getProvider(mediaType) })
+  //     : useMoviesEpisodes({
+  //         id,
+  //         type: type!,
+  //         provider: getProvider(mediaType),
+  //       });
+  // const episodeData = data?.episodes
   const { seasonNumber, setSeasonNumber, resetSeasonNumber } = useSeasonStore();
-  const movieSeasons = episodeData?.seasons as IMovieSeason[];
+  const movieSeasons = data?.seasons as IMovieSeason[];
   // console.log('movieSeasons', movieSeasons);
-  const animeEpisodes = useMemo(() => (Array.isArray(episodeData) ? episodeData : []), [episodeData]);
+  const animeEpisodes = useMemo(() => (Array.isArray(data?.episodes) ? data?.episodes : []), [data?.episodes]);
   const episodes = useMemo(() => {
     if (mediaType === MediaType.MOVIE && movieSeasons?.[seasonNumber]?.episodes) {
       return movieSeasons[seasonNumber].episodes;
@@ -118,7 +120,7 @@ const EpisodeList = ({
     if (movieSeasons && seasonNumber >= movieSeasons.length) {
       resetSeasonNumber();
     }
-  }, [episodeData, movieSeasons, seasonNumber, resetSeasonNumber]);
+  }, [data, movieSeasons, seasonNumber, resetSeasonNumber]);
   // console.log('episodes', episodeData);
   const currentEpisode = episodes.find((episode: IAnimeEpisode | IMovieEpisode) => episode.id === currentUniqueId);
   // console.log('currentUniqueId', currentUniqueId, currentEpisode);
@@ -223,7 +225,7 @@ const EpisodeList = ({
             mediaType,
             provider: getProvider(mediaType),
             id,
-            mediaId: episodeData?.id,
+            mediaId: data?.id,
             episodeId: item?.id,
             ...(item?.dubId ? { episodeDubId: item.dubId as string } : null),
             ...(item?.isDubbed ? { isDubbed: item.isDubbed as string } : null),
@@ -234,6 +236,7 @@ const EpisodeList = ({
             episodeNumber: (item?.number ?? item?.episode) as string,
             seasonNumber: item?.season as string,
             type,
+            episodeData: JSON.stringify(data),
           },
         });
       };
@@ -390,9 +393,9 @@ const EpisodeList = ({
     [renderFullMetadataPressableItem, renderTitleOnlyPressableItem, renderNumberOnlyPressableItem, displayMode],
   );
 
-  if (isLoading) {
-    return <LoadingState />;
-  }
+  // if (isLoading) {
+  //   return <LoadingState />;
+  // }
 
   return (
     <YStack flex={1} gap={2}>

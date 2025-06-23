@@ -13,7 +13,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import NoResults from './NoResults';
 import { useAnimeAndMangaSearch, useMediaFeed, useMovieSearch, useSearchStore } from '@/hooks';
-import { DEFAULT_PROVIDERS } from '@/constants/provider';
+import { DEFAULT_PROVIDERS, useProviderStore } from '@/constants/provider';
 
 export interface CardListProps {
   staticData?: (IAnimeResult | IMovieResult)[] | undefined;
@@ -38,6 +38,8 @@ const StyledCard = styled(Card, {
 const AnimatedStyledCard = Animated.createAnimatedComponent(StyledCard);
 
 const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProvider }) => {
+  const { getProvider } = useProviderStore();
+  const provider = getProvider(mediaType);
   return (
     item.image &&
     !item.image.includes('/originalundefined') &&
@@ -53,13 +55,13 @@ const CustomCard: React.FC<CardProps> = memo(({ item, index, mediaType, metaProv
             provider: (() => {
               switch (mediaType) {
                 case MediaType.ANIME:
-                  return DEFAULT_PROVIDERS.anime;
+                  return provider ?? DEFAULT_PROVIDERS.anime;
                 case MediaType.MANGA:
-                  return DEFAULT_PROVIDERS.manga;
+                  return provider ?? DEFAULT_PROVIDERS.manga;
                 case MediaType.MOVIE:
-                  return DEFAULT_PROVIDERS.movie;
+                  return provider ?? DEFAULT_PROVIDERS.movie;
                 default:
-                  return DEFAULT_PROVIDERS.anime;
+                  return provider ?? DEFAULT_PROVIDERS.anime;
               }
             })(),
             id: item.id,

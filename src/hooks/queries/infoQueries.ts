@@ -1,5 +1,5 @@
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
-import { Episode, MediaType, MetaProvider } from '@/constants/types';
+import { MediaType, MetaProvider } from '@/constants/types';
 import { useQuery } from '@tanstack/react-query';
 import { IAnimeInfo, IMovieInfo, MediaFormat, META, TvType, IAnimeEpisode, IMangaChapter } from 'react-native-consumet';
 
@@ -31,7 +31,15 @@ export function useInfo({
       // });
       try {
         if (metaProvider === 'anilist' || metaProvider === 'anilist-manga') {
-          data = (await new META.Anilist().fetchAnilistInfoById(id)) as unknown as IAnimeInfo;
+          const [animeInfo, episodes] = await Promise.all([
+            new META.Anilist().fetchAnilistInfoById(id),
+            (() => {
+              const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
+              return new META.Anilist(animeProviderInitializer).fetchEpisodesListById(id);
+            })(),
+          ]);
+          data = animeInfo as unknown as IAnimeInfo;
+          data.episodes = episodes as unknown as IAnimeEpisode[];
         }
         if (metaProvider === 'tmdb') {
           const movieProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
@@ -53,23 +61,23 @@ export function useInfo({
   });
 }
 
-export function useAnimeEpisodes({ id, provider = DEFAULT_PROVIDERS.anime }: { id: string; provider: string }) {
-  // console.log('useAnimeEpisodes is called');
+// export function useAnimeEpisodes({ id, provider = DEFAULT_PROVIDERS.anime }: { id: string; provider: string }) {
+//   // console.log('useAnimeEpisodes is called');
 
-  return useQuery<IAnimeEpisode>({
-    queryKey: ['anime', 'episodes', id, provider],
-    queryFn: async () => {
-      try {
-        const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
-        const data = (await new META.Anilist(animeProviderInitializer).fetchEpisodesListById(id)) as unknown as Episode;
-        console.log(data);
-        return data;
-      } catch (error) {
-        throw new Error(`Error fetching episodes: ${error}`);
-      }
-    },
-  });
-}
+//   return useQuery<IAnimeEpisode>({
+//     queryKey: ['anime', 'episodes', id, provider],
+//     queryFn: async () => {
+//       try {
+//         const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
+//         const data = (await new META.Anilist(animeProviderInitializer).fetchEpisodesListById(id)) as unknown as Episode;
+//         console.log(data);
+//         return data;
+//       } catch (error) {
+//         throw new Error(`Error fetching episodes: ${error}`);
+//       }
+//     },
+//   });
+// }
 
 export function useMangaChapters({ id, provider = DEFAULT_PROVIDERS.manga }: { id: string; provider: string }) {
   // console.log('useMangaEpisodes is called');
@@ -90,28 +98,28 @@ export function useMangaChapters({ id, provider = DEFAULT_PROVIDERS.manga }: { i
   });
 }
 
-export function useMoviesEpisodes({
-  id,
-  type,
-  provider = DEFAULT_PROVIDERS.movie,
-}: {
-  id: string;
-  type: MediaFormat | TvType;
-  provider: string;
-}) {
-  return useQuery<IMovieInfo>({
-    queryKey: ['movies', 'episodes', id, type, provider],
-    queryFn: async () => {
-      // let url = `${getFetchUrl().episodeApiUrl}/movies/tmdb/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
-      // console.log(url);
-      // const { data } = await axios.get(url);
-      const movieProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
-      const data = (await new META.TMDB(process.env.EXPO_TMDB_API_KEY, movieProviderInitializer).fetchMediaInfo(
-        id,
-        type,
-      )) as unknown as IMovieInfo;
-      console.log(data);
-      return data;
-    },
-  });
-}
+// export function useMoviesEpisodes({
+//   id,
+//   type,
+//   provider = DEFAULT_PROVIDERS.movie,
+// }: {
+//   id: string;
+//   type: MediaFormat | TvType;
+//   provider: string;
+// }) {
+//   return useQuery<IMovieInfo>({
+//     queryKey: ['movies', 'episodes', id, type, provider],
+//     queryFn: async () => {
+//       // let url = `${getFetchUrl().episodeApiUrl}/movies/tmdb/episodes/${id}?type=${type.split(' ')[0]}&provider=${provider}`;
+//       // console.log(url);
+//       // const { data } = await axios.get(url);
+//       const movieProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
+//       const data = (await new META.TMDB(process.env.EXPO_TMDB_API_KEY, movieProviderInitializer).fetchMediaInfo(
+//         id,
+//         type,
+//       )) as unknown as IMovieInfo;
+//       console.log(data);
+//       return data;
+//     },
+//   });
+// }

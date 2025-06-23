@@ -35,6 +35,7 @@ interface ControlsOverlayProps {
     title: string;
     episodeNumber: string;
     seasonNumber: string;
+    episodeData: string;
   };
   isPlaying: boolean;
   isMuted: boolean;
@@ -189,7 +190,6 @@ const ControlsOverlay = memo(
                   backgroundColor: SHEET_THEME_COLOR,
                 }}
                 onPress={() => {
-                  // console.log(index, selectedSubtitleIndex, track.index);
                   setSelectedVideoTrackIndex(track.index);
                   setOpenSettings(false);
                 }}>
@@ -199,51 +199,59 @@ const ControlsOverlay = memo(
           </YStack>
         ),
       },
-      {
-        key: 'tab2',
-        label: 'Subtitle',
-        content: (
-          <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-            {subtitleTracks?.map((track, index) => (
-              <RippleButton
-                key={index}
-                style={{
-                  backgroundColor: SHEET_THEME_COLOR,
-                }}
-                onPress={() => {
-                  setSelectedSubtitleIndex(index);
-                  setOpenSettings(false);
-                }}>
-                <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
-              </RippleButton>
-            ))}
-          </YStack>
-        ),
-      },
-      audioTracks &&
-        audioTracks.length > 0 && {
-          key: 'tab3',
-          label: 'Audio',
-          content: (
-            <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-              {audioTracks?.map((track, index) => (
-                <RippleButton
-                  key={index}
-                  style={{
-                    backgroundColor: SHEET_THEME_COLOR,
-                  }}
-                  onPress={() => {
-                    setSelectedAudioTrackIndex(index);
-                    setOpenSettings(false);
-                  }}>
-                  <Text color={selectedAudioTrackIndex === index ? '$color' : '$color1'}>
-                    {track.language}-{track.title}
-                  </Text>
-                </RippleButton>
-              ))}
-            </YStack>
-          ),
-        },
+      ...(subtitleTracks && subtitleTracks.length > 0
+        ? [
+            {
+              key: 'tab2',
+              label: 'Subtitle',
+              content: (
+                <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                  {subtitleTracks?.map((track, index) => (
+                    <RippleButton
+                      key={index}
+                      style={{
+                        backgroundColor: SHEET_THEME_COLOR,
+                      }}
+                      onPress={() => {
+                        setSelectedSubtitleIndex(index);
+                        setOpenSettings(false);
+                      }}>
+                      <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
+                    </RippleButton>
+                  ))}
+                </YStack>
+              ),
+            },
+          ]
+        : []),
+      // Only include audio tab if audioTracks exist and have items
+      ...(audioTracks && audioTracks.length > 0
+        ? [
+            {
+              key: 'tab3',
+              label: 'Audio',
+              content: (
+                <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                  {audioTracks.map((track, index) => (
+                    <RippleButton
+                      key={index}
+                      style={{
+                        backgroundColor: SHEET_THEME_COLOR,
+                      }}
+                      onPress={() => {
+                        setSelectedAudioTrackIndex(index);
+                        setOpenSettings(false);
+                      }}>
+                      <Text color={selectedAudioTrackIndex === index ? '$color' : '$color1'}>
+                        {track.language}-{track.title}
+                      </Text>
+                    </RippleButton>
+                  ))}
+                </YStack>
+              ),
+            },
+          ]
+        : []),
     ];
     useEffect(() => {
       if (prevId || nextId) {
@@ -426,6 +434,7 @@ const ControlsOverlay = memo(
                         episodes[prevEpisodeIndex].episode) as string,
                       seasonNumber: episodes[prevEpisodeIndex].season as string,
                       type: routeInfo.type,
+                      episodeData: routeInfo.episodeData,
                     },
                   });
                 }
@@ -470,6 +479,7 @@ const ControlsOverlay = memo(
                         episodes[nextEpisodeIndex].episode) as string,
                       seasonNumber: episodes[nextEpisodeIndex].season as string,
                       type: routeInfo.type,
+                      episodeData: routeInfo.episodeData,
                     },
                   });
                 }

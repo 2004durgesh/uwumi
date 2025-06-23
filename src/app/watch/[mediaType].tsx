@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { MediaType } from '@/constants/types';
 import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
-// import { WithDefault } from 'react-native/Libraries/Types/CodegenTypes'; // Not used directly
 import { ThemedView } from '@/components/ThemedView';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -117,6 +116,7 @@ const Watch = () => {
     episodeNumber,
     seasonNumber,
     type,
+    episodeData,
   } = useLocalSearchParams<{
     mediaType: MediaType;
     provider: string;
@@ -132,8 +132,9 @@ const Watch = () => {
     episodeNumber: string;
     seasonNumber: string;
     type: MediaFormat | TvType;
+    episodeData: string;
   }>();
-
+  // console.log(useLocalSearchParams(), 'useLocalSearchParams');
   const { top } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
   const { setProvider, getProvider } = useProviderStore();
@@ -459,6 +460,7 @@ const Watch = () => {
           });
         }
       });
+      console.log('animepahe qualities:', tracks);
       setVideoTracks(tracks);
       return data?.sources?.[selectedVideoTrackIndex || 0]?.url;
     } else {
@@ -609,10 +611,14 @@ const Watch = () => {
                   type: SelectedTrackType.INDEX,
                   value: (selectedSubtitleIndex ?? 0) + nullSubtitleIndex!,
                 }}
-                selectedAudioTrack={{
-                  type: SelectedTrackType.INDEX,
-                  value: (selectedAudioTrackIndex ?? 0) + nullAudioTrackIndex!,
-                }}
+                selectedAudioTrack={
+                  audioTracks && audioTracks.length > 0
+                    ? {
+                        type: SelectedTrackType.INDEX,
+                        value: (selectedAudioTrackIndex ?? 0) + nullAudioTrackIndex!,
+                      }
+                    : undefined
+                }
                 // onVideoTracks={(tracks) => {
                 //   console.log('Video Tracks:', tracks);
                 // }}
@@ -624,7 +630,7 @@ const Watch = () => {
 
               <ControlsOverlay
                 showControls={showControls}
-                routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber }}
+                routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber, episodeData }}
                 isPlaying={playbackState.isPlaying}
                 isMuted={isMuted}
                 isFullscreen={isFullscreen}
@@ -778,7 +784,14 @@ const Watch = () => {
               </YStack>
             )}
             <View flex={1}>
-              <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable={false} />
+              <EpisodeList
+                data={JSON.parse(episodeData)}
+                mediaType={mediaType}
+                provider={provider}
+                id={id}
+                type={type}
+                swipeable={false}
+              />
             </View>
           </YStack>
         )}

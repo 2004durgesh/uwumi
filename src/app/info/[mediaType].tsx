@@ -41,17 +41,17 @@ const Info = () => {
     {
       key: 'tab1',
       label: mediaType === MediaType.MANGA ? 'Chapters' : 'Episodes',
-      content: mediaType === MediaType.MANGA ? <Chapters /> : <Episodes />,
+      content: mediaType === MediaType.MANGA ? <Chapters /> : <Episodes data={data} />,
     },
     {
       key: 'tab2',
       label: 'Details',
-      content: <Details data={data as any} />,
+      content: <Details data={data} />,
     },
     {
       key: 'tab3',
       label: 'Similar',
-      content: <Similar data={data as any} mediaType={mediaType} metaProvider={metaProvider} />,
+      content: <Similar data={data} mediaType={mediaType} metaProvider={metaProvider} />,
     },
   ];
   // console.log(data);
