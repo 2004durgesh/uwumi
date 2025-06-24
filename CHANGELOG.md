@@ -1,5 +1,10 @@
 # Changelog
 
+## <small>2.5.3 (2025-06-24)</small>
+
+* refactor: revert back to the old episode fetching logic,update react-native-consumet,update readme ([2694f77](https://github.com/2004durgesh/uwumi/commit/2694f77))
+* refactor(episodes, providers): parallel episode fetching and improved provider handling ([e061f7d](https://github.com/2004durgesh/uwumi/commit/e061f7d))
+
 ## <small>2.5.2 (2025-06-20)</small>
 
 * feat: add audio track support to controls-overlay and watch components ([6e11286](https://github.com/2004durgesh/uwumi/commit/6e11286))
