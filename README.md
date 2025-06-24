@@ -53,20 +53,26 @@
    npx expo start
    ```
 
-### ENV Variables
+### Environment Variables
+
+Create a `.env` file in the root of the project and add the following variables:
+
 ```bash
+# API URLs (Currently not in use - kept for reference)
+EXPO_PUBLIC_API_URL=  # Leave blank - Original Consumet API endpoint (deprecated)
+EXPO_PUBLIC_API_URL_DEV=  # Leave blank - Development API endpoint (deprecated)
 
-# Create a .env file in the root of the project and add the following variables
+EXPO_PUBLIC_EPISODE_API_URL=  # Leave blank - Episodes API endpoint (no longer active)  
+EXPO_PUBLIC_EPISODE_API_URL_DEV=  # Leave blank - Development episodes API (no longer active)
 
-EXPO_PUBLIC_API_URL= # API URL for production (Consumet API)
-EXPO_PUBLIC_API_URL_DEV= # API URL for development
+# Active Configuration
+EXPO_TV=1  # Set to 1 to enable Android TV support (for tv-support branch)
+EXPO_TMDB_API_KEY=your_tmdb_api_key_here  # Required: TMDB API key for movie and series data
+```
 
-EXPO_PUBLIC_EPISODE_API_URL= # API URL for episodes in production (https://github.com/2004durgesh/episodes)
-EXPO_PUBLIC_EPISODE_API_URL_DEV= # API URL for episodes in development
-
-EXPO_TV=1  # Set to 1 to enable Android TV support
-EXPO_TMDB_API_KEY=123456789 # TMDB API key for movie and series data
-```   
+> [!NOTE] 
+> This project uses [react-native-consumet](https://github.com/2004durgesh/react-native-consumet) instead of the external Consumet API for content fetching. The API URL variables are currently not in use as the external endpoints are no longer maintained or active. These configuration fields are kept for potential future implementation or reference purposes, so you can leave them blank in your `.env` file.
+   
 
 ## 🏗️ Building for Production
 
@@ -131,4 +137,6 @@ If you have any questions, feel free to:
 
 
 ## Acknowledgements
-[Consumet API](https://github.com/consumet/api.consumet.org)
+[Consumet](https://github.com/consumet/consumet.ts)\
+[Aniyomi](https://github.com/aniyomiorg/aniyomi) - For ui inspiration.\
+[Miruro](https://www.miruro.to/watch) - For ui inspiration.

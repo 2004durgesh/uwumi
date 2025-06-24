@@ -27,7 +27,7 @@ import {
   useDoubleTapGesture,
   useWatchAnimeEpisodes,
   useWatchMoviesEpisodes,
-  useMoviesEpisodesServers,
+  // useMoviesEpisodesServers,
   useServerStore,
   useCurrentTheme,
   usePureBlackBackground,
@@ -185,24 +185,27 @@ const Watch = () => {
           server: currentServer?.name,
           embed: isEmbed,
         });
-  const {
-    data: serverData,
-    isLoading: isServerLoading,
-    error: serverError,
-  } = mediaType === MediaType.MOVIE
-    ? useMoviesEpisodesServers({ tmdbId: id, episodeNumber, seasonNumber, type, provider, embed: isEmbed })
-    : { data: undefined, isLoading: false, error: null };
+  /**
+   * keep it for future reference
+   */
+  // const {
+  //   data: serverData,
+  //   isLoading: isServerLoading,
+  //   error: serverError,
+  // } = mediaType === MediaType.MOVIE
+  //   ? useMoviesEpisodesServers({ tmdbId: id, episodeNumber, seasonNumber, type, provider, embed: isEmbed })
+  //   : { data: undefined, isLoading: false, error: null };
 
   useEffect(() => {
-    if (serverData && !serverInitialized) {
-      setServers(serverData);
-      if (serverData.length > 0 && !currentServer) {
+    if (data?.servers! && !serverInitialized) {
+      setServers(data?.servers!);
+      if (data?.servers!.length > 0 && !currentServer) {
         // Set current server only if not already set
-        setCurrentServer(serverData[0].name);
+        setCurrentServer(data?.servers![0].name);
       }
       setServerInitialized(true);
     }
-  }, [serverData, setCurrentServer, setServers, serverInitialized, currentServer]);
+  }, [data?.servers!, setCurrentServer, setServers, serverInitialized, currentServer]);
 
   useEffect(() => {
     setServerInitialized(false);
@@ -518,18 +521,18 @@ const Watch = () => {
   }, [data?.subtitles]);
 
   useEffect(() => {
-    if (!isLoading && !isServerLoading && !source && isVideoReady) {
+    if (!isLoading && !source && isVideoReady) {
       // isVideoReady to avoid premature toast
       toast.error('No video source found', { description: 'Please try changing servers or quality.' });
     }
-    if (!isLoading && (error || serverError)) {
+    if (!isLoading && error) {
       toast.error('Error loading media', {
-        description: error?.message || serverError?.message || 'An unknown error occurred.',
+        description: error?.message || 'An unknown error occurred.',
       });
     }
-  }, [source, isLoading, error, isServerLoading, serverError, isVideoReady]);
+  }, [source, isLoading, error, isVideoReady]);
 
-  if (isLoading || (mediaType === MediaType.MOVIE && isServerLoading && !serverInitialized)) {
+  if (isLoading || (mediaType === MediaType.MOVIE && !serverInitialized)) {
     return (
       <ThemedView useSafeArea={false} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Spinner size="large" color="$color" />
@@ -630,7 +633,7 @@ const Watch = () => {
 
               <ControlsOverlay
                 showControls={showControls}
-                routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber, episodeData }}
+                routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber }}
                 isPlaying={playbackState.isPlaying}
                 isMuted={isMuted}
                 isFullscreen={isFullscreen}
@@ -784,14 +787,7 @@ const Watch = () => {
               </YStack>
             )}
             <View flex={1}>
-              <EpisodeList
-                data={JSON.parse(episodeData)}
-                mediaType={mediaType}
-                provider={provider}
-                id={id}
-                type={type}
-                swipeable={false}
-              />
+              <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable={false} />
             </View>
           </YStack>
         )}

@@ -2,7 +2,7 @@
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
 import { IEpisodeServer, ISource, SubOrSub } from 'react-native-consumet';
 import { useQuery } from '@tanstack/react-query';
-import { getFetchUrl } from '@/constants/utils';
+// import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
 import { MediaType } from '@/constants/types';
 
@@ -57,63 +57,65 @@ export function useWatchMoviesEpisodes({
   embed: boolean;
 }) {
   // console.log('from query', server);
-  return useQuery<ISource>({
+  return useQuery<ISource & { servers: IEpisodeServer[] }>({
     queryKey: ['watch', episodeId, mediaId, server, provider],
     queryFn: async () => {
       try {
-        // console.log(
-        //   `${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&server=${server}&embed=${embed}`,
-        // );
-        // const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}`, {
-        //   params: {
-        //     episodeNumber,
-        //     seasonNumber,
-        //     type: type.split(' ')[0].toLowerCase(),
-        //     ...(server && { server }),
-        //     provider,
-        //     embed,
-        //   },
-        // });
         const moviesProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
-        // console.log(moviesProviderInitializer);
-        console.log({ episodeId, mediaId, type, provider, server, embed });
-        const data = await new moviesProviderInitializer.fetchEpisodeSources(episodeId, mediaId);
-        console.log(data);
-        return data;
+        const data = (await new moviesProviderInitializer.fetchEpisodeSources(episodeId, mediaId)) as ISource;
+        const servers = (await new moviesProviderInitializer.fetchEpisodeServers(
+          episodeId,
+          mediaId,
+        )) as IEpisodeServer[];
+        console.log("useWatchMoviesEpisodes",{ ...data, servers });
+        return { ...data, servers };
       } catch (error) {
         throw new Error(`Error fetching movies episode sources: ${error}`);
       }
     },
   });
 }
-export function useMoviesEpisodesServers({
-  tmdbId,
-  episodeNumber,
-  seasonNumber,
-  type,
-  provider = DEFAULT_PROVIDERS.movie,
-  embed,
-}: {
-  tmdbId: string;
-  episodeNumber: string;
-  seasonNumber: string;
-  type: string;
-  provider: string;
-  embed: boolean;
-}) {
-  // console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
+// export function useMoviesEpisodesServers({
+//   tmdbId,
+//   episodeNumber,
+//   seasonNumber,
+//   type,
+//   provider = DEFAULT_PROVIDERS.movie,
+//   embed,
+// }: {
+//   tmdbId: string;
+//   episodeNumber: string;
+//   seasonNumber: string;
+//   type: string;
+//   provider: string;
+//   embed: boolean;
+// }) {
+//   // console.log(tmdbId, episodeNumber, seasonNumber, type, provider);
 
-  return useQuery<IEpisodeServer[]>({
-    queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider, embed],
-    queryFn: async () => {
-      console.log(
-        `${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&embed=${embed}`,
-      );
-      const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/server/${tmdbId}`, {
-        params: { episodeNumber, seasonNumber, type: type.split(' ')[0].toLowerCase(), provider, embed },
-      });
-      console.log(data);
-      return data;
-    },
-  });
-}
+//   return useQuery<IEpisodeServer[]>({
+//     queryKey: ['watch', tmdbId, episodeNumber, seasonNumber, provider, embed],
+//     queryFn: async () => {
+//       try {
+//         // console.log(
+//         //   `${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}?episodeNumber=${episodeNumber}&seasonNumber=${seasonNumber}&type=${type.split(' ')[0].toLowerCase()}&server=${server}&embed=${embed}`,
+//         // );
+//         // const { data } = await axios.get(`${getFetchUrl().episodeApiUrl}/movies/tmdb/watch/${tmdbId}`, {
+//         //   params: {
+//         //     episodeNumber,
+//         //     seasonNumber,
+//         //     type: type.split(' ')[0].toLowerCase(),
+//         //     ...(server && { server }),
+//         //     provider,
+//         //     embed,
+//         //   },
+//         // });
+//         const moviesProviderInitializer = createProviderInstance(MediaType.MOVIE, provider);
+//         const data = await new moviesProviderInitializer.fetchEpisodeServers(episodeId, mediaId);
+//         console.log(data);
+//         return data;
+//       } catch (error) {
+//         throw new Error(`Error fetching movies episode sources: ${error}`);
+//       }
+//     },
+//   });
+// }

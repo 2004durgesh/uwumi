@@ -4,11 +4,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { IAnimeInfo, IMovieInfo, MediaFormat, TvType } from 'react-native-consumet';
 import { View } from 'tamagui';
 
-interface EpisodesProps {
-  data: IAnimeInfo | IMovieInfo | undefined;
-}
 
-const Episodes: React.FC<EpisodesProps> = ({ data }) => {
+const Episodes = () => {
   const { mediaType, provider, id, type } = useLocalSearchParams<{
     mediaType: MediaType;
     provider: string;
@@ -17,7 +14,7 @@ const Episodes: React.FC<EpisodesProps> = ({ data }) => {
   }>();
   return (
     <View height="100%">
-      <EpisodeList data={data} mediaType={mediaType} provider={provider} id={id} type={type} swipeable />
+      <EpisodeList mediaType={mediaType} provider={provider} id={id} type={type} swipeable />
     </View>
   );
 };

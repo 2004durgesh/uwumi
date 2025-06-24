@@ -21,6 +21,7 @@ import Similar from './Similar';
 import AnimatedFavoriteButton from '@/components/AnimatedFavoriteButton';
 import RippleButton from '@/components/RippleButton';
 import { MediaFormat, TvType } from 'react-native-consumet';
+import { useProviderStore } from '@/constants/provider';
 
 const Info = () => {
   const { mediaType, metaProvider, type, provider, id, image } = useLocalSearchParams<{
@@ -31,8 +32,9 @@ const Info = () => {
     id: string;
     image: string;
   }>();
+  const { getProvider } = useProviderStore();
   const insets = useSafeAreaInsets();
-  const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider });
+  const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider: getProvider(mediaType)});
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
   const router = useRouter();
@@ -41,7 +43,7 @@ const Info = () => {
     {
       key: 'tab1',
       label: mediaType === MediaType.MANGA ? 'Chapters' : 'Episodes',
-      content: mediaType === MediaType.MANGA ? <Chapters /> : <Episodes data={data} />,
+      content: mediaType === MediaType.MANGA ? <Chapters /> : <Episodes />,
     },
     {
       key: 'tab2',

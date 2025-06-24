@@ -35,7 +35,6 @@ interface ControlsOverlayProps {
     title: string;
     episodeNumber: string;
     seasonNumber: string;
-    episodeData: string;
   };
   isPlaying: boolean;
   isMuted: boolean;
@@ -434,7 +433,6 @@ const ControlsOverlay = memo(
                         episodes[prevEpisodeIndex].episode) as string,
                       seasonNumber: episodes[prevEpisodeIndex].season as string,
                       type: routeInfo.type,
-                      episodeData: routeInfo.episodeData,
                     },
                   });
                 }
@@ -479,7 +477,6 @@ const ControlsOverlay = memo(
                         episodes[nextEpisodeIndex].episode) as string,
                       seasonNumber: episodes[nextEpisodeIndex].season as string,
                       type: routeInfo.type,
-                      episodeData: routeInfo.episodeData,
                     },
                   });
                 }
