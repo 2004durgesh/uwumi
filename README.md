@@ -134,6 +134,22 @@ If you have any questions, feel free to:
 💬 **Open an issue** – Report bugs, suggest features, or ask for help.  
 🚀 **Your contributions help make Uwumi better!** 🎉  
 
+## 📞 Contact Me
+
+Got a question, idea, or just want to chat? I'm all ears! Feel free to reach out for:
+
+> 🐛 **Bug Reports**\
+> 💡 **Feature Suggestions**\
+> 🤝 **Collaboration Opportunities**\
+> ❓ **General Project Queries**
+
+---
+
+### 📬 Reach Out
+
+* **📧 Email**: [durgeshdwivedi81@gmail.com](mailto:durgeshdwivedi81@gmail.com)
+* **💬 Discord**: [Join the community](https://discord.gg/n7xVPxbG4R)
+
 
 
 ## Acknowledgements
