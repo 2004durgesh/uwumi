@@ -26,7 +26,7 @@ const SearchBar: React.FC = () => {
   const handleSearch = useCallback(() => {
     if (searchQuery.trim()) {
       setSearchQuery(searchQuery.trim());
-      setDebouncedQuery(searchQuery.trim()); // Pass true to skip debounce
+      setDebouncedQuery(searchQuery.trim());
     }
     setCurrentTab('tab3');
   }, [searchQuery]);

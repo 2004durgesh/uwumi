@@ -34,7 +34,7 @@ const Info = () => {
   }>();
   const { getProvider } = useProviderStore();
   const insets = useSafeAreaInsets();
-  const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider: getProvider(mediaType)});
+  const { data, isLoading } = useInfo({ mediaType, id, metaProvider, type, provider: getProvider(mediaType) });
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
   const router = useRouter();

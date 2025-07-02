@@ -67,7 +67,7 @@ export function useWatchMoviesEpisodes({
           episodeId,
           mediaId,
         )) as IEpisodeServer[];
-        console.log("useWatchMoviesEpisodes",{ ...data, servers });
+        console.log('useWatchMoviesEpisodes', { ...data, servers });
         return { ...data, servers };
       } catch (error) {
         throw new Error(`Error fetching movies episode sources: ${error}`);

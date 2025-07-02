@@ -4,7 +4,6 @@ import { useLocalSearchParams } from 'expo-router';
 import { IAnimeInfo, IMovieInfo, MediaFormat, TvType } from 'react-native-consumet';
 import { View } from 'tamagui';
 
-
 const Episodes = () => {
   const { mediaType, provider, id, type } = useLocalSearchParams<{
     mediaType: MediaType;

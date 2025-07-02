@@ -16,7 +16,7 @@ import ControlsOverlay from './ControlsOverlay';
 import { MediaType } from '@/constants/types';
 import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { ThemedView } from '@/components/ThemedView';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Route, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import * as Brightness from 'expo-brightness';
@@ -36,7 +36,6 @@ import { toast } from 'sonner-native';
 import axios from 'axios';
 import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import FullscreenModule from '../../../modules/fullscreen-module';
-import { RippleOverlay } from '@/components/RippleButton';
 import EpisodeList from '@/components/EpisodeList';
 import { Check } from '@tamagui/lucide-icons';
 
@@ -73,67 +72,52 @@ export interface AudioTrack {
   selected?: boolean;
 }
 
+export interface WatchSearchParams {
+  mediaType: MediaType;
+  provider: string;
+  id: string;
+  mediaId: string;
+  episodeId: string;
+  episodeDubId: string;
+  uniqueId: string;
+  isDubbed: string;
+  poster: string;
+  title: string;
+  description: string;
+  episodeNumber: string;
+  seasonNumber: string;
+  mappings: string;
+  type: MediaFormat | TvType;
+}
+
 const SeekText = styled(Text, {
-  fontSize: 16, // Slightly increased font size for visibility
+  fontSize: 10,
   fontWeight: 'bold',
   color: 'white',
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  backgroundColor: 'rgba(0,0,0,0.6)',
+  padding: 10,
+  backgroundColor: 'rgba(0,0,0,0.5)',
   borderRadius: 8,
-  // textShadowColor: 'rgba(0, 0, 0, 0.75)', // Optional: for better contrast
-  // textShadowOffset: { width: 0, height: 1 },
-  // textShadowRadius: 2,
 });
-
-// This view is for the container of the seek text animation (left/right halves)
-const SeekTextOverlayContainer = styled(Animated.View, {
+const OverlayedView = styled(Animated.View, {
   position: 'absolute',
   top: 0,
-  width: '50%', // Covers half the screen
+  // width: 200,
+  // height: 200,
+  width: '50%',
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
   pointerEvents: 'none',
   zIndex: 10,
   overflow: 'hidden',
-  borderRadius: '50%', // Makes the container circular
-  transform: [{ scale: 1.5 }], // Scales the container
-  // backgroundColor:'rgba(0, 255, 255, 0.9)'
+  borderRadius: '50%',
+  transform: [{ scale: 1.5 }],
+  // backgroundColor: 'red',
 });
 
 const Watch = () => {
-  const {
-    mediaType,
-    provider,
-    id,
-    mediaId,
-    episodeId,
-    uniqueId,
-    isDubbed,
-    poster,
-    title,
-    episodeNumber,
-    seasonNumber,
-    type,
-    episodeData,
-  } = useLocalSearchParams<{
-    mediaType: MediaType;
-    provider: string;
-    id: string;
-    mediaId: string;
-    episodeId: string;
-    episodeDubId: string;
-    uniqueId: string;
-    isDubbed: string;
-    poster: string;
-    title: string;
-    description: string;
-    episodeNumber: string;
-    seasonNumber: string;
-    type: MediaFormat | TvType;
-    episodeData: string;
-  }>();
+  const { mediaType, provider, id, mediaId, episodeId, uniqueId, isDubbed, poster, type } =
+    useLocalSearchParams() as unknown as WatchSearchParams;
   // console.log(useLocalSearchParams(), 'useLocalSearchParams');
   const { top } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
@@ -562,13 +546,21 @@ const Watch = () => {
                 ref={videoRef}
                 source={{
                   uri: source,
-                  textTracks: subtitleTracks?.map((track, index) => ({
-                    title: track.lang || 'Untitled',
-                    language: track.lang?.toLowerCase() as ISO639_1,
-                    type: TextTrackType.VTT,
-                    uri: track.url || '',
-                    index,
-                  })),
+                  // textTracks: subtitleTracks?.map((track, index) => ({
+                  //   title: track.lang || 'Untitled',
+                  //   language: track.lang?.toLowerCase() as ISO639_1,
+                  //   type: TextTrackType.VTT,
+                  //   uri: track.url || '',
+                  //   index,
+                  // })),
+                  textTracks: [
+                    {
+                      title: 'English',
+                      language: 'en' as ISO639_1,
+                      type: TextTrackType.SUBRIP,
+                      uri: 'https://dl.opensubtitles.org/en/download/src-api/vrf-19bb0c55/file/1954463516',
+                    },
+                  ],
                   textTracksAllowChunklessPreparation: false,
                 }}
                 style={videoStyle}
@@ -633,7 +625,6 @@ const Watch = () => {
 
               <ControlsOverlay
                 showControls={showControls}
-                routeInfo={{ mediaType, provider, id, type, title, episodeNumber, seasonNumber }}
                 isPlaying={playbackState.isPlaying}
                 isMuted={isMuted}
                 isFullscreen={isFullscreen}
@@ -658,29 +649,16 @@ const Watch = () => {
                 setBrightness={updateBrightness}
                 setVolume={updateVolume}
               />
-              <SeekTextOverlayContainer style={[{ left: '-15%' }]}>
-                <RippleOverlay
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    // backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
-                  }}></RippleOverlay>
-              </SeekTextOverlayContainer>
-
-              <SeekTextOverlayContainer style={[{ right: '-15%' }]}>
-                <RippleOverlay
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    // backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
-                  }}></RippleOverlay>
-              </SeekTextOverlayContainer>
+              <OverlayedView ref={backwardRippleRef} style={{ left: 0 }}>
+                <Animated.View style={[backwardAnimatedRipple]}>
+                  <SeekText>-{doubleTapValue.backward}s</SeekText>
+                </Animated.View>
+              </OverlayedView>
+              <OverlayedView ref={forwardRippleRef} style={{ right: 0 }}>
+                <Animated.View style={[forwardAnimatedRipple]}>
+                  <SeekText>+{doubleTapValue.forward}s</SeekText>
+                </Animated.View>
+              </OverlayedView>
             </View>
           </View>
         </GestureDetector>

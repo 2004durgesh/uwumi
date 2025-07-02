@@ -61,7 +61,9 @@ export function useAnimeEpisodes({ id, provider = DEFAULT_PROVIDERS.anime }: { i
     queryFn: async () => {
       try {
         const animeProviderInitializer = createProviderInstance(MediaType.ANIME, provider);
-        const data = (await new META.Anilist(animeProviderInitializer).fetchEpisodesListById(id)) as unknown as IAnimeEpisode;
+        const data = (await new META.Anilist(animeProviderInitializer).fetchEpisodesListById(
+          id,
+        )) as unknown as IAnimeEpisode;
         console.log(data);
         return data;
       } catch (error) {

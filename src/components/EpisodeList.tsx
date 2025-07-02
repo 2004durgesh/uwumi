@@ -232,6 +232,7 @@ const EpisodeList = ({
             description: item?.description,
             episodeNumber: (item?.number ?? item?.episode) as string,
             seasonNumber: item?.season as string,
+            mappings: JSON.stringify(episodeData?.mappings),
             type,
           },
         });

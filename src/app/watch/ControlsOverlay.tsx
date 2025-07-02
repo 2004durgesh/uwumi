@@ -14,28 +14,20 @@ import {
   SkipForward,
   SkipBack,
   Sun,
+  ListFilterPlus,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
-import { VideoTrack, AudioTrack } from './[mediaType]';
+import { VideoTrack, AudioTrack, WatchSearchParams } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs, { TabItem } from '@/components/HorizontalTabs';
 import SkiaSlider from './SkiaSlider';
 
 interface ControlsOverlayProps {
   showControls: boolean;
-  routeInfo: {
-    mediaType: string;
-    provider: string;
-    id: string;
-    type: MediaFormat | TvType;
-    title: string;
-    episodeNumber: string;
-    seasonNumber: string;
-  };
   isPlaying: boolean;
   isMuted: boolean;
   isFullscreen: boolean;
@@ -67,7 +59,6 @@ const AnimatedXStack = Animated.createAnimatedComponent(XStack);
 const ControlsOverlay = memo(
   ({
     showControls,
-    routeInfo,
     isPlaying,
     isMuted,
     isFullscreen,
@@ -150,7 +141,8 @@ const ControlsOverlay = memo(
     const controlsVisible = openSettings || (showControls && isUserActive);
 
     const router = useRouter();
-    const { mediaType, provider, id } = routeInfo;
+    const { mediaType, provider, id, type, title, episodeNumber, seasonNumber } =
+      useLocalSearchParams() as unknown as WatchSearchParams;
     const prevUniqueId = useEpisodesIdStore((state) => state.prevUniqueId);
     const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
     const nextUniqueId = useEpisodesIdStore((state) => state.nextUniqueId);
@@ -205,6 +197,33 @@ const ControlsOverlay = memo(
               label: 'Subtitle',
               content: (
                 <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                  <RippleButton
+                    onPress={() => {}}
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderWidth: 1,
+                      borderColor: '$borderColor',
+                      borderStyle: 'dashed',
+                      borderRadius: 8,
+                      padding: 12,
+                      marginBottom: 8,
+                    }}>
+                    <XStack alignItems="center" justifyContent="center" gap="$3">
+                      <View
+                        backgroundColor="$color4"
+                        borderRadius="$12"
+                        padding="$2"
+                        alignItems="center"
+                        justifyContent="center">
+                        <ListFilterPlus color="$background" size={16} />
+                      </View>
+                      <YStack>
+                        <Text color="$color1" fontSize="$2" fontWeight="600">
+                          Add External Subtitle
+                        </Text>
+                      </YStack>
+                    </XStack>
+                  </RippleButton>
                   {subtitleTracks?.map((track, index) => (
                     <RippleButton
                       key={index}
@@ -321,11 +340,11 @@ const ControlsOverlay = memo(
             pointerEvents={controlsVisible ? 'auto' : 'none'}>
             <YStack width="60%">
               <Text color="white" numberOfLines={1} fontWeight={700} fontSize="$3.5">
-                {routeInfo.title}
+                {title}
               </Text>
-              {routeInfo.type !== TvType.MOVIE && (
+              {type !== TvType.MOVIE && (
                 <Text color="white" fontStyle="italic" fontWeight={500} fontSize="$2.5">
-                  {routeInfo.seasonNumber ? `Season ${routeInfo.seasonNumber}` : null} Episode {routeInfo.episodeNumber}
+                  {seasonNumber ? `Season ${seasonNumber}` : null} Episode {episodeNumber}
                 </Text>
               )}
             </YStack>
@@ -432,7 +451,7 @@ const ControlsOverlay = memo(
                       episodeNumber: (episodes[prevEpisodeIndex].number ??
                         episodes[prevEpisodeIndex].episode) as string,
                       seasonNumber: episodes[prevEpisodeIndex].season as string,
-                      type: routeInfo.type,
+                      type: type,
                     },
                   });
                 }
@@ -476,7 +495,7 @@ const ControlsOverlay = memo(
                       episodeNumber: (episodes[nextEpisodeIndex].number ??
                         episodes[nextEpisodeIndex].episode) as string,
                       seasonNumber: episodes[nextEpisodeIndex].season as string,
-                      type: routeInfo.type,
+                      type: type,
                     },
                   });
                 }
