@@ -56,7 +56,7 @@ export function useWatchMoviesEpisodes({
   server?: string;
   embed: boolean;
 }) {
-  // console.log('from query', server);
+  // console.log('from query', episodeId, mediaId,);
   return useQuery<ISource & { servers: IEpisodeServer[] }>({
     queryKey: ['watch', episodeId, mediaId, server, provider],
     queryFn: async () => {
@@ -67,7 +67,7 @@ export function useWatchMoviesEpisodes({
           episodeId,
           mediaId,
         )) as IEpisodeServer[];
-        console.log('useWatchMoviesEpisodes', { ...data, servers });
+        // console.log('useWatchMoviesEpisodes', { ...data, servers });
         return { ...data, servers };
       } catch (error) {
         throw new Error(`Error fetching movies episode sources: ${error}`);

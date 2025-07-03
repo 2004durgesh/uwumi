@@ -141,8 +141,9 @@ const ControlsOverlay = memo(
     const controlsVisible = openSettings || (showControls && isUserActive);
 
     const router = useRouter();
-    const { mediaType, provider, id, type, title, episodeNumber, seasonNumber } =
+    const { mediaType, provider, id, mediaId, type, title, episodeNumber, seasonNumber, mappings } =
       useLocalSearchParams() as unknown as WatchSearchParams;
+    const parsedMappings = mappings ? JSON.parse(mappings) : null;
     const prevUniqueId = useEpisodesIdStore((state) => state.prevUniqueId);
     const currentUniqueId = useEpisodesIdStore((state) => state.currentUniqueId);
     const nextUniqueId = useEpisodesIdStore((state) => state.nextUniqueId);
@@ -198,31 +199,21 @@ const ControlsOverlay = memo(
               content: (
                 <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
                   <RippleButton
-                    onPress={() => {}}
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderWidth: 1,
-                      borderColor: '$borderColor',
-                      borderStyle: 'dashed',
-                      borderRadius: 8,
-                      padding: 12,
-                      marginBottom: 8,
+                    onPress={() => {
+                      console.log(
+                        'Add External Subtitle',
+                        // 'https://rest.opensubtitles.org/search/imdbid-1375666/sublanguageid-eng',
+                        `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
+                      );
                     }}>
-                    <XStack alignItems="center" justifyContent="center" gap="$3">
-                      <View
-                        backgroundColor="$color4"
-                        borderRadius="$12"
-                        padding="$2"
-                        alignItems="center"
-                        justifyContent="center">
-                        <ListFilterPlus color="$background" size={16} />
-                      </View>
-                      <YStack>
-                        <Text color="$color1" fontSize="$2" fontWeight="600">
+                    {parsedMappings && (
+                      <XStack alignItems="center" justifyContent="center" gap="$3">
+                        <ListFilterPlus color="$color1" size={16} />
+                        <Text color="$color1" fontSize="$3" fontWeight="600">
                           Add External Subtitle
                         </Text>
-                      </YStack>
-                    </XStack>
+                      </XStack>
+                    )}
                   </RippleButton>
                   {subtitleTracks?.map((track, index) => (
                     <RippleButton
@@ -386,7 +377,7 @@ const ControlsOverlay = memo(
                   marginHorizontal="auto"
                   width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <HorizontalTabs items={tabItems as TabItem[]} initialTab="tab1" />
+                    <HorizontalTabs items={tabItems as TabItem[]} initialTab="tab2" />
                   </Sheet.ScrollView>
                 </Sheet.Frame>
               </Sheet>
@@ -434,6 +425,7 @@ const ControlsOverlay = memo(
                       mediaType,
                       provider,
                       id,
+                      mediaId,
                       episodeId: episodes[prevEpisodeIndex].id,
                       uniqueId: episodes[prevEpisodeIndex].uniqueId,
                       ...(episodes[prevEpisodeIndex].dubId
@@ -451,6 +443,7 @@ const ControlsOverlay = memo(
                       episodeNumber: (episodes[prevEpisodeIndex].number ??
                         episodes[prevEpisodeIndex].episode) as string,
                       seasonNumber: episodes[prevEpisodeIndex].season as string,
+                      mappings: JSON.stringify(parsedMappings),
                       type: type,
                     },
                   });
@@ -478,6 +471,7 @@ const ControlsOverlay = memo(
                       mediaType,
                       provider,
                       id,
+                      mediaId,
                       episodeId: episodes[nextEpisodeIndex].id,
                       uniqueId: episodes[nextEpisodeIndex].uniqueId,
                       ...(episodes[nextEpisodeIndex].dubId
@@ -495,6 +489,7 @@ const ControlsOverlay = memo(
                       episodeNumber: (episodes[nextEpisodeIndex].number ??
                         episodes[nextEpisodeIndex].episode) as string,
                       seasonNumber: episodes[nextEpisodeIndex].season as string,
+                      mappings: JSON.stringify(parsedMappings),
                       type: type,
                     },
                   });
@@ -529,7 +524,7 @@ const ControlsOverlay = memo(
 
           {/* Bottom Controls - Always mounted, visibility controlled by animation */}
           <AnimatedYStack
-            style={bottomControlsAnimatedStyle}
+            style={[bottomControlsAnimatedStyle, { alignItems: 'center' }]}
             paddingVertical={isFullscreen ? '$5' : '$2'}
             paddingHorizontal={isFullscreen ? '$4' : '$2'}
             pointerEvents={controlsVisible ? 'auto' : 'none'}>
@@ -554,7 +549,7 @@ const ControlsOverlay = memo(
                 </RippleButton>
               </XStack>
             </XStack>
-            <YStack width={screenWidth - 10} alignItems="center">
+            <YStack width={screenWidth} alignItems="center">
               <View alignItems="center" justifyContent="center">
                 <SkiaSlider
                   width={screenWidth - 10}

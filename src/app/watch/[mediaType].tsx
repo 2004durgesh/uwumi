@@ -229,12 +229,12 @@ const Watch = () => {
 
   const enterFullscreen = useCallback(async () => {
     try {
-      StatusBar.setHidden(true),
+      (StatusBar.setHidden(true),
         SystemNavigationBar.stickyImmersive(),
         await Promise.all([
           ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE),
           FullscreenModule.enterFullscreen(),
-        ]);
+        ]));
       setIsFullscreen(true);
     } catch (err) {
       console.error('Failed to enter fullscreen:', err);
@@ -243,7 +243,7 @@ const Watch = () => {
 
   const exitFullscreen = useCallback(async () => {
     try {
-      StatusBar.setHidden(false),
+      (StatusBar.setHidden(false),
         SystemNavigationBar.setNavigationColor(
           pureBlackBackground ? currentTheme?.color5?.val || 'black' : currentTheme?.color3?.val || 'black',
         ),
@@ -251,7 +251,7 @@ const Watch = () => {
         await Promise.all([
           ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP),
           FullscreenModule.exitFullscreen(),
-        ]);
+        ]));
       setIsFullscreen(false);
     } catch (err) {
       console.error('Failed to exit fullscreen:', err);
@@ -525,7 +525,10 @@ const Watch = () => {
   }
 
   return (
-    <ThemedView useSafeArea={false} useStatusBar={isFullscreen} style={{ flex: 1, backgroundColor: 'black' }}>
+    <ThemedView
+      useSafeArea={false}
+      useStatusBar={isFullscreen}
+      style={{ flex: 1, backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background }}>
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
           <View
