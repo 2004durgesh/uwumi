@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { RefObject, useMemo } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { Text, YStack, XStack, Separator } from 'tamagui';
 import { Route, useRouter } from 'expo-router';
 import { Settings, Palette, Info, Heart } from '@tamagui/lucide-icons';
 import { Pressable, View } from 'react-native';
 
-// Enhanced MenuItem with improved TV focus support
 const MenuItem = ({
   href,
   icon: Icon,
@@ -16,7 +15,7 @@ const MenuItem = ({
   label: string;
   index?: number;
   totalItems?: number;
-  refs?: React.MutableRefObject<(View | null)[]>;
+  refs?: RefObject<(View | null)[]>;
   nextFocusUp?: number | null;
   nextFocusDown?: number | null;
 }) => {
@@ -40,22 +39,22 @@ const MenuItem = ({
 };
 
 const More = () => {
-  // Create menu items array to manage indices with useMemo to prevent recreation on each render
-  const menuItems = useMemo(
-    () => [
+  // Create menu items array with conditional development item inside useMemo
+  const menuItems = useMemo(() => {
+    const baseItems = [
       { href: '/(settings)/appearance' as Route, icon: Palette, label: 'Appearance' },
       { href: '/(settings)' as Route, icon: Settings, label: 'Settings' },
       { href: '/(settings)/favorites' as Route, icon: Heart, label: 'Favorites' },
       { href: '/(settings)/about' as Route, icon: Info, label: 'About' },
-    ],
-    [],
-  );
-  /**
-   * * Add a development-only menu item for testing purposes.
-   */
-  if (process.env.NODE_ENV === 'development') {
-    menuItems.push({ href: '/(settings)/example' as Route, icon: Info, label: 'Example' });
-  }
+    ];
+
+    // Add development-only menu item for testing purposes
+    if (process.env.NODE_ENV === 'development') {
+      return [...baseItems, { href: '/(settings)/example' as Route, icon: Info, label: 'Example' }];
+    }
+
+    return baseItems;
+  }, []); // Empty dependency array since NODE_ENV doesn't change during runtime
 
   const totalItems = menuItems.length;
 

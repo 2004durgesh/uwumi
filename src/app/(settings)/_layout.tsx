@@ -1,24 +1,62 @@
 import { useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View, XStack, Button } from 'tamagui';
+import { ArrowLeft } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
+import { Platform } from 'react-native';
+import RippleButton from '@/components/RippleButton';
 
 export default function SettingsLayout() {
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const insets = useSafeAreaInsets();
-  const calculatedHeaderHeight = insets.top * 1.5;
 
+
+//making a custom header component due to edge-to-edge issues with the default header in Expo Router or may be i'm small brained
   return (
     <Stack
       screenOptions={{
-        headerStyle: {
-          backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background,
-        },
-        headerTintColor: currentTheme?.color1,
         headerTransparent: true,
         contentStyle: {
-          marginTop: calculatedHeaderHeight,
+          paddingTop: insets.top,
           backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background,
+        },
+        header(props) {
+          const canGoBack = props.navigation.canGoBack();
+          return (
+            <View
+              backgroundColor={pureBlackBackground ? '#000' : currentTheme?.background}
+              paddingTop={insets.top}
+              zIndex={1000}>
+              <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$4">
+                {/* Left Section - Back Button */}
+                <XStack alignItems="center" flex={1}>
+                  {canGoBack && (
+                    // a small delay to ensure the back navigation is smooth
+                    <RippleButton onPress={() => setTimeout(() => props.navigation.goBack(), 300)}>
+                      <ArrowLeft size={24} color={currentTheme?.color1} />
+                    </RippleButton>
+                  )}
+                </XStack>
+
+                {/* Center Section - Title */}
+                <XStack flex={2} justifyContent="center">
+                  <Text
+                    fontSize="$5"
+                    fontWeight="600"
+                    color={currentTheme?.color1}
+                    textAlign="center"
+                    numberOfLines={1}>
+                    {props.options.title}
+                  </Text>
+                </XStack>
+
+                {/* Right Section - Empty for now */}
+                <XStack flex={1} justifyContent="flex-end"/>
+              </XStack>
+            </View>
+          );
         },
       }}>
       <Stack.Screen name="index" options={{ title: 'Settings' }} />

@@ -85,7 +85,7 @@ const ControlsOverlay = memo(
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     const [isUserActive, setIsUserActive] = useState(true);
-    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const inactivityTimerRef = useRef<number | null>(null);
     const lastActivityTimeRef = useRef(Date.now());
     const controlsTimeoutDuration = 5000;
 
@@ -156,6 +156,17 @@ const ControlsOverlay = memo(
     const nextId =
       currentEpisodeIndex < episodes.length - 1 ? String(episodes[currentEpisodeIndex + 1].uniqueId) : null;
     const themeName = useThemeStore((state) => state.themeName);
+
+    const handleExternalSubtitle = async (url: string) => {
+      const res = await fetch(url, {
+        headers: {
+          'x-user-agent': 'VLSub 0.10.2',
+          'X-User-Agent': 'trailers.to-UA',
+        },
+      });
+      const data = await res.json();
+      console.log('External Subtitle Data:', data);
+    };
     // console.log({
     //   prevUniqueId,
     //   currentUniqueId,
@@ -202,8 +213,14 @@ const ControlsOverlay = memo(
                     onPress={() => {
                       console.log(
                         'Add External Subtitle',
-                        // 'https://rest.opensubtitles.org/search/imdbid-1375666/sublanguageid-eng',
-                        `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
+                        type == TvType.TVSERIES
+                          ? `https://rest.opensubtitles.org/search/episode-${episodeNumber}/imdbid-${parsedMappings.imdb.replace('tt', '')}/season-${seasonNumber}/sublanguageid-eng`
+                          : `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
+                      );
+                      handleExternalSubtitle(
+                        type == TvType.TVSERIES
+                          ? `https://rest.opensubtitles.org/search/episode-${episodeNumber}/imdbid-${parsedMappings.imdb.replace('tt', '')}/season-${seasonNumber}/sublanguageid-eng`
+                          : `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
                       );
                     }}>
                     {parsedMappings && (

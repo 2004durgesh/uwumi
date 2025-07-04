@@ -8,7 +8,7 @@ import { View } from 'tamagui';
 
 const Favorites = () => {
   const { favorites } = useFavoriteStore();
-  console.log(favorites);
+  // console.log(favorites);
   const tabItems = [
     {
       key: 'tab1',

@@ -38,6 +38,7 @@ import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import FullscreenModule from '../../../modules/fullscreen-module';
 import EpisodeList from '@/components/EpisodeList';
 import { Check } from '@tamagui/lucide-icons';
+import { set } from 'lodash';
 
 // SubtitleTrack, VideoTrack, AudioTrack interfaces remain the same
 
@@ -151,7 +152,6 @@ const Watch = () => {
   const [seekableDuration, setSeekableDuration] = useState(0);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [dub, setDub] = useState(false);
-  const [playbackState, setPlaybackState] = useState<PlaybackState>({ isPlaying: false, isSeeking: false });
   const [playerDimensions, setPlayerDimensions] = useState({ width: 0, height: 0 });
   const [dimensions, setDimensions] = useState({
     width: Dimensions.get('screen').width,
@@ -278,20 +278,13 @@ const Watch = () => {
     [uniqueId, getProgress, setProgress],
   );
 
-  const handlePlaybackStateChange = useCallback((state: PlaybackState) => {
-    setPlaybackState(state);
-    // console.log('Playback State:', state);
-  }, []);
-
   const handlePlayPress = useCallback(() => {
-    if (videoRef.current) {
-      if (playbackState.isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.resume();
-      }
+    if (isPlaying) {
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
     }
-  }, [playbackState.isPlaying]);
+  }, [isPlaying]);
 
   const handleMutePress = useCallback(() => {
     setIsMuted((prev) => !prev);
@@ -549,28 +542,30 @@ const Watch = () => {
                 ref={videoRef}
                 source={{
                   uri: source,
-                  // textTracks: subtitleTracks?.map((track, index) => ({
-                  //   title: track.lang || 'Untitled',
-                  //   language: track.lang?.toLowerCase() as ISO639_1,
-                  //   type: TextTrackType.VTT,
-                  //   uri: track.url || '',
-                  //   index,
-                  // })),
-                  textTracks: [
-                    {
-                      title: 'English',
-                      language: 'en' as ISO639_1,
-                      type: TextTrackType.SUBRIP,
-                      uri: 'https://dl.opensubtitles.org/en/download/src-api/vrf-19bb0c55/file/1954463516',
-                    },
-                  ],
+                  textTracks: subtitleTracks?.map((track, index) => ({
+                    title: track.lang || 'Untitled',
+                    language: track.lang?.toLowerCase() as ISO639_1,
+                    type: TextTrackType.VTT,
+                    uri: track.url || '',
+                    index,
+                  })),
+                  // textTracks: [
+                  //   {
+                  //     title: 'English',
+                  //     language: 'en' as ISO639_1,
+                  //     type: TextTrackType.SUBRIP,
+                  //     uri: 'https://dl.opensubtitles.org/en/download/src-api/vrf-19bb0c55/file/1954463516',
+                  //   },
+                  // ],
                   textTracksAllowChunklessPreparation: false,
                 }}
                 style={videoStyle}
                 resizeMode={'contain'}
                 poster={{ source: { uri: poster }, resizeMode: 'contain' }}
                 onProgress={handleProgress}
-                onPlaybackStateChanged={handlePlaybackStateChange}
+                paused={!isPlaying}
+                volume={isMuted ? 0 : volume}
+                // onPlaybackStateChanged={handlePlaybackStateChange}
                 onLayout={(e) => {
                   setPlayerDimensions({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height });
                 }}
@@ -628,7 +623,7 @@ const Watch = () => {
 
               <ControlsOverlay
                 showControls={showControls}
-                isPlaying={playbackState.isPlaying}
+                isPlaying={isPlaying}
                 isMuted={isMuted}
                 isFullscreen={isFullscreen}
                 currentTime={currentTime}

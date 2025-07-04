@@ -98,7 +98,8 @@ const Info = () => {
           </View>
           <View padding={10} marginTop={insets.top}>
             <XStack alignItems="center" justifyContent="space-between" marginBlockEnd={20}>
-              <RippleButton onPress={() => router.back()}>
+              {/* a small delay to ensure the back navigation is smooth  */}
+              <RippleButton onPress={() => setTimeout(() => router.back(), 300)}>
                 <ArrowLeft />
               </RippleButton>
 
