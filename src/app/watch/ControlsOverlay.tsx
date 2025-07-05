@@ -19,9 +19,9 @@ import {
 import Animated, { FadeIn, FadeOut, Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useExternalSubtitles, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
-import { VideoTrack, AudioTrack, WatchSearchParams } from './[mediaType]';
+import { VideoTrack, AudioTrack, WatchSearchParams, SubtitleTrack } from './[mediaType]';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs, { TabItem } from '@/components/HorizontalTabs';
 import SkiaSlider from './SkiaSlider';
@@ -32,9 +32,11 @@ interface ControlsOverlayProps {
   isMuted: boolean;
   isFullscreen: boolean;
   isBuffering: boolean;
-  subtitleTracks: ISubtitle[] | undefined;
+  subtitleTracks: (SubtitleTrack | ISubtitle)[] | undefined;
   selectedSubtitleIndex: number | undefined;
   setSelectedSubtitleIndex: (index: number | undefined) => void;
+  isExternalSubtitlesLoading: boolean;
+  setShouldFetchExternalSubs: (value: boolean) => void;
   videoTracks: VideoTrack[] | undefined;
   selectedVideoTrackIndex: number | undefined;
   setSelectedVideoTrackIndex: (height: number | undefined) => void;
@@ -66,6 +68,8 @@ const ControlsOverlay = memo(
     subtitleTracks,
     selectedSubtitleIndex,
     setSelectedSubtitleIndex,
+    isExternalSubtitlesLoading,
+    setShouldFetchExternalSubs,
     videoTracks,
     selectedVideoTrackIndex,
     setSelectedVideoTrackIndex,
@@ -157,16 +161,6 @@ const ControlsOverlay = memo(
       currentEpisodeIndex < episodes.length - 1 ? String(episodes[currentEpisodeIndex + 1].uniqueId) : null;
     const themeName = useThemeStore((state) => state.themeName);
 
-    const handleExternalSubtitle = async (url: string) => {
-      const res = await fetch(url, {
-        headers: {
-          'x-user-agent': 'VLSub 0.10.2',
-          'X-User-Agent': 'trailers.to-UA',
-        },
-      });
-      const data = await res.json();
-      console.log('External Subtitle Data:', data);
-    };
     // console.log({
     //   prevUniqueId,
     //   currentUniqueId,
@@ -211,21 +205,15 @@ const ControlsOverlay = memo(
                 <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
                   <RippleButton
                     onPress={() => {
-                      console.log(
-                        'Add External Subtitle',
-                        type == TvType.TVSERIES
-                          ? `https://rest.opensubtitles.org/search/episode-${episodeNumber}/imdbid-${parsedMappings.imdb.replace('tt', '')}/season-${seasonNumber}/sublanguageid-eng`
-                          : `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
-                      );
-                      handleExternalSubtitle(
-                        type == TvType.TVSERIES
-                          ? `https://rest.opensubtitles.org/search/episode-${episodeNumber}/imdbid-${parsedMappings.imdb.replace('tt', '')}/season-${seasonNumber}/sublanguageid-eng`
-                          : `https://rest.opensubtitles.org/search/imdbid-${parsedMappings.imdb.replace('tt', '')}/sublanguageid-eng`,
-                      );
+                      setShouldFetchExternalSubs(true);
                     }}>
                     {parsedMappings && (
                       <XStack alignItems="center" justifyContent="center" gap="$3">
-                        <ListFilterPlus color="$color1" size={16} />
+                        {isExternalSubtitlesLoading ? (
+                          <Spinner color="$color1" size="small" />
+                        ) : (
+                          <ListFilterPlus color="$color1" size={16} />
+                        )}
                         <Text color="$color1" fontSize="$3" fontWeight="600">
                           Add External Subtitle
                         </Text>
@@ -242,7 +230,9 @@ const ControlsOverlay = memo(
                         setSelectedSubtitleIndex(index);
                         setOpenSettings(false);
                       }}>
-                      <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>{track.lang}</Text>
+                      <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>
+                        {'lang' in track ? track.lang : track.language}-{'title' in track ? track.title : undefined}
+                      </Text>
                     </RippleButton>
                   ))}
                 </YStack>

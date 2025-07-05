@@ -1,10 +1,8 @@
 import { useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, View, XStack, Button } from 'tamagui';
+import { Text, View, XStack } from 'tamagui';
 import { ArrowLeft } from '@tamagui/lucide-icons';
-import { useRouter } from 'expo-router';
-import { Platform } from 'react-native';
 import RippleButton from '@/components/RippleButton';
 
 export default function SettingsLayout() {
@@ -12,8 +10,7 @@ export default function SettingsLayout() {
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const insets = useSafeAreaInsets();
 
-
-//making a custom header component due to edge-to-edge issues with the default header in Expo Router or may be i'm small brained
+  //making a custom header component due to edge-to-edge issues with the default header in Expo Router or may be i'm small brained
   return (
     <Stack
       screenOptions={{
@@ -53,7 +50,7 @@ export default function SettingsLayout() {
                 </XStack>
 
                 {/* Right Section - Empty for now */}
-                <XStack flex={1} justifyContent="flex-end"/>
+                <XStack flex={1} justifyContent="flex-end" />
               </XStack>
             </View>
           );

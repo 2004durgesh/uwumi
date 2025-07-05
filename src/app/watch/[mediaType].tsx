@@ -14,9 +14,9 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
 import { MediaType } from '@/constants/types';
-import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
+import { ISubtitle, MediaFormat, TvType, ISource, IEpisodeServer } from 'react-native-consumet';
 import { ThemedView } from '@/components/ThemedView';
-import { Route, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import * as Brightness from 'expo-brightness';
@@ -31,6 +31,7 @@ import {
   useServerStore,
   useCurrentTheme,
   usePureBlackBackground,
+  useExternalSubtitles,
 } from '@/hooks';
 import { toast } from 'sonner-native';
 import axios from 'axios';
@@ -38,22 +39,16 @@ import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import FullscreenModule from '../../../modules/fullscreen-module';
 import EpisodeList from '@/components/EpisodeList';
 import { Check } from '@tamagui/lucide-icons';
-import { set } from 'lodash';
 
 // SubtitleTrack, VideoTrack, AudioTrack interfaces remain the same
 
 export interface SubtitleTrack {
-  index: number;
+  index?: number;
   title?: string;
   language?: string;
-  type?: 'srt' | 'ttml' | 'vtt' | 'application/x-media-cues'; // Simplified WithDefault
+  type: TextTrackType | 'application/x-media-cues';
   selected?: boolean;
   uri: string;
-}
-
-interface PlaybackState {
-  isPlaying: boolean;
-  isSeeking: boolean;
 }
 
 export interface VideoTrack {
@@ -117,8 +112,20 @@ const OverlayedView = styled(Animated.View, {
 });
 
 const Watch = () => {
-  const { mediaType, provider, id, mediaId, episodeId, uniqueId, isDubbed, poster, type } =
-    useLocalSearchParams() as unknown as WatchSearchParams;
+  const {
+    mediaType,
+    provider,
+    id,
+    mediaId,
+    episodeId,
+    uniqueId,
+    isDubbed,
+    poster,
+    type,
+    mappings,
+    episodeNumber,
+    seasonNumber,
+  } = useLocalSearchParams() as unknown as WatchSearchParams;
   // console.log(useLocalSearchParams(), 'useLocalSearchParams');
   const { top } = useSafeAreaInsets();
   const { setProgress, getProgress } = useWatchProgressStore();
@@ -158,17 +165,25 @@ const Watch = () => {
     height: Dimensions.get('screen').height,
   });
   const [wrapperDimensions, setWrapperDimensions] = useState({ width: 0, height: 0 }); // Not actively used
-  const { data, isLoading, error } =
+
+  const animeQuery =
     mediaType === MediaType.ANIME
       ? useWatchAnimeEpisodes({ episodeId: currentEpisodeId ?? episodeId, provider: getProvider(mediaType), dub })
-      : useWatchMoviesEpisodes({
+      : { data: undefined, isLoading: false, error: null };
+
+  const movieQuery =
+    mediaType === MediaType.MOVIE
+      ? useWatchMoviesEpisodes({
           episodeId: currentEpisodeId ?? episodeId,
           mediaId,
           type,
           provider: getProvider(mediaType),
           server: currentServer?.name,
           embed: isEmbed,
-        });
+        })
+      : { data: undefined, isLoading: false, error: null };
+
+  const { data, isLoading, error } = mediaType === MediaType.ANIME ? animeQuery : movieQuery;
   /**
    * keep it for future reference
    */
@@ -181,23 +196,25 @@ const Watch = () => {
   //   : { data: undefined, isLoading: false, error: null };
 
   useEffect(() => {
-    if (data?.servers! && !serverInitialized) {
-      setServers(data?.servers!);
-      if (data?.servers!.length > 0 && !currentServer) {
+    if (mediaType === MediaType.MOVIE && movieQuery.data && 'servers' in movieQuery.data && !serverInitialized) {
+      const movieData = movieQuery.data as ISource & { servers: IEpisodeServer[] };
+      setServers(movieData.servers);
+      if (movieData.servers.length > 0 && !currentServer) {
         // Set current server only if not already set
-        setCurrentServer(data?.servers![0].name);
+        setCurrentServer(movieData.servers[0].name);
       }
       setServerInitialized(true);
     }
-  }, [data?.servers!, setCurrentServer, setServers, serverInitialized, currentServer]);
+  }, [movieQuery.data, setCurrentServer, setServers, serverInitialized, currentServer, mediaType]);
 
   useEffect(() => {
     setServerInitialized(false);
   }, [isEmbed, provider]);
 
-  const [subtitleTracks, setSubtitleTracks] = useState<ISubtitle[] | undefined>([]);
+  const [subtitleTracks, setSubtitleTracks] = useState<(SubtitleTrack | ISubtitle)[] | undefined>([]);
   const [nullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
+  const [shouldFetchExternalSubs, setShouldFetchExternalSubs] = useState(false);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
   const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
   const [nullAudioTrackIndex, setNullAudioTrackIndex] = useState<number | undefined>(0);
@@ -207,6 +224,23 @@ const Watch = () => {
   const [brightness, setBrightness] = useState(1);
   const [volume, setVolume] = useState(1);
   const [systemVolume, setSystemVolume] = useState(1);
+
+  const parsedMappings = mappings ? JSON.parse(mappings) : null;
+  const imdbId = parsedMappings?.imdb?.replace('tt', '') || '';
+  const isImdbIdValid = imdbId && imdbId.trim() !== '' && imdbId.length > 0;
+  const {
+    data: externalSubtitles,
+    isLoading: isExternalSubtitlesLoading,
+    isError: isExternalSubtitlesError,
+  } = useExternalSubtitles({
+    imdbId,
+    episodeNumber,
+    seasonNumber,
+    type,
+    language: 'eng',
+    enabled: shouldFetchExternalSubs && isImdbIdValid,
+  });
+  // console.log('externalSubtitles', externalSubtitles, isExternalSubtitlesLoading, isExternalSubtitlesError);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ screen }) => {
@@ -258,10 +292,22 @@ const Watch = () => {
     }
   }, [pureBlackBackground, currentTheme]);
 
+  const lastProgressUpdateRef = useRef({ currentTime: 0, seekableDuration: 0 });
+
   const handleProgress = useCallback(
     ({ currentTime: newTime, seekableDuration: newDuration }: { currentTime: number; seekableDuration: number }) => {
-      setCurrentTime(newTime);
-      setSeekableDuration(newDuration);
+      // Only update state if the time has changed by at least 0.5 seconds to prevent excessive re-renders
+      const lastUpdate = lastProgressUpdateRef.current;
+
+      if (Math.abs(newTime - lastUpdate.currentTime) >= 0.5) {
+        setCurrentTime(newTime);
+        lastUpdate.currentTime = newTime;
+      }
+      if (Math.abs(newDuration - lastUpdate.seekableDuration) >= 0.5) {
+        setSeekableDuration(newDuration);
+        lastUpdate.seekableDuration = newDuration;
+      }
+
       if (uniqueId && newDuration > 0 && Math.floor(newTime) % 5 === 0) {
         // Save every 5 seconds
         const savedProgress = getProgress(uniqueId);
@@ -275,7 +321,8 @@ const Watch = () => {
         }
       }
     },
-    [uniqueId, getProgress, setProgress],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [uniqueId],
   );
 
   const handlePlayPress = useCallback(() => {
@@ -493,13 +540,18 @@ const Watch = () => {
 
   useEffect(() => {
     if (data?.subtitles && data?.subtitles?.length > 0) {
-      setSubtitleTracks(data?.subtitles);
+      //id external subtitles present add them too
+      if (externalSubtitles && externalSubtitles.length > 0) {
+        const combinedSubtitles = [...data.subtitles, ...externalSubtitles];
+        setSubtitleTracks(combinedSubtitles);
+      }
+      // If no external subtitles, just set the internal ones
+      else setSubtitleTracks(data?.subtitles);
     }
-  }, [data?.subtitles]);
+  }, [data?.subtitles, externalSubtitles]);
 
   useEffect(() => {
     if (!isLoading && !source && isVideoReady) {
-      // isVideoReady to avoid premature toast
       toast.error('No video source found', { description: 'Please try changing servers or quality.' });
     }
     if (!isLoading && error) {
@@ -507,7 +559,12 @@ const Watch = () => {
         description: error?.message || 'An unknown error occurred.',
       });
     }
-  }, [source, isLoading, error, isVideoReady]);
+    if (isExternalSubtitlesError) {
+      toast.error('Error loading external subtitles', {
+        description: 'Please try changing the subtitle language or check your internet connection.',
+      });
+    }
+  }, [source, isLoading, error, isVideoReady, isExternalSubtitlesError]);
 
   if (isLoading || (mediaType === MediaType.MOVIE && !serverInitialized)) {
     return (
@@ -543,10 +600,13 @@ const Watch = () => {
                 source={{
                   uri: source,
                   textTracks: subtitleTracks?.map((track, index) => ({
-                    title: track.lang || 'Untitled',
-                    language: track.lang?.toLowerCase() as ISO639_1,
-                    type: TextTrackType.VTT,
-                    uri: track.url || '',
+                    title:
+                      ('title' in track ? track.title : undefined) ||
+                      ('lang' in track ? track.lang : track.language) ||
+                      'Untitled',
+                    language: (('lang' in track ? track.lang : track.language)?.toLowerCase() as ISO639_1) || 'en',
+                    type: 'type' in track && track.type !== 'application/x-media-cues' ? track.type : TextTrackType.VTT,
+                    uri: ('url' in track ? track.url : track.uri) || '',
                     index,
                   })),
                   // textTracks: [
@@ -597,7 +657,8 @@ const Watch = () => {
                   // console.log('nullAudioTrackCount:', nullAudioTrackCount, uniqueAudioTrack);
                   setAudioTracks(uniqueAudioTrack);
                   videoRef?.current?.seek(getProgress(uniqueId)?.currentTime || 0);
-                  videoRef?.current?.resume();
+                  // videoRef?.current?.resume();
+                  setIsPlaying(true);
                 }}
                 selectedVideoTrack={{ type: SelectedVideoTrackType.INDEX, value: selectedVideoTrackIndex ?? 0 }}
                 selectedTextTrack={{
@@ -632,6 +693,8 @@ const Watch = () => {
                 subtitleTracks={subtitleTracks}
                 selectedSubtitleIndex={selectedSubtitleIndex}
                 setSelectedSubtitleIndex={setSelectedSubtitleIndex}
+                isExternalSubtitlesLoading={isExternalSubtitlesLoading}
+                setShouldFetchExternalSubs={setShouldFetchExternalSubs}
                 videoTracks={videoTracks}
                 selectedVideoTrackIndex={selectedVideoTrackIndex}
                 setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}

@@ -1,9 +1,8 @@
 import { ThemedView } from '@/components/ThemedView';
 import { ChevronDown, Languages } from '@tamagui/lucide-icons';
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Sheet, Input, Button, YStack, View, Text, XStack, Separator } from 'tamagui';
 import { SUB_LANGUAGE } from '@/constants/subtitle-language';
-import { debounce } from 'lodash';
 
 const Example = () => {
   const [open, setOpen] = useState(false);
@@ -11,7 +10,7 @@ const Example = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
   const [inputValue, setInputValue] = useState('');
-console.log(open,"opena");
+  console.log(open, 'opena');
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchLanguage(text);

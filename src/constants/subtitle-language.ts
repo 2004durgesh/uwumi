@@ -1,4 +1,4 @@
-export const SUB_LANGUAGE:{
+export const SUB_LANGUAGE: {
   [key: string]: string;
 } = {
   all: 'ALL',

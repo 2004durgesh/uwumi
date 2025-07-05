@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
-import { IEpisodeServer, ISource, SubOrSub } from 'react-native-consumet';
+import { IEpisodeServer, ISource, ISubtitle, MediaFormat, SubOrSub, TvType } from 'react-native-consumet';
 import { useQuery } from '@tanstack/react-query';
 // import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
-import { MediaType } from '@/constants/types';
+import { ExternalSubtitleData, MediaType } from '@/constants/types';
+import { TextTrackType } from 'react-native-video/lib/types/video';
+import { SubtitleTrack } from '@/app/watch/[mediaType]';
 
 export function useWatchAnimeEpisodes({
   episodeId,
@@ -119,3 +121,58 @@ export function useWatchMoviesEpisodes({
 //     },
 //   });
 // }
+
+export function useExternalSubtitles({
+  imdbId,
+  episodeNumber,
+  seasonNumber,
+  type,
+  language = 'eng',
+  enabled = false,
+}: {
+  imdbId: string;
+  episodeNumber?: string;
+  seasonNumber?: string;
+  type: TvType | MediaFormat;
+  language?: string;
+  enabled?: boolean;
+}) {
+  // Check if imdbId is valid (not null, undefined, empty, or just 'tt')
+  const isImdbIdValid = imdbId && imdbId.trim() !== '' && imdbId !== 'tt' && imdbId.length > 2;
+
+  return useQuery<SubtitleTrack[]>({
+    queryKey: ['externalSubtitles', imdbId, episodeNumber, seasonNumber, language],
+    queryFn: async () => {
+      const url =
+        type == TvType.TVSERIES
+          ? `https://rest.opensubtitles.org/search/episode-${episodeNumber}/imdbid-${imdbId}/season-${seasonNumber}/sublanguageid-${language}`
+          : `https://rest.opensubtitles.org/search/imdbid-${imdbId}/sublanguageid-${language}`;
+
+      console.log('Fetching external subtitles from:', url);
+
+      try {
+        const { data }: { data: ExternalSubtitleData[] } = await axios.get(url, {
+          headers: {
+            'x-user-agent': 'VLSub 0.10.2',
+            'X-User-Agent': 'trailers.to-UA',
+          },
+        });
+
+        const subtitles: SubtitleTrack[] = data.map((item) => ({
+          index: parseInt(item.IDSubtitleFile),
+          language: item.ISO639,
+          type: TextTrackType.SUBRIP,
+          uri: item.SubDownloadLink.replace('.gz', ''),
+          title: item.MovieName || item.MovieReleaseName,
+        }));
+        console.log('external subtitles', subtitles);
+        return subtitles;
+      } catch (error) {
+        console.error('Error fetching external subtitles:', error);
+        throw error;
+      }
+    },
+    // Only enable if imdbId is valid, enabled is true, and for TV series also check episode/season
+    enabled: Boolean(enabled && isImdbIdValid && (type !== TvType.TVSERIES || (episodeNumber && seasonNumber))),
+  });
+}
