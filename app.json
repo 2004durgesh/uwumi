@@ -5,9 +5,10 @@
     "version": "2.5.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "uwumi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "edgeToEdgeEnabled": true,
     "ios": {
       "supportsTablet": true,
       "requireFullScreen": true,
@@ -72,14 +73,12 @@
         }
       ],
       [
-        "@react-native-tvos/config-tv",
+        "react-native-edge-to-edge",
         {
-          "isTV": true,
-          "showVerboseWarnings": false,
-          "tvosDeploymentTarget": "15.1",
-          "removeFlipperOnAndroid": false,
-          "androidTVBanner": "./assets/images/tv_banner.png",
-          "androidTVIcon": "./assets/images/tv_icon.png"
+          "android": {
+            "parentTheme": "Material3",
+            "enforceNavigationBarContrast": false
+          }
         }
       ]
     ],
