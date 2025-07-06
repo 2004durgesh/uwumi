@@ -2,7 +2,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ChevronDown, Languages } from '@tamagui/lucide-icons';
 import { useState, useMemo, useCallback } from 'react';
 import { Sheet, Input, Button, YStack, View, Text, XStack, Separator } from 'tamagui';
-import { SUB_LANGUAGE } from '@/constants/subtitle-language';
+import { SUB_LANGUAGE } from '@/constants/config';
 
 const Example = () => {
   const [open, setOpen] = useState(false);

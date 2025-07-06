@@ -6,13 +6,17 @@ import CustomImage from '@/components/CustomImage';
 import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 import RippleButton from '@/components/RippleButton';
 import { openBrowserAsync } from 'expo-web-browser';
+import { EXTERNAL_LINKS } from '@/constants/config';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useCurrentTheme } from '@/hooks';
 const About = () => {
   const { checkForUpdates, updateInfo } = useUpdateChecker();
   useEffect(() => {
-    checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases/latest`);
+    checkForUpdates(EXTERNAL_LINKS.GITHUB_LATEST_RELEASE_API);
   }, []);
 
   const hasNewVersion = !updateInfo.isNewVersionPreRelease && updateInfo.newVersion !== updateInfo.currentVersion;
+  const currentTheme = useCurrentTheme();
 
   return (
     <ThemedView>
@@ -86,17 +90,31 @@ const About = () => {
         </Card>
 
         <YStack gap="$4" alignItems="center" marginTop="$2">
-          <XStack gap="$4" justifyContent="center">
+          <XStack gap="$4" justifyContent="center" flexWrap="wrap" alignItems="center">
             <Theme>
-              <RippleButton onPress={() => openBrowserAsync('https://github.com/2004durgesh/uwumi')}>
+              <RippleButton onPress={() => openBrowserAsync(EXTERNAL_LINKS.GITHUB_REPOSITORY)}>
                 <XStack gap="$2" alignItems="center">
                   <Github size={20} />
                   <Text fontWeight="600">GitHub</Text>
                 </XStack>
               </RippleButton>
 
+              <RippleButton onPress={() => openBrowserAsync(EXTERNAL_LINKS.DISCORD_SERVER)}>
+                <XStack gap="$2" alignItems="center">
+                  <FontAwesome6 name="discord" size={20} color={currentTheme.color} />
+                  <Text fontWeight="600">Discord</Text>
+                </XStack>
+              </RippleButton>
+
+              <RippleButton onPress={() => openBrowserAsync(EXTERNAL_LINKS.PROJECT_WEBSITE)}>
+                <XStack gap="$2" alignItems="center">
+                  <FontAwesome6 name="globe" size={20} color={currentTheme.color} />
+                  <Text fontWeight="600">Website</Text>
+                </XStack>
+              </RippleButton>
+
               {hasNewVersion && (
-                <RippleButton onPress={() => openBrowserAsync('https://github.com/2004durgesh/uwumi/releases/latest')}>
+                <RippleButton onPress={() => openBrowserAsync(EXTERNAL_LINKS.GITHUB_LATEST_RELEASE)}>
                   <XStack gap="$2" alignItems="center">
                     <ExternalLink size={20} />
                     <Text fontWeight="600">Update</Text>

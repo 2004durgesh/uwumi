@@ -18,6 +18,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeStore, useAccentStore } from '@/hooks';
 import * as WebBrowser from 'expo-web-browser';
 import { useUpdateChecker } from '@/hooks/useUpdateChecker';
+import { SystemBars } from 'react-native-edge-to-edge';
+import { LogBox } from 'react-native';
+import { EXTERNAL_LINKS } from '@/constants/config';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -120,13 +123,15 @@ export default function RootLayout() {
   const { isUpdateAvailable, isUpdateChecked, updateInfo, checkForUpdates, setIsUpdateAvailable } = useUpdateChecker();
 
   useEffect(() => {
-    checkForUpdates(`https://api.github.com/repos/2004durgesh/uwumi/releases`);
+    checkForUpdates(EXTERNAL_LINKS.GITHUB_RELEASES_API);
   }, []);
   const [loaded] = useFonts({
     InterMedium,
     InterSemiBold,
     InterBold,
   });
+  //suppress edge-to-edge warning for status bar background color
+  LogBox.ignoreLogs(['StatusBar backgroundColor is not supported with edge-to-edge enabled']);
   const themeName = useThemeStore((state) => state.themeName);
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -182,6 +187,7 @@ export default function RootLayout() {
             richColors
             swipeToDismissDirection="left"
           />
+          <SystemBars hidden={false} />
         </TamaguiProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

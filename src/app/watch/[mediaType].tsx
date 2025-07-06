@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Dimensions, StyleProp, ViewStyle, StatusBar } from 'react-native'; // Removed Pressable as it's not directly used after changes
+import { Dimensions, StyleProp, ViewStyle } from 'react-native'; // Removed Pressable as it's not directly used after changes
 import Video, {
   ISO639_1,
   SelectedTrackType,
@@ -39,6 +39,7 @@ import { PROVIDERS, useProviderStore } from '@/constants/provider';
 import FullscreenModule from '../../../modules/fullscreen-module';
 import EpisodeList from '@/components/EpisodeList';
 import { Check } from '@tamagui/lucide-icons';
+import { SystemBars, SystemBarsEntry } from 'react-native-edge-to-edge';
 
 // SubtitleTrack, VideoTrack, AudioTrack interfaces remain the same
 
@@ -241,18 +242,31 @@ const Watch = () => {
     enabled: shouldFetchExternalSubs && isImdbIdValid,
   });
   // console.log('externalSubtitles', externalSubtitles, isExternalSubtitlesLoading, isExternalSubtitlesError);
+  const systemBarsStackEntry = useRef<SystemBarsEntry | null>(null);
 
+  /**
+   * systemBarsStackEntry is used to manage the system bars state due to the edge-to-edge support.
+   */
   useEffect(() => {
+    // Set initial SystemBars state for normal mode
+    systemBarsStackEntry.current = SystemBars.pushStackEntry({
+      style: 'auto',
+      hidden: false,
+    });
+
     const subscription = Dimensions.addEventListener('change', ({ screen }) => {
       setDimensions({ width: screen.width, height: screen.height });
     });
 
     return () => {
       subscription?.remove();
+      if (systemBarsStackEntry.current) {
+        SystemBars.popStackEntry(systemBarsStackEntry.current);
+        systemBarsStackEntry.current = null;
+      }
       Promise.all([
-        StatusBar.setHidden(false),
         SystemNavigationBar.setNavigationColor(
-          pureBlackBackground ? currentTheme?.color5 || 'black' : currentTheme?.color3 || 'black', // Access .val for Tamagui colors
+          pureBlackBackground ? currentTheme?.color5 || 'black' : currentTheme?.color3 || 'black',
         ),
         SystemNavigationBar.navigationShow(),
         ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP),
@@ -263,12 +277,18 @@ const Watch = () => {
 
   const enterFullscreen = useCallback(async () => {
     try {
-      (StatusBar.setHidden(true),
-        SystemNavigationBar.stickyImmersive(),
-        await Promise.all([
-          ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE),
-          FullscreenModule.enterFullscreen(),
-        ]));
+      // Replace the current SystemBars entry with fullscreen settings
+      if (systemBarsStackEntry.current) {
+        systemBarsStackEntry.current = SystemBars.replaceStackEntry(systemBarsStackEntry.current, {
+          style: 'dark',
+          hidden: true, // hide both status bar and nav bar (nav bar will only hide on Android)
+        });
+      }
+      SystemNavigationBar.stickyImmersive();
+      await Promise.all([
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE),
+        FullscreenModule.enterFullscreen(),
+      ]);
       setIsFullscreen(true);
     } catch (err) {
       console.error('Failed to enter fullscreen:', err);
@@ -277,15 +297,21 @@ const Watch = () => {
 
   const exitFullscreen = useCallback(async () => {
     try {
-      (StatusBar.setHidden(false),
-        SystemNavigationBar.setNavigationColor(
-          pureBlackBackground ? currentTheme?.color5?.val || 'black' : currentTheme?.color3?.val || 'black',
-        ),
-        SystemNavigationBar.navigationShow(),
-        await Promise.all([
-          ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP),
-          FullscreenModule.exitFullscreen(),
-        ]));
+      // Replace the current SystemBars entry back to normal mode
+      if (systemBarsStackEntry.current) {
+        systemBarsStackEntry.current = SystemBars.replaceStackEntry(systemBarsStackEntry.current, {
+          style: 'auto',
+          hidden: false,
+        });
+      }
+      SystemNavigationBar.setNavigationColor(
+        pureBlackBackground ? currentTheme?.color5?.val || 'black' : currentTheme?.color3?.val || 'black',
+      );
+      SystemNavigationBar.navigationShow();
+      await Promise.all([
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP),
+        FullscreenModule.exitFullscreen(),
+      ]);
       setIsFullscreen(false);
     } catch (err) {
       console.error('Failed to exit fullscreen:', err);

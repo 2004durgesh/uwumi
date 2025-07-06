@@ -5,6 +5,7 @@ import { View } from 'tamagui';
 import { useThemeStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import AnimeIcon from '@/components/SVG/AnimeIcon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -14,6 +15,7 @@ export default function TabLayout() {
   const themeName = useThemeStore((state) => state.themeName);
   const currentTheme = useCurrentTheme();
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
+  const insets = useSafeAreaInsets();
 
   SystemNavigationBar.setNavigationColor(pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3 || 'black');
 
@@ -49,7 +51,7 @@ export default function TabLayout() {
           fontWeight: 'bold',
         },
         tabBarStyle: {
-          height: 64,
+          height: 64 + insets.bottom, //bcoz of edge-to-edge support
           backgroundColor: pureBlackBackground ? currentTheme?.color5 : currentTheme?.color3,
           borderTopWidth: 0,
           elevation: 0,
