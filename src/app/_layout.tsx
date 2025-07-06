@@ -119,20 +119,60 @@ const DownloadDialog = ({
   );
 };
 
-export default function RootLayout() {
-  const { isUpdateAvailable, isUpdateChecked, updateInfo, checkForUpdates, setIsUpdateAvailable } = useUpdateChecker();
-
-  useEffect(() => {
-    checkForUpdates(EXTERNAL_LINKS.GITHUB_RELEASES_API);
-  }, []);
+const AppContent = () => {
+  const { isUpdateAvailable, isUpdateChecked, updateInfo, setIsUpdateAvailable } = useUpdateChecker(
+    EXTERNAL_LINKS.GITHUB_RELEASES_API,
+  );
   const [loaded] = useFonts({
     InterMedium,
     InterSemiBold,
     InterBold,
   });
+
+  const themeName = useThemeStore((state) => state.themeName);
+  useEffect(() => {
+    if (loaded && isUpdateChecked) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, isUpdateChecked]);
+
+  if (!loaded) {
+    return null;
+  }
+
+  return (
+    <TamaguiProvider config={config}>
+      <PortalProvider>
+        <Theme name={themeName}>
+          <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="info/[mediaType]" />
+            <Stack.Screen name="watch/[mediaType]" />
+            <Stack.Screen name="read/[id]" />
+            <Stack.Screen name="(settings)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          {isUpdateAvailable && (
+            <DownloadDialog
+              currentVersion={updateInfo.currentVersion}
+              newVersion={updateInfo.newVersion}
+              updateType={updateInfo.updateType}
+              showUpdateDialog={isUpdateAvailable}
+              setShowUpdateDialog={setIsUpdateAvailable}
+            />
+          )}
+        </Theme>
+      </PortalProvider>
+      <Toaster position="bottom-center" invert autoWiggleOnUpdate="always" richColors swipeToDismissDirection="left" />
+      <SystemBars hidden={false} />
+    </TamaguiProvider>
+  );
+};
+
+export default function RootLayout() {
   //suppress edge-to-edge warning for status bar background color
   LogBox.ignoreLogs(['StatusBar backgroundColor is not supported with edge-to-edge enabled']);
-  const themeName = useThemeStore((state) => state.themeName);
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -145,50 +185,11 @@ export default function RootLayout() {
       },
     },
   });
-  useEffect(() => {
-    if (loaded && isUpdateChecked) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, isUpdateChecked]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={config}>
-          <PortalProvider>
-            <Theme name={themeName}>
-              <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="info/[mediaType]" />
-                <Stack.Screen name="watch/[mediaType]" />
-                <Stack.Screen name="read/[id]" />
-                <Stack.Screen name="(settings)" />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              {isUpdateAvailable && (
-                <DownloadDialog
-                  currentVersion={updateInfo.currentVersion}
-                  newVersion={updateInfo.newVersion}
-                  updateType={updateInfo.updateType}
-                  showUpdateDialog={isUpdateAvailable}
-                  setShowUpdateDialog={setIsUpdateAvailable}
-                />
-              )}
-            </Theme>
-          </PortalProvider>
-          <Toaster
-            position="bottom-center"
-            invert
-            autoWiggleOnUpdate="always"
-            richColors
-            swipeToDismissDirection="left"
-          />
-          <SystemBars hidden={false} />
-        </TamaguiProvider>
+        <AppContent />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

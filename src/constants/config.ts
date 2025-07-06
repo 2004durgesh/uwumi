@@ -1,13 +1,3 @@
-// export const EXTERNAL_LINKS = {
-//   GITHUB_REPOSITORY_API: 'https://api.github.com/repos/uwumilabs/uwumi',
-//   GITHUB_RELEASES_API: 'https://api.github.com/repos/uwumilabs/uwumi/releases',
-//   GITHUB_LATEST_RELEASE_API: 'https://api.github.com/repos/uwumilabs/uwumi/releases/latest',
-//   GITHUB_REPOSITORY: 'https://github.com/uwumilabs/uwumi',
-//   GITHUB_LATEST_RELEASE: 'https://github.com/uwumilabs/uwumi/releases/latest',
-//   DISCORD_SERVER: 'https://discord.gg/n7xVPxbG4R',
-//   PROJECT_WEBSITE: 'https://uwumi-dash.netlify.app/',
-// } as const;
-
 export const EXTERNAL_LINKS = {
   GITHUB_REPOSITORY_API: 'https://api.github.com/repos/uwumilabs/uwumi',
   GITHUB_RELEASES_API: 'https://api.github.com/repos/uwumilabs/uwumi/releases',

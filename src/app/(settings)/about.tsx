@@ -1,22 +1,32 @@
 import React, { useEffect } from 'react';
 import { ThemedView } from '@/components/ThemedView';
-import { Text, YStack, XStack, Separator, Card, Theme } from 'tamagui';
+import { Text, YStack, XStack, Separator, Card, Theme, Spinner } from 'tamagui';
 import { Github, ExternalLink, CheckCircle2, AlertCircle } from '@tamagui/lucide-icons';
 import CustomImage from '@/components/CustomImage';
 import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 import RippleButton from '@/components/RippleButton';
 import { openBrowserAsync } from 'expo-web-browser';
 import { EXTERNAL_LINKS } from '@/constants/config';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { useCurrentTheme } from '@/hooks';
+import { toast } from 'sonner-native';
+
 const About = () => {
-  const { checkForUpdates, updateInfo } = useUpdateChecker();
-  useEffect(() => {
-    checkForUpdates(EXTERNAL_LINKS.GITHUB_LATEST_RELEASE_API);
-  }, []);
+  const { updateInfo, isLoading, isError, checkForUpdates } = useUpdateChecker(
+    EXTERNAL_LINKS.GITHUB_LATEST_RELEASE_API,
+  );
 
   const hasNewVersion = !updateInfo.isNewVersionPreRelease && updateInfo.newVersion !== updateInfo.currentVersion;
   const currentTheme = useCurrentTheme();
+
+  // Handle error state with toast notification in useEffect to avoid side effects during render
+  useEffect(() => {
+    if (isError) {
+      toast.error('Unable to check for updates. Please try again later.', {
+        description: `Current version: ${updateInfo.currentVersion}`,
+      });
+    }
+  }, [isError, updateInfo.currentVersion]);
 
   return (
     <ThemedView>
@@ -64,9 +74,24 @@ const About = () => {
               <Text color="$color1" fontSize="$3">
                 Current Version
               </Text>
-              <Text fontSize="$4" fontWeight="500">
-                {`${updateInfo.currentVersion} (${new Date(updateInfo.createdAt).toLocaleDateString()})`}
-              </Text>
+              {isLoading ? (
+                <XStack gap="$2" alignItems="center">
+                  <Spinner size="small" />
+                  <Text fontSize="$4" fontWeight="500">
+                    Checking for updates...
+                  </Text>
+                </XStack>
+              ) : isError ? (
+                <Text fontSize="$4" fontWeight="500" color="red">
+                  {updateInfo.currentVersion} (Unable to check for updates)
+                </Text>
+              ) : (
+                <Text fontSize="$4" fontWeight="500">
+                  {updateInfo.createdAt
+                    ? `${updateInfo.currentVersion} (${new Date(updateInfo.createdAt).toLocaleDateString()})`
+                    : updateInfo.currentVersion}
+                </Text>
+              )}
             </YStack>
 
             {hasNewVersion && (
@@ -90,6 +115,12 @@ const About = () => {
         </Card>
 
         <YStack gap="$4" alignItems="center" marginTop="$2">
+          <RippleButton onPress={() => checkForUpdates()}>
+            <XStack gap="$2" alignItems="center">
+              <Ionicons name="sync" size={20} color={currentTheme.color} />
+              <Text fontWeight="600">Check for Updates</Text>
+            </XStack>
+          </RippleButton>
           <XStack gap="$4" justifyContent="center" flexWrap="wrap" alignItems="center">
             <Theme>
               <RippleButton onPress={() => openBrowserAsync(EXTERNAL_LINKS.GITHUB_REPOSITORY)}>
