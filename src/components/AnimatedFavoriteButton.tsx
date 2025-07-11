@@ -6,9 +6,8 @@ import favoriteAnimation from '../../assets/animations/like.json';
 import { View } from 'tamagui';
 import { MediaType, MetaProvider } from '@/constants/types';
 import { ITitle, MediaFormat, TvType } from 'react-native-consumet';
-import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
 import RippleButton from './RippleButton';
-import { useCurrentTheme } from '@/hooks';
+import { useCurrentTheme, useFavoriteStore } from '@/hooks';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 

@@ -202,115 +202,45 @@ const ControlsOverlay = memo(
           </YStack>
         ),
       },
-      ...(subtitleTracks && subtitleTracks.length > 0
-        ? [
-            {
-              key: 'tab2',
-              label: 'Subtitle',
-              content: (
-                <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
-                  {/* <Popover placement="top" stayInFrame allowFlip>
-                    <Popover.Trigger asChild> */}
-                  <RippleButton
-                    onPress={() => {
-                      setOpenExternalSubtitleLanguageDialog(true);
-                      setOpenSettings(false);
-                    }}>
-                    {true && (
-                      <XStack alignItems="center" justifyContent="center" gap="$3">
-                        <ListFilterPlus color="$color1" size={16} />
-                        <Text color="$color1" fontSize="$3" fontWeight="600">
-                          Add External Subtitle
-                        </Text>
-                      </XStack>
-                    )}
-                  </RippleButton>
-                  {/* <XStack
-                        alignItems="center"
-                        gap="$3"
-                        padding="$3"
-                        backgroundColor="$color2"
-                        borderRadius="$3"
-                        pressStyle={{ backgroundColor: '$color3' }}
-                        hoverStyle={{ backgroundColor: '$color3' }}>
-                        {parsedMappings && (
-                          <XStack alignItems="center" justifyContent="center" gap="$3">
-                            <ListFilterPlus color="$color1" size={16} />
-                            <Text color="$color1" fontSize="$3" fontWeight="600">
-                              Add External Subtitle
-                            </Text>
-                          </XStack>
-                        )}
-                      </XStack>
-                    </Popover.Trigger>
+      {
+        key: 'tab2',
+        label: 'Subtitle',
+        content: (
+          <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+            <RippleButton
+              onPress={() => {
+                setOpenExternalSubtitleLanguageDialog(true);
+                setOpenSettings(false);
+              }}>
+              {parsedMappings && (
+                <XStack alignItems="center" justifyContent="center" gap="$3">
+                  <ListFilterPlus color="$color1" size={16} />
+                  <Text color="$color1" fontSize="$3" fontWeight="600">
+                    Add External Subtitle
+                  </Text>
+                </XStack>
+              )}
+            </RippleButton>
 
-                    <Popover.Content
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                      width={'100%'}
-                      enterStyle={{ y: -10, opacity: 0 }}
-                      exitStyle={{ y: -10, opacity: 0 }}
-                      elevate
-                      zIndex={110000}
-                      position="absolute"
-                      top="10"
-                      animation={[
-                        'quick',
-                        {
-                          opacity: {
-                            overshootClamping: true,
-                          },
-                        },
-                      ]}>
-                      <Popover.Arrow />
-
-                      <Popover.ScrollView>
-                        <YStack gap="$3" padding="$3">
-                          <Text fontSize="$4" fontWeight="bold" color="$color">
-                            External Subtitle Options
-                          </Text>
-                          <Text fontSize="$3" color="$color1">
-                            Choose subtitle language:
-                          </Text>
-                          <YStack gap="$2">
-                            <Button size="$3" variant="outlined" onPress={() => console.log('English selected')}>
-                              English
-                            </Button>
-                            <Button size="$3" variant="outlined" onPress={() => console.log('Spanish selected')}>
-                              Spanish
-                            </Button>
-                            <Button size="$3" variant="outlined" onPress={() => console.log('French selected')}>
-                              French
-                            </Button>
-                            <Button size="$3" variant="outlined" onPress={() => console.log('German selected')}>
-                              German
-                            </Button>
-                          </YStack>
-                        </YStack>
-                      </Popover.ScrollView>
-                    </Popover.Content>
-                  </Popover> */}
-
-                  {subtitleTracks?.map((track, index) => (
-                    <RippleButton
-                      key={index}
-                      style={{
-                        backgroundColor: SHEET_THEME_COLOR,
-                      }}
-                      onPress={() => {
-                        setSelectedSubtitleIndex(index);
-                        setOpenSettings(false);
-                      }}>
-                      <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>
-                        {'lang' in track ? track.lang : track.language}-{'title' in track ? track.title : undefined}
-                      </Text>
-                    </RippleButton>
-                  ))}
-                </YStack>
-              ),
-            },
-          ]
-        : []),
+            {subtitleTracks?.map((track, index) => (
+              <RippleButton
+                key={index}
+                style={{
+                  backgroundColor: SHEET_THEME_COLOR,
+                }}
+                onPress={() => {
+                  setSelectedSubtitleIndex(index);
+                  setOpenSettings(false);
+                }}>
+                <Text color={selectedSubtitleIndex === index ? '$color' : '$color1'}>
+                  {'lang' in track ? track.lang : track.language}-{'title' in track ? track.title : undefined}
+                </Text>
+              </RippleButton>
+            ))}
+          </YStack>
+        ),
+      },
+      ,
       // Only include audio tab if audioTracks exist and have items
       ...(audioTracks && audioTracks.length > 0
         ? [

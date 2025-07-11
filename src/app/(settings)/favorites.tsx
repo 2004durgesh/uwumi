@@ -2,7 +2,7 @@ import CardList from '@/components/CardList';
 import HorizontalTabs from '@/components/HorizontalTabs';
 import { ThemedView } from '@/components/ThemedView';
 import { MediaType } from '@/constants/types';
-import { useFavoriteStore } from '@/hooks/stores/useFavoriteStore';
+import { useFavoriteStore } from '@/hooks';
 import React from 'react';
 import { View } from 'tamagui';
 
