@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.6.0 (2025-07-11)
+
+* refactor: enhance update checking mechanism with loading and error handling ([071aa87](https://github.com/uwumilabs/uwumi/commit/071aa87))
+* refactor: streamline imports by consolidating hooks and code cleanup ([6ecee5b](https://github.com/uwumilabs/uwumi/commit/6ecee5b))
+* feat: configure edge-to-edge support ([44ef537](https://github.com/uwumilabs/uwumi/commit/44ef537))
+* feat: implement a dialog to choose external subtitle language ([32c077c](https://github.com/uwumilabs/uwumi/commit/32c077c))
+* feat: implement external subtitle fetching and enhance subtitle handling in video player ([6795d4e](https://github.com/uwumilabs/uwumi/commit/6795d4e))
+* feat: refactor external links and improve edge-to-edge support in layout ([529099d](https://github.com/uwumilabs/uwumi/commit/529099d))
+* fix: downgrade react-native-video version and improve header navigation in settings layout ([bf28d20](https://github.com/uwumilabs/uwumi/commit/bf28d20))
+* chore: update dependencies and improve code structure ([b8f7161](https://github.com/uwumilabs/uwumi/commit/b8f7161))
+* chore(debug): add debug config, revert ripple, and stub external subtitles ([019806c](https://github.com/uwumilabs/uwumi/commit/019806c))
+* docs(readme): add contact section ([c338a00](https://github.com/uwumilabs/uwumi/commit/c338a00))
+
 ## <small>2.5.3 (2025-06-24)</small>
 
 * refactor: revert back to the old episode fetching logic,update react-native-consumet,update readme ([2694f77](https://github.com/2004durgesh/uwumi/commit/2694f77))
