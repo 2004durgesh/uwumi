@@ -7,14 +7,16 @@ import Video, {
   TextTrackType,
   SelectedVideoTrackType,
   type VideoRef,
+  VideoTrack,
+  AudioTrack,
 } from 'react-native-video';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { Button, Spinner, Text, View, XStack, YStack, styled } from 'tamagui';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ControlsOverlay from './ControlsOverlay';
-import { MediaType } from '@/constants/types';
-import { ISubtitle, MediaFormat, TvType, ISource, IEpisodeServer } from 'react-native-consumet';
+import { MediaType, SubtitleTrack, WatchSearchParams } from '@/constants/types';
+import { ISubtitle, ISource, IEpisodeServer } from 'react-native-consumet';
 import { ThemedView } from '@/components/ThemedView';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -32,6 +34,7 @@ import {
   useCurrentTheme,
   usePureBlackBackground,
   useExternalSubtitles,
+  useCustomBackHandler,
 } from '@/hooks';
 import { toast } from 'sonner-native';
 import axios from 'axios';
@@ -40,52 +43,7 @@ import FullscreenModule from '../../../modules/fullscreen-module';
 import EpisodeList from '@/components/EpisodeList';
 import { Check } from '@tamagui/lucide-icons';
 import { SystemBars, SystemBarsEntry } from 'react-native-edge-to-edge';
-
-// SubtitleTrack, VideoTrack, AudioTrack interfaces remain the same
-
-export interface SubtitleTrack {
-  index?: number;
-  title?: string;
-  language?: string;
-  type: TextTrackType | 'application/x-media-cues';
-  selected?: boolean;
-  uri: string;
-}
-
-export interface VideoTrack {
-  width?: number;
-  height?: number;
-  codecs?: string;
-  index: number;
-  bitrate?: number;
-}
-
-export interface AudioTrack {
-  index: number;
-  title?: string;
-  language?: string;
-  bitrate?: number;
-  type?: string;
-  selected?: boolean;
-}
-
-export interface WatchSearchParams {
-  mediaType: MediaType;
-  provider: string;
-  id: string;
-  mediaId: string;
-  episodeId: string;
-  episodeDubId: string;
-  uniqueId: string;
-  isDubbed: string;
-  poster: string;
-  title: string;
-  description: string;
-  episodeNumber: string;
-  seasonNumber: string;
-  mappings: string;
-  type: MediaFormat | TvType;
-}
+import { SUB_LANGUAGE } from '@/constants/config';
 
 const SeekText = styled(Text, {
   fontSize: 10,
@@ -216,6 +174,7 @@ const Watch = () => {
   const [nullSubtitleIndex, setNullSubtitleIndex] = useState<number | undefined>(0);
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(0);
   const [shouldFetchExternalSubs, setShouldFetchExternalSubs] = useState(false);
+  const [externalSubtitleLanguage, setExternalSubtitleLanguage] = useState<string | null>(null);
   const [videoTracks, setVideoTracks] = useState<VideoTrack[]>();
   const [selectedVideoTrackIndex, setSelectedVideoTrackIndex] = useState<number | undefined>(0);
   const [nullAudioTrackIndex, setNullAudioTrackIndex] = useState<number | undefined>(0);
@@ -238,15 +197,26 @@ const Watch = () => {
     episodeNumber,
     seasonNumber,
     type,
-    language: 'eng',
+    language: SUB_LANGUAGE[externalSubtitleLanguage as keyof typeof SUB_LANGUAGE],
     enabled: shouldFetchExternalSubs && isImdbIdValid,
   });
   // console.log('externalSubtitles', externalSubtitles, isExternalSubtitlesLoading, isExternalSubtitlesError);
+
+  useCustomBackHandler(isFullscreen, () => {
+    // If in fullscreen, exit fullscreen instead of going back
+    if (isFullscreen) {
+      exitFullscreen();
+      return true;
+    }
+    return false;
+  });
+
   const systemBarsStackEntry = useRef<SystemBarsEntry | null>(null);
 
   /**
    * systemBarsStackEntry is used to manage the system bars state due to the edge-to-edge support.
    */
+
   useEffect(() => {
     // Set initial SystemBars state for normal mode
     systemBarsStackEntry.current = SystemBars.pushStackEntry({
@@ -568,7 +538,7 @@ const Watch = () => {
     if (data?.subtitles && data?.subtitles?.length > 0) {
       //id external subtitles present add them too
       if (externalSubtitles && externalSubtitles.length > 0) {
-        const combinedSubtitles = [...data.subtitles, ...externalSubtitles];
+        const combinedSubtitles = [...externalSubtitles, ...data.subtitles];
         setSubtitleTracks(combinedSubtitles);
       }
       // If no external subtitles, just set the internal ones
@@ -594,7 +564,7 @@ const Watch = () => {
 
   if (isLoading || (mediaType === MediaType.MOVIE && !serverInitialized)) {
     return (
-      <ThemedView useSafeArea={false} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Spinner size="large" color="$color" />
       </ThemedView>
     );
@@ -602,8 +572,8 @@ const Watch = () => {
 
   return (
     <ThemedView
-      useSafeArea={false}
-      useStatusBar={isFullscreen}
+      useSafeArea
+      useStatusBar={!isFullscreen}
       style={{ flex: 1, backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background }}>
       <View height="100%" top={top}>
         <GestureDetector gesture={gestures}>
@@ -721,6 +691,8 @@ const Watch = () => {
                 setSelectedSubtitleIndex={setSelectedSubtitleIndex}
                 isExternalSubtitlesLoading={isExternalSubtitlesLoading}
                 setShouldFetchExternalSubs={setShouldFetchExternalSubs}
+                externalSubtitleLanguage={externalSubtitleLanguage}
+                setExternalSubtitleLanguage={setExternalSubtitleLanguage}
                 videoTracks={videoTracks}
                 selectedVideoTrackIndex={selectedVideoTrackIndex}
                 setSelectedVideoTrackIndex={setSelectedVideoTrackIndex}

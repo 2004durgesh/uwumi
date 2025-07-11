@@ -59,7 +59,7 @@ const Info = () => {
   // console.log(data);
   if (isLoading) {
     return (
-      <ThemedView useSafeArea={false}>
+      <ThemedView>
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="$color" />
         </YStack>
@@ -68,7 +68,7 @@ const Info = () => {
   }
   return (
     <>
-      <ThemedView useSafeArea={false} statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>
+      <ThemedView useSafeArea statusBarProps={{ translucent: true, backgroundColor: 'transparent' }}>
         <ZStack height={300}>
           <ImageBackground source={{ uri: data?.cover }} style={{ width: '100%', height: 300 }} />
           <BlurView

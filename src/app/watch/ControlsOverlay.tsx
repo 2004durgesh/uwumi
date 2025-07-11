@@ -17,14 +17,15 @@ import {
   ListFilterPlus,
 } from '@tamagui/lucide-icons';
 import Animated, { FadeIn, FadeOut, Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { ISubtitle, MediaFormat, TvType } from 'react-native-consumet';
+import { ISubtitle, TvType } from 'react-native-consumet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useExternalSubtitles, useThemeStore } from '@/hooks';
+import { useCurrentTheme, useEpisodesIdStore, useEpisodesStore, useThemeStore } from '@/hooks';
 import { formatTime } from '@/constants/utils';
-import { VideoTrack, AudioTrack, WatchSearchParams, SubtitleTrack } from './[mediaType]';
+import { VideoTrack, AudioTrack, WatchSearchParams, SubtitleTrack } from '@/constants/types';
 import RippleButton from '@/components/RippleButton';
 import HorizontalTabs, { TabItem } from '@/components/HorizontalTabs';
 import SkiaSlider from './SkiaSlider';
+import ExternalSubDialog from './components/ExternalSubDialog';
 
 interface ControlsOverlayProps {
   showControls: boolean;
@@ -34,9 +35,11 @@ interface ControlsOverlayProps {
   isBuffering: boolean;
   subtitleTracks: (SubtitleTrack | ISubtitle)[] | undefined;
   selectedSubtitleIndex: number | undefined;
+  externalSubtitleLanguage: string | null;
   setSelectedSubtitleIndex: (index: number | undefined) => void;
   isExternalSubtitlesLoading: boolean;
   setShouldFetchExternalSubs: (value: boolean) => void;
+  setExternalSubtitleLanguage: (value: string | null) => void;
   videoTracks: VideoTrack[] | undefined;
   selectedVideoTrackIndex: number | undefined;
   setSelectedVideoTrackIndex: (height: number | undefined) => void;
@@ -67,9 +70,11 @@ const ControlsOverlay = memo(
     isBuffering,
     subtitleTracks,
     selectedSubtitleIndex,
+    externalSubtitleLanguage,
     setSelectedSubtitleIndex,
     isExternalSubtitlesLoading,
     setShouldFetchExternalSubs,
+    setExternalSubtitleLanguage,
     videoTracks,
     selectedVideoTrackIndex,
     setSelectedVideoTrackIndex,
@@ -89,6 +94,7 @@ const ControlsOverlay = memo(
   }: ControlsOverlayProps) => {
     const [openSettings, setOpenSettings] = useState(false);
     const [isUserActive, setIsUserActive] = useState(true);
+    const [openExternalSubtitleLanguageDialog, setOpenExternalSubtitleLanguageDialog] = useState(false);
     const inactivityTimerRef = useRef<number | null>(null);
     const lastActivityTimeRef = useRef(Date.now());
     const controlsTimeoutDuration = 5000;
@@ -203,23 +209,88 @@ const ControlsOverlay = memo(
               label: 'Subtitle',
               content: (
                 <YStack flex={1} width="100%" gap="$2" alignSelf="flex-start" paddingHorizontal="$4">
+                  {/* <Popover placement="top" stayInFrame allowFlip>
+                    <Popover.Trigger asChild> */}
                   <RippleButton
                     onPress={() => {
-                      setShouldFetchExternalSubs(true);
+                      setOpenExternalSubtitleLanguageDialog(true);
+                      setOpenSettings(false);
                     }}>
-                    {parsedMappings && (
+                    {true && (
                       <XStack alignItems="center" justifyContent="center" gap="$3">
-                        {isExternalSubtitlesLoading ? (
-                          <Spinner color="$color1" size="small" />
-                        ) : (
-                          <ListFilterPlus color="$color1" size={16} />
-                        )}
+                        <ListFilterPlus color="$color1" size={16} />
                         <Text color="$color1" fontSize="$3" fontWeight="600">
                           Add External Subtitle
                         </Text>
                       </XStack>
                     )}
                   </RippleButton>
+                  {/* <XStack
+                        alignItems="center"
+                        gap="$3"
+                        padding="$3"
+                        backgroundColor="$color2"
+                        borderRadius="$3"
+                        pressStyle={{ backgroundColor: '$color3' }}
+                        hoverStyle={{ backgroundColor: '$color3' }}>
+                        {parsedMappings && (
+                          <XStack alignItems="center" justifyContent="center" gap="$3">
+                            <ListFilterPlus color="$color1" size={16} />
+                            <Text color="$color1" fontSize="$3" fontWeight="600">
+                              Add External Subtitle
+                            </Text>
+                          </XStack>
+                        )}
+                      </XStack>
+                    </Popover.Trigger>
+
+                    <Popover.Content
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      width={'100%'}
+                      enterStyle={{ y: -10, opacity: 0 }}
+                      exitStyle={{ y: -10, opacity: 0 }}
+                      elevate
+                      zIndex={110000}
+                      position="absolute"
+                      top="10"
+                      animation={[
+                        'quick',
+                        {
+                          opacity: {
+                            overshootClamping: true,
+                          },
+                        },
+                      ]}>
+                      <Popover.Arrow />
+
+                      <Popover.ScrollView>
+                        <YStack gap="$3" padding="$3">
+                          <Text fontSize="$4" fontWeight="bold" color="$color">
+                            External Subtitle Options
+                          </Text>
+                          <Text fontSize="$3" color="$color1">
+                            Choose subtitle language:
+                          </Text>
+                          <YStack gap="$2">
+                            <Button size="$3" variant="outlined" onPress={() => console.log('English selected')}>
+                              English
+                            </Button>
+                            <Button size="$3" variant="outlined" onPress={() => console.log('Spanish selected')}>
+                              Spanish
+                            </Button>
+                            <Button size="$3" variant="outlined" onPress={() => console.log('French selected')}>
+                              French
+                            </Button>
+                            <Button size="$3" variant="outlined" onPress={() => console.log('German selected')}>
+                              German
+                            </Button>
+                          </YStack>
+                        </YStack>
+                      </Popover.ScrollView>
+                    </Popover.Content>
+                  </Popover> */}
+
                   {subtitleTracks?.map((track, index) => (
                     <RippleButton
                       key={index}
@@ -365,7 +436,7 @@ const ControlsOverlay = memo(
               </RippleButton>
               <Sheet
                 forceRemoveScrollEnabled={false}
-                modal={true}
+                modal
                 open={openSettings}
                 onOpenChange={(value: boolean) => setOpenSettings(value)}
                 snapPoints={isFullscreen ? [80, 25] : [50, 25]}
@@ -384,10 +455,19 @@ const ControlsOverlay = memo(
                   marginHorizontal="auto"
                   width={isFullscreen ? '50%' : '90%'}>
                   <Sheet.ScrollView>
-                    <HorizontalTabs items={tabItems as TabItem[]} initialTab="tab2" />
+                    <HorizontalTabs items={tabItems as TabItem[]} initialTab="tab1" />
                   </Sheet.ScrollView>
                 </Sheet.Frame>
               </Sheet>
+              <ExternalSubDialog
+                openExternalSubtitleLanguageDialog={openExternalSubtitleLanguageDialog}
+                setOpenExternalSubtitleLanguageDialog={setOpenExternalSubtitleLanguageDialog}
+                externalSubtitleLanguage={externalSubtitleLanguage}
+                setExternalSubtitleLanguage={setExternalSubtitleLanguage}
+                isExternalSubtitlesLoading={isExternalSubtitlesLoading}
+                setShouldFetchExternalSubs={setShouldFetchExternalSubs}
+                isFullscreen={isFullscreen}
+              />
             </XStack>
           </AnimatedXStack>
 

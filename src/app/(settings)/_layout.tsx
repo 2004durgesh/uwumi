@@ -16,7 +16,7 @@ export default function SettingsLayout() {
       screenOptions={{
         headerTransparent: true,
         contentStyle: {
-          paddingTop: insets.top,
+          paddingTop: insets.top * 2,
           backgroundColor: pureBlackBackground ? '#000' : currentTheme?.background,
         },
         header(props) {

@@ -1,5 +1,5 @@
 import { View, Theme, ViewProps } from 'tamagui';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore, useAccentStore, useCurrentTheme, usePureBlackBackground } from '@/hooks';
 import { StatusBar, StatusBarProps } from 'expo-status-bar';
 
@@ -12,8 +12,8 @@ export type ThemedViewProps = {
 
 export function ThemedView({
   children,
-  useSafeArea = true,
-  useStatusBar = false,
+  useSafeArea = false, //becoz of edge-to-edge we wont be using safe area insets instead we will use paddingTop={insets.top} in the View component
+  useStatusBar = true,
   statusBarProps,
   ...props
 }: ThemedViewProps) {
@@ -21,27 +21,29 @@ export function ThemedView({
   const accentName = useAccentStore((state) => state.accentName);
   const pureBlackBackground = usePureBlackBackground((state) => state.pureBlackBackground);
   const currentTheme = useCurrentTheme();
+  const insets = useSafeAreaInsets();
 
-  const content = (
-    <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} {...props}>
-      {children}
-    </View>
-  );
+  // const content = (
+  //   <View flex={1} backgroundColor={pureBlackBackground ? '#000' : '$background'} {...props}>
+  //     {children}
+  //   </View>
+  // );
   // console.log(themeName,accentName,useTheme())
 
   return (
     <Theme name={accentName}>
-      {useSafeArea ? (
-        <SafeAreaView style={{ flex: 1, backgroundColor: pureBlackBackground ? '#000' : '$background' }}>
-          {content}
-        </SafeAreaView>
-      ) : (
-        content
-      )}
+      <View
+        paddingTop={useSafeArea ? 0 : insets.top}
+        flex={1}
+        backgroundColor={pureBlackBackground ? '#000' : '$background'}
+        {...props}>
+        {children}
+      </View>
+
       <StatusBar
         animated
         hideTransitionAnimation="slide"
-        hidden={useStatusBar}
+        hidden={!useStatusBar}
         style={themeName === 'dark' ? 'light' : 'dark'}
         backgroundColor={pureBlackBackground ? '#000' : currentTheme?.background}
         {...statusBarProps}

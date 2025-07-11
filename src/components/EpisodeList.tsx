@@ -29,8 +29,8 @@ import {
   useSeasonStore,
 } from '@/hooks';
 import WavyAnimation from './WavyAnimation';
-import { EpisodeDisplayMode, IMovieSeason, MediaType } from '@/constants/types';
-import { IAnimeEpisode, IAnimeInfo, IMovieEpisode, IMovieInfo, MediaFormat, TvType } from 'react-native-consumet';
+import { EpisodeDisplayMode, MediaType } from '@/constants/types';
+import { IAnimeEpisode, IMovieSeason, IMovieEpisode, MediaFormat, TvType } from 'react-native-consumet';
 import NoResults from './NoResults';
 import { formatTime } from '@/constants/utils';
 import CustomSelect from './CustomSelect';

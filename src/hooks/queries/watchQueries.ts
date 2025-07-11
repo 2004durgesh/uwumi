@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { createProviderInstance, DEFAULT_PROVIDERS } from '@/constants/provider';
-import { IEpisodeServer, ISource, ISubtitle, MediaFormat, SubOrSub, TvType } from 'react-native-consumet';
+import { IEpisodeServer, ISource, MediaFormat, SubOrSub, TvType } from 'react-native-consumet';
 import { useQuery } from '@tanstack/react-query';
 // import { getFetchUrl } from '@/constants/utils';
 import axios from 'axios';
 import { ExternalSubtitleData, MediaType } from '@/constants/types';
 import { TextTrackType } from 'react-native-video/lib/types/video';
-import { SubtitleTrack } from '@/app/watch/[mediaType]';
+import { SubtitleTrack } from '@/constants/types';
 
 export function useWatchAnimeEpisodes({
   episodeId,
@@ -165,7 +165,10 @@ export function useExternalSubtitles({
           uri: item.SubDownloadLink.replace('.gz', ''),
           title: item.MovieName || item.MovieReleaseName,
         }));
-        console.log('external subtitles', subtitles);
+        // console.log('external subtitles', subtitles);
+        if (subtitles.length === 0) {
+          throw new Error(`No external subtitles found for the ${language} language.`);
+        }
         return subtitles;
       } catch (error) {
         console.error('Error fetching external subtitles:', error);

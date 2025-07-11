@@ -1,21 +1,5 @@
-import { IMovieEpisode } from 'react-native-consumet';
-
-export interface Episode {
-  id: string;
-  dubId?: string;
-  uniqueId: string;
-  isDubbed?: boolean;
-  isSubbed?: boolean;
-  isFiller?: boolean;
-  number: number;
-  url: string;
-  dubUrl?: string;
-  image?: string;
-  title: string;
-  description?: string;
-  createdAt?: string;
-  [x: string]: any;
-}
+import { MediaFormat, TvType } from 'react-native-consumet';
+import { TextTrackType } from 'react-native-video';
 
 export enum MediaType {
   ANIME = 'anime',
@@ -69,15 +53,6 @@ export interface Details {
     month: number;
     day: number;
   };
-}
-
-export interface IMovieSeason {
-  season: number;
-  image?: {
-    mobile?: string;
-    hd?: string;
-  };
-  episodes: IMovieEpisode[];
 }
 
 export enum EpisodeDisplayMode {
@@ -151,4 +126,48 @@ export interface ExternalSubtitleData {
     sublanguageid: string;
   };
   Score: number;
+}
+
+export interface SubtitleTrack {
+  index?: number;
+  title?: string;
+  language?: string;
+  type: TextTrackType | 'application/x-media-cues';
+  selected?: boolean;
+  uri: string;
+}
+
+export interface VideoTrack {
+  width?: number;
+  height?: number;
+  codecs?: string;
+  index: number;
+  bitrate?: number;
+}
+
+export interface AudioTrack {
+  index: number;
+  title?: string;
+  language?: string;
+  bitrate?: number;
+  type?: string;
+  selected?: boolean;
+}
+
+export interface WatchSearchParams {
+  mediaType: MediaType;
+  provider: string;
+  id: string;
+  mediaId: string;
+  episodeId: string;
+  episodeDubId: string;
+  uniqueId: string;
+  isDubbed: string;
+  poster: string;
+  title: string;
+  description: string;
+  episodeNumber: string;
+  seasonNumber: string;
+  mappings: string;
+  type: MediaFormat | TvType;
 }

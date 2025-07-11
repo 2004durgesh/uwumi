@@ -3,3 +3,4 @@ export * from './stores';
 export * from './useCurrentTheme';
 export * from './useDoubleTap';
 export * from './useWarmUpBrowser';
+export * from './useCustomBackHandler';

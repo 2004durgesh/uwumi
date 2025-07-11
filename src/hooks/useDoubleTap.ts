@@ -31,7 +31,7 @@ export const useDoubleTapGesture = ({
   const [isDoubleTap, setIsDoubleTap] = useState(false);
   const tapCount = useSharedValue(0);
   const lastTap = useRef(0);
-  const animationTimeoutRef = useRef<NodeJS.Timeout>();
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Animation values
   const forwardOpacity = useSharedValue(0);
